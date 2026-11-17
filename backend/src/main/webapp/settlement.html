@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 모임별 N빵 회비 정산기</title>
+  <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
+  <script>
+    (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
+    (function(){var t=localStorage.getItem('travelmates_theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();
+  </script>
+  <script src="js/tailwind.cdn.js?v=20261117_03"></script>
+  <!-- jQuery 3.7.1 CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+            ocean: { 500: '#0ea5e9', 600: '#0284c7' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body data-active-tab="settlement" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16 md:pb-0">
+  <!-- Skip Navigation -->
+  <a href="#contents" class="skip-nav">본문 바로가기</a>
+
+  <!-- ==================== 1. HEADER ==================== -->
+  <header id="header"></header>
+
+  <!-- ==================== 2. CONTENTS ==================== -->
+  <main id="contents" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <section id="tab-settlement" class="tab-content">
+
+      <!-- 회비 정산 모임 선택 헤더 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="receipt" class="w-6 h-6 text-emerald-600"></i>
+              <span>모임별 N빵 회비 정산기</span>
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 해당 모임의 영수증과 N빵 송금 내역을 관리할 수 있습니다.</p>
+          </div>
+          <!-- 모임 선택 드롭다운 -->
+          <div class="flex items-center gap-3">
+            <label for="settlement-group-select" class="text-sm font-medium text-slate-600 whitespace-nowrap">
+              <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+            </label>
+            <div class="relative w-full sm:w-72 md:w-80">
+              <select id="settlement-group-select" onchange="onSettlementGroupChange()"
+                class="h-10.5 w-full pl-3.5 pr-9 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 hover:border-slate-300 transition shadow-2xs">
+                <option value="">-- 모임을 선택하세요 --</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+            <button onclick="refreshSettlementExpenses()" title="새로고침" aria-label="모임 목록 새로고침"
+              class="h-10.5 px-3.5 rounded-xl border border-slate-200 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition shadow-2xs flex items-center justify-center active:scale-95">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모임 미선택 안내 -->
+      <div id="settlement-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+        <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="calculator" class="w-10 h-10 text-emerald-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-600 mb-2">정산할 여행 모임을 선택해주세요</h3>
+        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 해당 모임의 회비 및 N빵 정산 내역이 열립니다.</p>
+        <a href="index.html" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mx-auto inline-flex">
+          <i data-lucide="users" class="w-4 h-4"></i>여행 모임 보러가기
+        </a>
+      </div>
+
+      <!-- 모임 선택 후 메인 정산 패널 -->
+      <div id="settlement-body" class="hidden space-y-6">
+
+        <!-- 선택 모임 정보 배너 -->
+        <div class="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-teal-100 text-xs font-medium mb-1">선택된 여행 모임 정산</p>
+            <h3 id="settlement-group-name" class="text-xl font-bold"></h3>
+            <p id="settlement-group-meta" class="text-teal-100 text-sm mt-0.5"></p>
+          </div>
+          <div class="flex items-center gap-4 sm:gap-6 self-end sm:self-auto">
+            <div class="text-right">
+              <span class="text-xs text-teal-100 block">설정된 총 예산</span>
+              <span id="settlement-group-budget" class="text-xl sm:text-2xl font-extrabold text-amber-300">₩0</span>
+            </div>
+            <div class="h-8 w-px bg-teal-400/40"></div>
+            <div class="text-right">
+              <span class="text-xs text-teal-100 block">등록된 영수증</span>
+              <span id="settlement-expense-count" class="text-xl sm:text-2xl font-extrabold text-white">0건</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Form: 지출 내역 입력 -->
+          <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="credit-card" class="w-5 h-5 text-emerald-600"></i>
+              <span>새 지출 영수증 등록</span>
+            </h3>
+            <form id="expense-form" onsubmit="addExpense(event)" class="space-y-4">
+              <div>
+                <label for="expense-title" class="block text-xs font-semibold text-slate-600 mb-1">지출 항목 <span class="text-red-400">*</span></label>
+                <input type="text" id="expense-title" placeholder="예: 첫날 흑돼지 저녁 식사" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+              </div>
+              <div>
+                <label for="expense-amount" class="block text-xs font-semibold text-slate-600 mb-1">결제 금액 (원) <span class="text-red-400">*</span></label>
+                <input type="number" id="expense-amount" placeholder="120000" min="0" step="1000" required
+                  oninput="updateReceiptPerPersonPreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+              </div>
+              <div>
+                <label for="expense-payer-select" class="block text-xs font-semibold text-slate-600 mb-1">결제자 (누가 먼저 냈나요?)</label>
+                <div class="relative w-full">
+                  <select id="expense-payer-select" class="w-full h-11 pl-3.5 pr-9 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer appearance-none transition">
+                    <!-- 모임 참여 멤버 목록 동적 주입 -->
+                  </select>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                </div>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-600">함께한 친구들 (N빵 분할 참여자)</label>
+                  <button type="button" onclick="selectAllExpenseParticipants()" class="text-[11px] text-emerald-600 hover:text-emerald-700 font-semibold">
+                    전체 선택
+                  </button>
+                </div>
+                <div id="expense-participants-checkboxes" class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200/80 max-h-40 overflow-y-auto">
+                  <!-- 동적 렌더링 -->
+                </div>
+              </div>
+
+              <!-- 영수증 가격 및 분할 참여자 대비 1인당 지출 금액 실시간 산정 뱃지 -->
+              <div id="receipt-per-person-preview" class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1 font-medium">
+                  <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>이 영수증의 1인당 분할 부담액:</span>
+                </span>
+                <span id="receipt-per-person-amount" class="text-sm font-extrabold text-emerald-700">₩0</span>
+              </div>
+
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>지출 등록하기</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Summary & Expense List -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- 요약 지표 카드 (4분할: 총 예산, 총 지출, 잔여 예산, 1인당 평균 분담액) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <!-- 카드 1: 총 예산 -->
+              <div class="bg-gradient-to-br from-amber-50 to-orange-50/70 border border-amber-200/90 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-amber-800 uppercase flex items-center gap-1">
+                  <i data-lucide="coins" class="w-3.5 h-3.5 text-amber-600"></i>
+                  모임 총 예산
+                </span>
+                <div class="text-xl sm:text-2xl font-black text-amber-950 mt-1" id="total-budget-display">₩0</div>
+                <span id="total-budget-subtext" class="text-[11px] text-amber-700/80 mt-0.5 block truncate">모임 개설 설정 기준</span>
+              </div>
+
+              <!-- 카드 2: 총 지출 -->
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-emerald-700 uppercase flex items-center gap-1">
+                  <i data-lucide="receipt" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  모임 총 지출 금액
+                </span>
+                <div class="text-xl sm:text-2xl font-black text-emerald-950 mt-1" id="total-expense-display">₩0</div>
+                <span id="total-expense-subtext" class="text-[11px] text-slate-500 mt-0.5 block truncate">등록된 모든 영수증 합계</span>
+              </div>
+
+              <!-- 카드 3: 잔여 예산 -->
+              <div id="remaining-budget-card" class="bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-200 rounded-2xl p-4 shadow-sm transition">
+                <span class="text-xs font-semibold text-sky-800 uppercase flex items-center gap-1">
+                  <i data-lucide="piggy-bank" class="w-3.5 h-3.5 text-sky-600"></i>
+                  잔여 예산 (남은 금액)
+                </span>
+                <div class="text-xl sm:text-2xl font-black text-sky-950 mt-1" id="remaining-budget-display">₩0</div>
+                <span id="remaining-budget-subtext" class="text-[11px] text-sky-700/80 mt-0.5 block truncate">예산 대비 남은 잔액</span>
+              </div>
+
+              <!-- 카드 4: 1인당 평균 분담액 -->
+              <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-slate-600 uppercase flex items-center gap-1">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-slate-500"></i>
+                  1인당 평균 지출액
+                </span>
+                <div class="text-xl sm:text-2xl font-black text-slate-800 mt-1" id="average-expense-display">₩0</div>
+                <span class="text-[11px] text-slate-400 mt-0.5 block truncate">전체 모임 인원 기준</span>
+              </div>
+            </div>
+
+            <!-- 총 예산 대비 집행 현황 프로그레스 바 카드 -->
+            <div id="settlement-budget-progress-box" class="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs">
+              <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                    <i data-lucide="pie-chart" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-900">총 예산 대비 지출 집행률</h4>
+                    <p class="text-[11px] text-slate-400">모임 총 예산에서 사용된 금액 비율</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span id="total-receipt-count" class="hidden">0건</span>
+                  <span id="budget-burn-rate-badge" class="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 transition">
+                    소진율 0%
+                  </span>
+                </div>
+              </div>
+
+              <!-- 진행바 -->
+              <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden flex shadow-inner mt-2">
+                <div id="budget-burn-progress-bar" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2 font-medium flex-wrap gap-1">
+                <span id="budget-progress-spent-text">총 지출: ₩0</span>
+                <span id="budget-progress-remain-text" class="font-bold text-emerald-700">남은 예산: ₩0</span>
+                <span id="budget-progress-total-text">총 예산: ₩0</span>
+              </div>
+            </div>
+
+            <!-- 멤버별 1인당 실제 분할 부담 금액 현황 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="wallet-cards" class="w-4 h-4 text-emerald-600"></i>
+                  <span>참여자별 최종 정산 및 내야 할 돈 (1인당 분할 집계)</span>
+                </span>
+                <span class="text-xs text-slate-400 font-normal">송금 필요 금액 강조</span>
+              </h4>
+              <div id="member-breakdown-list" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- 동적 렌더링 -->
+              </div>
+            </div>
+
+            <!-- N빵 최종 정산 송금 안내 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <h4 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i data-lucide="arrow-right-left" class="w-5 h-5 text-cyan-600"></i>
+                <span>누가 누구에게 얼마를 보내야 할까요? (최소 송금 계산)</span>
+              </h4>
+              <div id="transfer-summary-list" class="space-y-2 text-sm text-slate-700">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- 지출 항목 리스트 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                  <h4 class="text-base font-bold text-slate-900">상세 영수증 목록</h4>
+                  <span id="expense-table-count" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">0건</span>
+                </div>
+                <span id="expense-table-sub" class="text-xs text-slate-400 font-normal">최신순 정렬</span>
+              </div>
+
+              <!-- 모바일 전용 카드 뷰 (360px~768px 화면 텍스트 몰림 방지) -->
+              <div id="expense-card-list" class="block md:hidden space-y-3">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <!-- 데스크톱 / 태블릿 전용 테이블 뷰 (가로 너비 보장 및 스크롤) -->
+              <div class="hidden md:block overflow-x-auto">
+                <table class="w-full min-w-[580px] text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-medium text-xs">
+                      <th class="pb-3">항목</th>
+                      <th class="pb-3">결제자</th>
+                      <th class="pb-3">영수증 금액</th>
+                      <th class="pb-3">분할 참여자</th>
+                      <th class="pb-3 text-emerald-700 font-bold">1인당 분할 금액</th>
+                      <th class="pb-3 text-right">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expense-table-body" class="divide-y divide-slate-100">
+                    <!-- Rendered dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== 3. FOOTER ==================== -->
+  <footer id="footer"></footer>
+
+  <!-- 공통 모달 및 모바일 하단 탭바 -->
+  <div id="modals"></div>
+  <div id="bottom-nav"></div>
+
+  <!-- 공통 컴포넌트 스크립트 및 앱 로직 -->
+  <script src="js/common.js?v=20261117_02"></script>
+  <script src="js/components.js?v=20261117_02"></script>
+  <script src="js/app.js?v=20261117_02"></script>
+</body>
+</html>

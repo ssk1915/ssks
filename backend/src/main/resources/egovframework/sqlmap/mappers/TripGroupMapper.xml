@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.travel.mapper.TripGroupMapper">
+
+    <!-- 여행 모임 목록 조회 (국내/해외 구분 및 검색 조건) -->
+    <select id="selectTripGroupList" parameterType="egovframework.travel.vo.TripGroupVO" resultType="egovframework.travel.vo.TripGroupVO">
+        SELECT 
+            G.GROUP_ID,
+            G.GROUP_NAME,
+            G.TRIP_TYPE,
+            G.LOCATION,
+            G.START_DATE,
+            G.END_DATE,
+            G.MAX_MEMBERS,
+            G.ESTIMATED_BUDGET,
+            G.DESCRIPTION,
+            G.IMAGE_URL,
+            G.STATUS,
+            G.CREATED_BY,
+            G.CREATED_AT,
+            G.UPDATED_AT,
+            M.NAME AS CREATOR_NAME,
+            COUNT(TM.MEMBER_ID) AS CURRENT_MEMBERS
+        FROM TRIP_GROUP G
+        LEFT JOIN MEMBER M ON G.CREATED_BY = M.MEMBER_ID
+        LEFT JOIN TRIP_MEMBER TM ON G.GROUP_ID = TM.GROUP_ID
+        <where>
+            <if test="tripType != null and tripType != '' and tripType != 'all'">
+                AND G.TRIP_TYPE = #{tripType}
+            </if>
+            <if test="searchKeyword != null and searchKeyword != ''">
+                AND (G.GROUP_NAME LIKE CONCAT('%', #{searchKeyword}, '%') OR G.LOCATION LIKE CONCAT('%', #{searchKeyword}, '%'))
+            </if>
+        </where>
+        GROUP BY G.GROUP_ID
+        ORDER BY G.CREATED_AT DESC
+    </select>
+
+    <!-- 모임 상세 조회 -->
+    <select id="selectTripGroupDetail" parameterType="int" resultType="egovframework.travel.vo.TripGroupVO">
+        SELECT 
+            G.GROUP_ID,
+            G.GROUP_NAME,
+            G.TRIP_TYPE,
+            G.LOCATION,
+            G.START_DATE,
+            G.END_DATE,
+            G.MAX_MEMBERS,
+            G.ESTIMATED_BUDGET,
+            G.DESCRIPTION,
+            G.IMAGE_URL,
+            G.STATUS,
+            G.CREATED_BY,
+            G.CREATED_AT,
+            G.UPDATED_AT,
+            M.NAME AS CREATOR_NAME,
+            COUNT(TM.MEMBER_ID) AS CURRENT_MEMBERS
+        FROM TRIP_GROUP G
+        LEFT JOIN MEMBER M ON G.CREATED_BY = M.MEMBER_ID
+        LEFT JOIN TRIP_MEMBER TM ON G.GROUP_ID = TM.GROUP_ID
+        WHERE G.GROUP_ID = #{groupId}
+        GROUP BY G.GROUP_ID
+    </select>
+
+    <!-- 모임 생성 -->
+    <insert id="insertTripGroup" parameterType="egovframework.travel.vo.TripGroupVO" useGeneratedKeys="true" keyProperty="groupId">
+        INSERT INTO TRIP_GROUP (
+            GROUP_NAME,
+            TRIP_TYPE,
+            LOCATION,
+            START_DATE,
+            END_DATE,
+            MAX_MEMBERS,
+            ESTIMATED_BUDGET,
+            DESCRIPTION,
+            IMAGE_URL,
+            CREATED_BY,
+            CREATED_AT,
+            UPDATED_AT
+        ) VALUES (
+            #{groupName},
+            #{tripType},
+            #{location},
+            #{startDate},
+            #{endDate},
+            #{maxMembers},
+            #{estimatedBudget},
+            #{description},
+            #{imageUrl},
+            #{createdBy},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 모임 참여자 등록 (방장 등록 또는 참여 신청) -->
+    <insert id="insertTripMember" parameterType="map">
+        INSERT INTO TRIP_MEMBER (GROUP_ID, MEMBER_ID, ROLE, CREATED_AT, UPDATED_AT)
+        VALUES (#{groupId}, #{memberId}, #{role}, NOW(), NOW())
+    </insert>
+
+    <!-- 모임 참여 취소 -->
+    <delete id="deleteTripMember" parameterType="map">
+        DELETE FROM TRIP_MEMBER
+        WHERE GROUP_ID = #{groupId} AND MEMBER_ID = #{memberId}
+    </delete>
+
+    <!-- 모임 삭제 (외래키 CASCADE 제약조건에 의해 관련 데이터 자동 연계 삭제) -->
+    <delete id="deleteTripGroup" parameterType="int">
+        DELETE FROM TRIP_GROUP
+        WHERE GROUP_ID = #{groupId}
+    </delete>
+
+</mapper>

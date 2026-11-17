@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 여행 추억 갤러리</title>
+  <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
+  <script>
+    (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
+    (function(){var t=localStorage.getItem('travelmates_theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();
+  </script>
+  <script src="js/tailwind.cdn.js?v=20261117_03"></script>
+  <!-- jQuery 3.7.1 CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+            ocean: { 500: '#0ea5e9', 600: '#0284c7' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body data-active-tab="gallery" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16 md:pb-0">
+  <!-- Skip Navigation -->
+  <a href="#contents" class="skip-nav">본문 바로가기</a>
+
+  <!-- ==================== 1. HEADER ==================== -->
+  <header id="header"></header>
+
+  <!-- ==================== 2. CONTENTS ==================== -->
+  <main id="contents" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <!-- 상단 헤더 카드 (타이틀 & 모임 선택 드롭다운) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="camera" class="w-6 h-6 text-emerald-600"></i>
+            <span>여행 추억 갤러리</span>
+          </h2>
+          <p class="text-slate-500 text-sm mt-1">여행 모임별로 친구들과 함께 찍은 멋진 순간들을 업로드하고 간직하세요.</p>
+        </div>
+        <!-- 모임 선택 드롭다운 및 액션 버튼 -->
+        <div class="flex items-center gap-3">
+          <label for="gallery-group-select" class="text-sm font-medium text-slate-600 whitespace-nowrap">
+            <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+          </label>
+          <div class="relative w-full sm:w-72 md:w-80">
+            <select id="gallery-group-select" onchange="onGalleryGroupChange()"
+              class="h-10.5 w-full pl-3.5 pr-9 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 hover:border-slate-300 transition shadow-2xs">
+              <option value="">-- 모임을 선택하세요 --</option>
+              <option value="ALL">🌟 전체 모임 사진 둘러보기</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+          <button type="button" onclick="refreshGalleryPhotos()" title="새로고침" aria-label="모임 및 사진 새로고침"
+            class="h-10.5 px-3.5 rounded-xl border border-slate-200 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition shadow-2xs flex items-center justify-center active:scale-95">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모임 미선택 안내 (Empty State) -->
+    <div id="gallery-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+      <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="camera" class="w-10 h-10 text-emerald-500"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-800 mb-2">여행 모임을 선택해주세요</h3>
+      <p class="text-sm text-slate-400 max-w-md mx-auto mb-6">상단 드롭다운에서 여행 모임을 선택하면 해당 모임에 업로드된 추억 사진들을 모아보고 새로운 사진을 등록할 수 있습니다.</p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <button type="button" onclick="selectGalleryAllGroups()"
+          class="text-sm font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+          <i data-lucide="images" class="w-4 h-4"></i>전체 사진 모아보기
+        </button>
+        <a href="index.html"
+          class="text-sm font-semibold text-slate-600 hover:text-slate-900 border border-slate-200 px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 active:scale-95">
+          <i data-lucide="users" class="w-4 h-4"></i>여행 모임 보러가기
+        </a>
+      </div>
+    </div>
+
+    <!-- 모임 선택 후 갤러리 본문 패널 -->
+    <div id="gallery-selected-panel" class="hidden space-y-6">
+      <!-- 선택 모임 정보 배너 -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span id="gallery-selected-group-badge" class="px-2 py-0.5 rounded-md text-xs font-bold bg-white/20 text-white backdrop-blur-xs">국내</span>
+            <span class="text-emerald-100 text-xs font-medium">선택된 여행 모임 갤러리</span>
+          </div>
+          <h3 id="gallery-selected-group-name" class="text-xl font-bold">여행 모임 갤러리</h3>
+          <p id="gallery-selected-group-meta" class="text-emerald-100 text-sm mt-0.5"></p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-emerald-100 text-xs">등록된 사진</p>
+            <p id="gallery-photo-count" class="text-2xl font-black">0장</p>
+          </div>
+          <button type="button" onclick="openPhotoUploadModal()"
+            class="flex-shrink-0 flex items-center gap-2 bg-white text-emerald-700 hover:bg-emerald-50 text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-sm active:scale-95">
+            <i data-lucide="upload" class="w-4 h-4"></i>사진 올리기
+          </button>
+        </div>
+      </div>
+
+      <!-- 사진 갤러리 그리드 컨테이너 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <!-- 상단 서브 툴바 (사진 개수 & 필터) -->
+        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-bold text-slate-800">사진 피드</span>
+            <span id="gallery-sub-count" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">0</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- 정렬 버튼 (최신순 / 인기순) -->
+            <button type="button" onclick="setGallerySort('latest')" id="btn-sort-latest"
+              class="text-xs px-3 py-1.5 rounded-lg font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 transition">
+              최신순
+            </button>
+            <button type="button" onclick="setGallerySort('likes')" id="btn-sort-likes"
+              class="text-xs px-3 py-1.5 rounded-lg font-semibold text-slate-500 hover:text-slate-800 border border-slate-200 hover:bg-slate-50 transition">
+              인기순 ❤️
+            </button>
+          </div>
+        </div>
+
+        <!-- 3열 반응형 사진 그리드 -->
+        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <!-- Rendered dynamically via app.js -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== 사진 업로드 모달 ==================== -->
+  <div id="modal-photo-upload" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-photo-upload-title">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-scale-up">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <h3 id="modal-photo-upload-title" class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <i data-lucide="camera" class="w-5 h-5 text-emerald-600"></i>
+          <span>여행 추억 사진 올리기</span>
+        </h3>
+        <button type="button" onclick="closePhotoUploadModal()" aria-label="닫기"
+          class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <form id="form-photo-upload" onsubmit="handlePhotoUploadSubmit(event)" class="p-6 space-y-4">
+        <!-- 업로드 대상 모임 선택 -->
+        <div>
+          <label for="upload-photo-group" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            업로드할 여행 모임 <span class="text-red-500">*</span>
+          </label>
+          <div class="relative w-full">
+            <select id="upload-photo-group" required
+              class="w-full h-11 pl-3.5 pr-9 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer appearance-none transition">
+              <!-- Dynamically populated -->
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- 사진 파일 선택 및 드래그앤드롭 영역 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+            사진 선택 <span class="text-red-500">*</span>
+          </label>
+          <div id="photo-dropzone" onclick="$('#photo-file-input').trigger('click')"
+            class="border-2 border-dashed border-slate-300 hover:border-emerald-400 rounded-2xl p-6 text-center cursor-pointer transition bg-slate-50/50 hover:bg-emerald-50/30">
+            <input type="file" id="photo-file-input" accept="image/*" class="hidden" aria-label="업로드할 사진 파일 선택" onchange="onPhotoFileSelected(event)">
+            
+            <!-- 파일 미선택 시 기본 안내 -->
+            <div id="photo-empty-preview">
+              <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2">
+                <i data-lucide="image-plus" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-semibold text-slate-700">클릭하여 이미지 파일 선택</p>
+              <p class="text-xs text-slate-400 mt-1">JPG, PNG, GIF, WebP (최대 10MB)</p>
+            </div>
+
+            <!-- 파일 선택 후 이미지 미리보기 -->
+            <div id="photo-active-preview" class="hidden">
+              <img id="photo-preview-img" src="" alt="업로드 이미지 미리보기" class="max-h-48 rounded-xl mx-auto object-cover shadow-sm">
+              <p id="photo-preview-filename" class="text-xs text-slate-600 font-medium mt-2 truncate"></p>
+              <button type="button" onclick="event.stopPropagation(); resetPhotoSelection();"
+                class="text-xs text-rose-500 hover:underline mt-1 inline-block">
+                다른 사진으로 변경
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 캡션 (설명) -->
+        <div>
+          <label for="upload-photo-caption" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            추억 설명 (한 줄 캡션) <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="upload-photo-caption" required
+            placeholder="예: 성산일출봉 정상에서 맞이한 아침 햇살 🌅"
+            class="w-full h-11 px-3.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white transition">
+        </div>
+
+        <!-- 등록자 이름 -->
+        <div>
+          <label for="upload-photo-uploader" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            등록자 이름 / 닉네임
+          </label>
+          <input type="text" id="upload-photo-uploader" placeholder="예: 김민수"
+            class="w-full h-11 px-3.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white transition">
+        </div>
+
+        <!-- 액션 버튼 -->
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closePhotoUploadModal()"
+            class="h-11 px-4 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+            취소
+          </button>
+          <button type="submit" id="btn-submit-photo-upload"
+            class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center gap-1.5 active:scale-95">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>사진 등록하기</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 사진 확대 뷰어 모달 (Photo Lightbox) ==================== -->
+  <div id="modal-photo-lightbox" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-between p-3 sm:p-6 bg-black/90 backdrop-blur-md animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="lightbox-caption">
+    <!-- 상단 툴바 (Top Bar) -->
+    <div class="w-full max-w-5xl flex items-center justify-between text-white z-10 pb-2 flex-shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 truncate pr-2">
+        <span id="lightbox-group-badge" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-600/80 text-white backdrop-blur-sm shadow-xs truncate max-w-[200px]">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 shrink-0"></i>
+          <span id="lightbox-group-name" class="truncate">여행 모임</span>
+        </span>
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-white/20 text-slate-100 backdrop-blur-xs">
+          <i data-lucide="user" class="w-3 h-3 text-slate-300"></i>
+          <span id="lightbox-uploader">작성자</span>
+        </span>
+        <span id="lightbox-counter" class="text-xs text-slate-400 font-medium hidden sm:inline-block">1 / 1</span>
+      </div>
+
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 모달 내 좋아요 버튼 -->
+        <button type="button" id="lightbox-like-btn" onclick="toggleLightboxLike()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-rose-500/20 text-white hover:text-rose-400 border border-white/20 transition active:scale-95 text-xs font-bold"
+          title="좋아요">
+          <i data-lucide="heart" class="w-4 h-4 text-rose-500 fill-rose-500"></i>
+          <span id="lightbox-like-count">0</span>
+        </button>
+
+        <!-- 원본 새 탭 보기 -->
+        <a id="lightbox-link-orig" href="#" target="_blank" rel="noopener noreferrer"
+          class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white border border-white/20 transition active:scale-95 flex items-center justify-center"
+          title="새 창에서 원본 보기" aria-label="새 창에서 원본 사진 보기">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+
+        <!-- 닫기 버튼 -->
+        <button type="button" onclick="closePhotoLightbox()" aria-label="사진 확대창 닫기"
+          class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white border border-white/20 transition active:scale-95 flex items-center justify-center"
+          title="닫기 (ESC)">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 중앙 이미지 뷰어 (Center Stage with Prev/Next Navigation) -->
+    <div class="relative w-full flex-1 flex items-center justify-center my-auto min-h-0 overflow-hidden" onclick="onLightboxBackdropClick(event)">
+      <!-- 이전 사진 버튼 -->
+      <button type="button" onclick="prevLightboxPhoto(event)" aria-label="이전 사진 보기"
+        class="absolute left-2 sm:left-4 z-20 p-2.5 sm:p-3 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-xs border border-white/10 transition shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center"
+        title="이전 사진 (좌측 화살표키)">
+        <i data-lucide="chevron-left" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+      </button>
+
+      <!-- 확대 이미지 본체 -->
+      <div class="relative max-h-full max-w-full flex items-center justify-center p-1 sm:p-2 pointer-events-none">
+        <img id="lightbox-img" src="" alt="확대된 여행 사진"
+          class="max-h-[72vh] sm:max-h-[76vh] w-auto max-w-full object-contain rounded-2xl shadow-2xl transition-all duration-300 select-none pointer-events-auto">
+      </div>
+
+      <!-- 다음 사진 버튼 -->
+      <button type="button" onclick="nextLightboxPhoto(event)" aria-label="다음 사진 보기"
+        class="absolute right-2 sm:right-4 z-20 p-2.5 sm:p-3 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-xs border border-white/10 transition shadow-lg hover:scale-105 active:scale-95 flex items-center justify-center"
+        title="다음 사진 (우측 화살표키)">
+        <i data-lucide="chevron-right" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+      </button>
+    </div>
+
+    <!-- 하단 캡션 바 (Bottom Caption) -->
+    <div class="w-full max-w-3xl text-center z-10 pt-3 flex-shrink-0">
+      <div class="inline-block max-w-full bg-black/60 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white/10 shadow-lg">
+        <p id="lightbox-caption" class="text-sm sm:text-base font-medium text-white leading-relaxed break-words"></p>
+        <p class="text-[11px] text-slate-400 mt-1 flex items-center justify-center gap-1.5">
+          <i data-lucide="info" class="w-3 h-3"></i>
+          <span>ESC 키 또는 바깥 영역 클릭으로 닫기 · 좌우 화살표키(←, →)로 사진 넘기기</span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. FOOTER ==================== -->
+  <footer id="footer"></footer>
+
+  <!-- 공통 모달 및 모바일 하단 탭바 -->
+  <div id="modals"></div>
+  <div id="bottom-nav"></div>
+
+  <!-- 공통 컴포넌트 스크립트 및 앱 로직 -->
+  <script src="js/common.js?v=20261117_02"></script>
+  <script src="js/components.js?v=20261117_02"></script>
+  <script src="js/app.js?v=20261117_02"></script>
+</body>
+</html>

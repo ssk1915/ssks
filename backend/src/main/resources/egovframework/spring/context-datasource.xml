@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Database Properties 외부 분리 설정 -->
+    <context:property-placeholder location="classpath:/egovframework/egovProps/globals.properties" ignore-unresolvable="true" />
+
+    <!-- MySQL DataSource (Apache Commons DBCP2) -->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+        <property name="url" value="${Globals.Url:jdbc:mysql://localhost:3306/travelmates_db?useSSL=false&amp;serverTimezone=Asia/Seoul&amp;characterEncoding=UTF-8&amp;allowPublicKeyRetrieval=true}" />
+        <property name="username" value="${Globals.UserName:root}" />
+        <property name="password" value="${Globals.Password:password}" />
+        <property name="initialSize" value="5" />
+        <property name="maxTotal" value="20" />
+        <property name="maxIdle" value="10" />
+        <property name="minIdle" value="5" />
+        <property name="validationQuery" value="SELECT 1" />
+        <property name="testOnBorrow" value="true" />
+    </bean>
+
+</beans>
+

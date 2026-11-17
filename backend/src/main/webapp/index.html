@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 친구와 함께하는 여행 모임 플래너</title>
+  <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
+  <script>
+    (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
+    (function(){var t=localStorage.getItem('travelmates_theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();
+  </script>
+  <script src="js/tailwind.cdn.js?v=20261117_03"></script>
+  <!-- jQuery 3.7.1 CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+            ocean: { 500: '#0ea5e9', 600: '#0284c7' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body data-active-tab="groups" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16 md:pb-0">
+  <!-- Skip Navigation -->
+  <a href="#contents" class="skip-nav">본문 바로가기</a>
+
+  <!-- ==================== 1. HEADER ==================== -->
+  <header id="header"></header>
+
+  <!-- ==================== 2. CONTENTS ==================== -->
+  <main id="contents" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Hero Banner -->
+    <section id="hero-banner" class="relative rounded-3xl overflow-hidden mb-10 shadow-lg bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white p-8 md:p-12">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
+          ✈️ 친구와 함께 떠나요!
+        </span>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+          따로 또 같이, <br class="hidden sm:block"/>친구들과 완성하는 최고의 여행
+        </h1>
+        <p class="text-emerald-50 text-base md:text-lg mb-6 leading-relaxed">
+          일정 투표부터 코스 기획, 헷갈리는 회비 N빵 정산과 사진 공유까지 한 곳에서 간편하게 관리하세요!
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="openCreateGroupModal()" class="bg-white text-emerald-700 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> 모임 만들기
+          </button>
+          <a href="settlement.html" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl font-semibold transition flex items-center gap-2">
+            <i data-lucide="calculator" class="w-4 h-4"></i> 회비 정산기 바로가기
+          </a>
+        </div>
+      </div>
+      <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+    </section>
+
+    <!-- 여행 모임 목록 섹션 -->
+    <section id="tab-groups" class="tab-content">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <span>참여 가능한 여행 모임</span>
+            <span id="group-count-badge" class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">0</span>
+          </h2>
+          <p class="text-slate-500 text-sm mt-1">친구들이 만든 모임에 참여 신청하거나 새 모임을 모집해보세요.</p>
+        </div>
+
+        <!-- 필터 버튼 -->
+        <div class="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-xl text-xs font-medium">
+          <button onclick="filterGroups('all')" class="filter-btn px-3 py-1.5 rounded-lg transition bg-white text-slate-800 shadow-sm font-bold flex items-center gap-1" data-filter="all">전체</button>
+          <button onclick="filterGroups('my')" class="filter-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1" data-filter="my">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-500"></i>
+            <span>내 여행</span>
+          </button>
+          <button onclick="filterGroups('국내')" class="filter-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1" data-filter="국내">국내여행</button>
+          <button onclick="filterGroups('해외')" class="filter-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900 flex items-center gap-1" data-filter="해외">해외여행</button>
+        </div>
+      </div>
+
+      <!-- 모임 카드 그리드 -->
+      <div id="groups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- js/app.js에 의해 동적 렌더링 -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== 3. FOOTER ==================== -->
+  <footer id="footer"></footer>
+
+  <!-- 공통 모달 및 모바일 하단 탭바 -->
+  <div id="modals"></div>
+  <div id="bottom-nav"></div>
+
+  <!-- 공통 상수/유틸리티, 컴포넌트 스크립트 & 앱 메인 로직 -->
+  <script src="js/common.js?v=20261117_02"></script>
+  <script src="js/components.js?v=20261117_02"></script>
+  <script src="js/app.js?v=20261117_02"></script>
+</body>
+</html>

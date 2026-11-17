@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 관리자 일정 관리</title>
+  <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
+  <script>
+    (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
+    (function(){var t=localStorage.getItem('travelmates_theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();
+  </script>
+  <script src="js/tailwind.cdn.js?v=20261117_03"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#f0fdf4', 100:'#dcfce7', 500:'#22c55e', 600:'#16a34a', 700:'#15803d' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+  <!-- Skip Navigation -->
+  <a href="#contents" class="skip-nav">본문 바로가기</a>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+      <!-- 좌측: 메인 바로가기 및 타이틀 (h-9 sm:h-10 규격 일치화) -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0">
+        <a href="index.html" class="h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-slate-500 hover:text-emerald-600 transition text-sm flex items-center gap-1.5 flex-shrink-0" title="메인 홈으로 이동">
+          <i data-lucide="arrow-left" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="hidden sm:inline font-medium">메인으로</span>
+        </a>
+        <span class="text-slate-300 dark:text-slate-600 hidden sm:inline">|</span>
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center text-white flex-shrink-0 shadow-xs">
+            <i data-lucide="shield" class="w-4.5 h-4.5 flex-shrink-0"></i>
+          </div>
+          <span class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">관리자 패널</span>
+          <span class="hidden sm:inline-block text-[10px] sm:text-xs bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800">ADMIN</span>
+        </div>
+
+        <!-- 데스크톱 관리자 메뉴 탭 (h-9 sm:h-10 일치화) -->
+        <nav class="hidden md:flex items-center gap-1 ml-2 lg:ml-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-9 sm:h-10">
+          <button id="admin-tab-btn-schedules" type="button" onclick="switchAdminTab('schedules')"
+            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs">
+            <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
+            <span>일정 관리</span>
+          </button>
+          <button id="admin-tab-btn-members" type="button" onclick="switchAdminTab('members')"
+            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition">
+            <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+            <span>가입 회원 관리</span>
+            <span id="admin-tab-member-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold ml-0.5">5명</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- 우측: 모바일 탭 바 & 관리자명 & 테마 토글 & 로그아웃 (h-9 sm:h-10 및 w-4 h-4 통일) -->
+      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
+        <!-- 모바일 탭 바 (h-9 sm:h-10) -->
+        <div class="flex md:hidden items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-9 flex-shrink-0">
+          <button id="mobile-tab-btn-schedules" type="button" onclick="switchAdminTab('schedules')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-orange-600 transition" title="일정 관리" aria-label="일정 관리 탭">
+            <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
+          </button>
+          <button id="mobile-tab-btn-members" type="button" onclick="switchAdminTab('members')" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-orange-600 transition" title="회원 관리" aria-label="회원 관리 탭">
+            <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+          </button>
+        </div>
+
+        <span id="admin-name" class="hidden sm:inline-flex items-center h-9 sm:h-10 text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium truncate max-w-[90px]"></span>
+
+        <!-- 화면 테마 토글 버튼 (w-9 h-9 sm:w-10 sm:h-10, 아이콘 w-4 h-4) -->
+        <button id="theme-toggle-btn" type="button" onclick="toggleDarkMode()"
+          aria-label="화면 테마 모드 전환 (라이트/다크)"
+          title="화면 테마 전환"
+          class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 flex items-center justify-center flex-shrink-0">
+          <i data-lucide="moon" id="theme-toggle-icon" class="w-4 h-4 flex-shrink-0"></i>
+        </button>
+
+        <!-- 로그아웃 버튼 (h-9 sm:h-10, 아이콘 w-4 h-4) -->
+        <button onclick="adminLogout()" class="h-9 sm:h-10 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 px-2.5 sm:px-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-200 transition flex-shrink-0 whitespace-nowrap" title="로그아웃">
+          <i data-lucide="log-out" class="w-4 h-4 flex-shrink-0"></i>
+          <span class="hidden sm:inline">로그아웃</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 관리자 로그인 체크 오버레이 -->
+  <div id="admin-auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-orange-500 to-red-500 flex items-center justify-center text-white mx-auto mb-4">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+      </div>
+      <h2 class="text-xl font-bold text-slate-800 mb-2">관리자 로그인 필요</h2>
+      <p class="text-sm text-slate-500 mb-6">관리자 계정으로 로그인해야 접근할 수 있습니다.</p>
+      <div id="auth-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"></div>
+      <form onsubmit="adminLogin(event)" class="space-y-3 text-left">
+        <div>
+          <label for="auth-username" class="sr-only">관리자 아이디</label>
+          <input type="text" id="auth-username" placeholder="아이디" value="admin"
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm">
+        </div>
+        <div>
+          <label for="auth-password" class="sr-only">관리자 비밀번호</label>
+          <input type="password" id="auth-password" placeholder="비밀번호"
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-2.5 rounded-xl transition">
+          관리자 로그인
+        </button>
+      </form>
+      <!-- [표시 제한] 현재 컴퓨터 MAC 주소에서만 동적으로 노출되는 기본 계정 안내 -->
+      <div id="admin-test-account-box" class="hidden mt-3 p-2 bg-orange-50 border border-orange-200 rounded-xl text-center text-xs text-orange-800">
+        <span>기본 계정: <strong>admin / admin123</strong></span>
+        <span class="block text-[10px] text-orange-600 font-mono mt-0.5">🔒 로컬 MAC 인증됨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 일정 관리 뷰 (Schedule Management) -->
+  <div id="view-schedule-management" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 모임 선택 헤더 카드 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="calendar-days" class="w-6 h-6 text-emerald-600"></i>
+            <span>여행 일정 플래너 (관리자)</span>
+          </h2>
+          <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 Day별 일정을 관리·추가·수정·삭제할 수 있습니다.</p>
+        </div>
+        <!-- 모임 선택 드롭다운 -->
+        <div class="flex items-center gap-3">
+          <label for="admin-group-select" class="text-sm font-medium text-slate-600 whitespace-nowrap">
+            <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+          </label>
+          <div class="relative w-full sm:w-72 md:w-80">
+            <select id="admin-group-select" onchange="onAdminGroupSelectChange()"
+              class="h-10.5 w-full pl-3.5 pr-9 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 hover:border-slate-300 transition shadow-2xs">
+              <option value="">-- 모임을 선택하세요 --</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+          <button type="button" onclick="loadAdminGroups()" title="새로고침" aria-label="모임 목록 새로고침"
+            class="h-10.5 px-3.5 rounded-xl border border-slate-200 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition shadow-2xs flex items-center justify-center active:scale-95">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모임 미선택 안내 (Empty State) -->
+    <div id="admin-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+      <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="map" class="w-10 h-10 text-emerald-400"></i>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-700 mb-2">여행 모임을 선택해주세요</h3>
+      <p class="text-sm text-slate-400">상단 드롭다운에서 여행 모임을 선택하면 Day별 일정 플래너가 열립니다.</p>
+    </div>
+
+    <!-- 일정 플래너 본문 (모임 선택 후) -->
+    <div id="admin-schedule-panel" class="hidden space-y-6">
+
+      <!-- 선택 모임 정보 배너 -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p class="text-emerald-100 text-xs font-medium mb-1">선택된 여행 모임</p>
+          <h3 id="admin-selected-group-name" class="text-xl font-bold"></h3>
+          <p id="admin-selected-group-meta" class="text-emerald-100 text-sm mt-0.5"></p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-emerald-100 text-xs">총 일정 건수</p>
+            <p id="admin-schedule-total-count" class="text-2xl font-black">0건</p>
+          </div>
+          <button type="button" onclick="openAdminAddPlanModal()"
+            class="flex-shrink-0 flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm active:scale-95">
+            <i data-lucide="plus" class="w-4 h-4"></i>일정 추가
+          </button>
+        </div>
+      </div>
+
+      <!-- Day 탭 바 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="flex gap-2 overflow-x-auto pb-1" id="admin-day-tabs">
+          <!-- Dynamically populated (전체 일정 📋, Day 1, Day 2, ...) -->
+        </div>
+      </div>
+
+      <!-- 타임라인 카드 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h4 id="admin-day-title" class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>Day 1 일정
+          </h4>
+          <span id="admin-schedule-count" class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-semibold">0개</span>
+        </div>
+
+        <!-- 인라인 일정 추가 폼 -->
+        <form id="admin-inline-add-plan-form" onsubmit="handleAdminInlineAddPlan(event)"
+          class="mb-6 p-4 bg-emerald-50/60 rounded-xl border border-emerald-100 grid grid-cols-2 md:grid-cols-4 gap-3">
+          <input type="hidden" id="admin-inline-plan-lat" value="">
+          <input type="hidden" id="admin-inline-plan-lng" value="">
+          <div>
+            <label for="admin-inline-plan-time" class="block text-xs font-medium text-slate-600 mb-1">시간</label>
+            <div class="relative">
+              <input type="text" id="admin-inline-plan-time" readonly onclick="openTimePickerModal('admin-inline-plan-time')"
+                placeholder="시간 선택"
+                class="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white cursor-pointer hover:border-emerald-400 transition">
+              <button type="button" onclick="openTimePickerModal('admin-inline-plan-time')" aria-label="시간 선택 팝업 열기"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="시간 팝업 선택">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label for="admin-inline-plan-place" class="block text-xs font-medium text-slate-600 mb-1">장소 <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <input type="text" id="admin-inline-plan-place" placeholder="방문할 장소" required
+                class="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+              <button type="button" onclick="openLocationPickerModal('admin-inline-plan-place')" aria-label="지도 위치 선택 팝업 열기"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="지도에서 위치 선택">
+                <i data-lucide="map-pin" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label for="admin-inline-plan-memo" class="block text-xs font-medium text-slate-600 mb-1">메모</label>
+            <input type="text" id="admin-inline-plan-memo" placeholder="준비물, 예약 등"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+          </div>
+          <div class="flex items-end">
+            <button type="submit"
+              class="w-full flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 rounded-lg transition shadow-sm active:scale-95">
+              <i data-lucide="plus" class="w-4 h-4"></i>추가
+            </button>
+          </div>
+        </form>
+
+        <!-- 타임라인 리스트 -->
+        <div class="relative pl-6 border-l-2 border-emerald-200 space-y-5" id="admin-plan-timeline">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 가입 회원 관리 뷰 (Member Management) -->
+  <section id="view-member-management" class="hidden flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- 상단 요약 통계 카드 (4분할) -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <!-- 전체 회원 -->
+      <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-4 shadow-xs">
+        <span class="text-xs font-semibold text-orange-700 uppercase flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4 text-orange-600"></i>
+          전체 가입 회원
+        </span>
+        <div class="text-2xl font-black text-slate-900 mt-1" id="stat-total-members">0명</div>
+        <span class="text-[11px] text-slate-500 mt-0.5 block">시스템 등록 계정 수</span>
+      </div>
+
+      <!-- 일반 회원 -->
+      <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
+        <span class="text-xs font-semibold text-emerald-700 uppercase flex items-center gap-1.5">
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+          일반 회원 (MEMBER)
+        </span>
+        <div class="text-2xl font-black text-emerald-950 mt-1" id="stat-normal-members">0명</div>
+        <span class="text-[11px] text-slate-500 mt-0.5 block">여행 모임 참여 멤버</span>
+      </div>
+
+      <!-- 관리자 계정 -->
+      <div class="bg-gradient-to-br from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-4 shadow-xs">
+        <span class="text-xs font-semibold text-rose-700 uppercase flex items-center gap-1.5">
+          <i data-lucide="shield-check" class="w-4 h-4 text-rose-600"></i>
+          관리자 (ADMIN)
+        </span>
+        <div class="text-2xl font-black text-rose-950 mt-1" id="stat-admin-members">0명</div>
+        <span class="text-[11px] text-slate-500 mt-0.5 block">시스템 총괄 관리 권한</span>
+      </div>
+
+      <!-- 신규 가입 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+        <span class="text-xs font-semibold text-slate-600 uppercase flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+          신규 가입 회원
+        </span>
+        <div class="text-2xl font-black text-slate-800 mt-1" id="stat-new-members">0명</div>
+        <span class="text-[11px] text-slate-400 mt-0.5 block">최근 등록된 계정</span>
+      </div>
+    </div>
+
+    <!-- 검색 & 액션 툴바 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+      <div class="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <!-- 검색창 -->
+        <div class="relative flex-1 min-w-[220px]">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          <input type="text" id="member-search-input" oninput="filterAdminMembers()"
+            placeholder="이름, 아이디, 이메일, 전화번호 검색..." aria-label="회원 검색창"
+            class="h-10 w-full pl-9 pr-4 border border-slate-200 rounded-xl text-sm bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-slate-300 transition shadow-2xs">
+        </div>
+
+        <!-- 권한 필터 -->
+        <div class="flex items-center gap-2">
+          <label for="member-role-filter" class="text-xs text-slate-500 font-semibold whitespace-nowrap">권한:</label>
+          <div class="relative w-[155px]">
+            <select id="member-role-filter" onchange="filterAdminMembers()"
+              class="h-10 w-full pl-3 pr-8 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-slate-300 transition shadow-2xs">
+              <option value="ALL">전체 권한</option>
+              <option value="MEMBER">일반 회원 (MEMBER)</option>
+              <option value="ADMIN">관리자 (ADMIN)</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <!-- 정렬 -->
+        <div class="flex items-center gap-2">
+          <label for="member-sort-select" class="text-xs text-slate-500 font-semibold whitespace-nowrap">정렬:</label>
+          <div class="relative w-[140px]">
+            <select id="member-sort-select" onchange="filterAdminMembers()"
+              class="h-10 w-full pl-3 pr-8 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-slate-300 transition shadow-2xs">
+              <option value="NEWEST">최신 가입순</option>
+              <option value="OLDEST">오래된 가입순</option>
+              <option value="NAME">이름 가나다순</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 justify-end flex-shrink-0">
+        <!-- 새로고침 버튼 -->
+        <button type="button" onclick="loadAdminMembers()"
+          class="h-10 flex items-center justify-center gap-1.5 px-3.5 rounded-xl text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition shadow-2xs active:scale-95 whitespace-nowrap"
+          title="회원 목록 새로고침" aria-label="회원 목록 새로고침">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-500"></i>
+          <span>새로고침</span>
+        </button>
+        <!-- 신규 회원 등록 버튼 -->
+        <button type="button" onclick="openMemberModal()"
+          class="h-10 flex items-center justify-center gap-2 px-4 rounded-xl text-sm font-bold bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-xs transition active:scale-95 whitespace-nowrap"
+          title="신규 회원 직접 등록" aria-label="신규 회원 직접 등록">
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
+          <span>신규 회원 등록</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 회원 목록 테이블 -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i data-lucide="users-2" class="w-4 h-4 text-orange-500"></i>
+            <span>가입 회원 명단</span>
+          </h3>
+          <span id="member-table-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">0명</span>
+        </div>
+        <span class="text-xs text-slate-400">총 회원 관리 및 권한 설정</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b border-slate-100 bg-slate-50/70 text-slate-500 font-semibold text-xs">
+              <th class="py-3 px-4 w-14 text-center">ID</th>
+              <th class="py-3 px-4">회원 정보</th>
+              <th class="py-3 px-4">아이디(계정)</th>
+              <th class="py-3 px-4">이메일</th>
+              <th class="py-3 px-4">전화번호</th>
+              <th class="py-3 px-4 text-center">참여 / 등록 일정</th>
+              <th class="py-3 px-4 text-center">권한</th>
+              <th class="py-3 px-4">가입일시</th>
+              <th class="py-3 px-4 text-right">관리</th>
+            </tr>
+          </thead>
+          <tbody id="member-table-body" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="9" class="py-12 text-center text-slate-400 text-sm">
+                <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300"></i>
+                회원 정보를 불러오는 중...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 회원 등록 및 수정 모달 -->
+  <div id="modal-member-edit" role="dialog" aria-modal="true" aria-labelledby="modal-member-title"
+    class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scaleUp">
+      <button type="button" onclick="closeMemberModal()" aria-label="팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-10 h-10 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
+          <i data-lucide="user-cog" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 id="modal-member-title" class="text-lg font-bold text-slate-900">회원 정보</h3>
+          <p id="modal-member-subtitle" class="text-xs text-slate-500">회원 정보를 입력하고 권한을 지정합니다.</p>
+        </div>
+      </div>
+
+      <div id="member-form-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600"></div>
+
+      <form id="member-edit-form" onsubmit="handleSaveMember(event)" class="space-y-3.5">
+        <input type="hidden" id="member-form-id">
+
+        <div>
+          <label for="member-form-username" class="block text-xs font-semibold text-slate-700 mb-1">
+            아이디 <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="member-form-username" required placeholder="영문/숫자 4자 이상"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+          <span id="member-form-username-hint" class="text-[11px] text-slate-400 mt-0.5 block"></span>
+        </div>
+
+        <div>
+          <label for="member-form-name" class="block text-xs font-semibold text-slate-700 mb-1">
+            이름 / 닉네임 <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="member-form-name" required placeholder="실명 또는 닉네임"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+
+        <div>
+          <label for="member-form-email" class="block text-xs font-semibold text-slate-700 mb-1">
+            이메일 주소 <span class="text-red-500">*</span>
+          </label>
+          <input type="email" id="member-form-email" required placeholder="user@example.com"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+
+        <div>
+          <label for="member-form-phone" class="block text-xs font-semibold text-slate-700 mb-1">
+            전화번호
+          </label>
+          <input type="text" id="member-form-phone" placeholder="010-1234-5678" oninput="handleMemberPhoneInput(this)"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+        </div>
+
+        <div>
+          <label for="member-form-password" class="block text-xs font-semibold text-slate-700 mb-1">
+            비밀번호 <span id="member-form-pwd-req" class="text-red-500">*</span>
+          </label>
+          <input type="password" id="member-form-password" placeholder="비밀번호 입력"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+          <span id="member-form-pwd-hint" class="text-[11px] text-slate-400 mt-0.5 block">수정 시 입력하지 않으면 기존 비밀번호가 유지됩니다.</span>
+        </div>
+
+        <div>
+          <label for="member-form-role" class="block text-xs font-semibold text-slate-700 mb-1">
+            회원 권한 (ROLE) <span class="text-red-500">*</span>
+          </label>
+          <div class="relative w-full">
+            <select id="member-form-role"
+              class="w-full h-11 pl-3.5 pr-9 border border-slate-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 appearance-none cursor-pointer transition">
+              <option value="MEMBER">일반 회원 (MEMBER)</option>
+              <option value="ADMIN">관리자 (ADMIN)</option>
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeMemberModal()"
+            class="px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-600 hover:bg-slate-50 transition">
+            취소
+          </button>
+          <button type="submit"
+            class="px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold text-sm rounded-xl shadow-xs transition active:scale-95">
+            저장하기
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 회원 삭제 확인 모달 -->
+  <div id="modal-member-delete" role="dialog" aria-modal="true" aria-labelledby="modal-member-delete-title"
+    class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative animate-scaleUp text-center">
+      <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="user-x" class="w-7 h-7"></i>
+      </div>
+      <h3 id="modal-member-delete-title" class="text-lg font-bold text-slate-900 mb-1">회원 삭제 확인</h3>
+      <p class="text-xs text-slate-500 mb-4">정말로 이 회원을 삭제하시겠습니까? 삭제 후에는 계정 정보가 영구히 제거됩니다.</p>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-left text-xs mb-5 space-y-1">
+        <div><span class="text-slate-400">회원명:</span> <strong id="delete-member-name" class="text-slate-800"></strong></div>
+        <div><span class="text-slate-400">아이디:</span> <span id="delete-member-username" class="font-mono text-slate-600"></span></div>
+        <div><span class="text-slate-400">이메일:</span> <span id="delete-member-email" class="text-slate-600"></span></div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="closeMemberDeleteModal()"
+          class="flex-1 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+          취소
+        </button>
+        <button type="button" onclick="confirmExecuteDeleteMember()"
+          class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow-xs transition active:scale-95">
+          삭제하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 회원 등록 일정 확인 모달 (참여 모임 및 상세 일정 확인) -->
+  <div id="modal-member-schedules" role="dialog" aria-modal="true" aria-labelledby="modal-member-schedules-title"
+    class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative animate-scaleUp">
+      <!-- 상단 고정 헤더 -->
+      <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-6 pt-5 pb-4 border-b border-slate-100 flex items-center justify-between gap-3 flex-shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="m-sched-avatar" class="w-11 h-11 rounded-2xl bg-orange-500 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+            M
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h3 id="modal-member-schedules-title" class="text-base sm:text-lg font-bold text-slate-900 truncate">회원 등록 일정 현황</h3>
+              <span id="m-sched-role-badge" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200 flex-shrink-0">일반회원</span>
+            </div>
+            <p id="modal-member-schedules-subtitle" class="text-xs text-slate-500 mt-0.5 truncate">회원명 님이 참여/등록 중인 여행 일정 목록입니다.</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeMemberSchedulesModal()" aria-label="팝업 닫기"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex-shrink-0">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 본문 스크롤 영역 -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-4">
+        <!-- 요약 통계 2분할 칩 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-gradient-to-br from-orange-50 to-amber-50/60 border border-orange-200/80 rounded-2xl p-3.5 flex items-center gap-3 shadow-2xs">
+            <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <i data-lucide="map-pin" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="text-[11px] text-orange-700 font-semibold block">참여 여행 모임</span>
+              <span id="m-sched-total-groups" class="text-xl font-black text-slate-900">0개</span>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-emerald-50 to-teal-50/60 border border-emerald-200/80 rounded-2xl p-3.5 flex items-center gap-3 shadow-2xs">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <i data-lucide="calendar-days" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <span class="text-[11px] text-emerald-700 font-semibold block">총 등록 일정 건수</span>
+              <span id="m-sched-total-schedules" class="text-xl font-black text-slate-900">0개</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 일정 상세 목록 컨테이너 -->
+        <div id="m-sched-list-container" class="space-y-4 min-h-[200px]">
+          <div class="py-12 text-center text-slate-400 text-sm">
+            <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300"></i>
+            일정 정보를 불러오는 중...
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 고정 푸터 -->
+      <div class="sticky bottom-0 z-20 bg-white/95 backdrop-blur-md px-6 py-3.5 border-t border-slate-100 flex items-center justify-between gap-3 flex-shrink-0">
+        <span class="text-xs text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i>
+          <span class="hidden sm:inline">모임의 '일정 바로가기' 버튼을 누르면 해당 모임의 일정을 즉시 관리할 수 있습니다.</span>
+          <span class="sm:hidden">'일정 바로가기' 시 즉시 관리 가능</span>
+        </span>
+        <button type="button" onclick="closeMemberSchedulesModal()"
+          class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm shadow-xs transition active:scale-95">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Plan Item Modal (관리자 일정 항목 추가 모달) -->
+  <div id="modal-add-plan" role="dialog" aria-modal="true" aria-labelledby="modal-add-plan-title" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scaleUp">
+      <button type="button" onclick="closeAdminAddPlanModal()" aria-label="모달 닫기" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <h3 id="modal-add-plan-title" class="text-xl font-bold text-slate-900 mb-2">일정 항목 추가</h3>
+      <p class="text-slate-500 text-xs mb-4">선택된 일차의 방문지 및 세부 계획을 기록합니다.</p>
+
+      <form id="admin-add-plan-form" onsubmit="handleAdminAddPlan(event)" class="space-y-4">
+        <input type="hidden" id="admin-plan-lat" value="">
+        <input type="hidden" id="admin-plan-lng" value="">
+        <div>
+          <label for="admin-plan-day-select" class="block text-xs font-semibold text-slate-700 mb-1">일차 (Day)</label>
+          <div class="relative w-full">
+            <select id="admin-plan-day-select" class="w-full h-11 pl-3.5 pr-9 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer appearance-none transition">
+              <!-- Dynamically populated -->
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+        <div>
+          <label for="admin-plan-time" class="block text-xs font-semibold text-slate-700 mb-1">시간대</label>
+          <div class="relative">
+            <input type="text" id="admin-plan-time" readonly onclick="openTimePickerModal('admin-plan-time')"
+              placeholder="시간 선택 (클릭)" required
+              class="w-full pl-3.5 pr-9 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer hover:border-emerald-400 transition">
+            <button type="button" onclick="openTimePickerModal('admin-plan-time')" aria-label="시간 선택 팝업 열기"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="시간 팝업 선택">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="admin-plan-place" class="block text-xs font-semibold text-slate-700 mb-1">장소 / 활동명 <span class="text-red-400">*</span></label>
+          <div class="relative">
+            <input type="text" id="admin-plan-place" placeholder="예: 성산일출봉 하이킹 & 기념사진" required
+              class="w-full pl-3.5 pr-9 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+            <button type="button" onclick="openLocationPickerModal('admin-plan-place')" aria-label="지도 위치 선택 팝업 열기"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="지도에서 위치 선택">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="admin-plan-memo" class="block text-xs font-semibold text-slate-700 mb-1">메모 / 준비물</label>
+          <input type="text" id="admin-plan-memo" placeholder="예: 편한 운동화 착용, 입장료 5,000원"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>일정에 즉시 등록</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Location Picker Popup Modal (지도 위치 및 장소 선택 팝업 모달) -->
+  <div id="modal-location-picker" role="dialog" aria-modal="true" aria-labelledby="modal-location-picker-title"
+    class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-scaleUp flex flex-col max-h-[92vh]">
+      <button type="button" onclick="closeLocationPickerModal()" aria-label="장소 선택 팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 id="modal-location-picker-title" class="text-base sm:text-lg font-bold text-slate-900">지도에서 위치 / 장소 선택</h3>
+          <p class="text-slate-500 text-xs">지도 클릭 또는 검색을 통해 일정을 등록하세요.</p>
+        </div>
+      </div>
+
+      <div class="mt-3 mb-2 flex items-center gap-2">
+        <div class="relative flex-1">
+          <label for="loc-search-input" class="sr-only">장소명 검색</label>
+          <input type="text" id="loc-search-input" placeholder="장소명 검색 (예: 성산일출봉, 해운대)"
+            onkeydown="if(event.key === 'Enter'){ event.preventDefault(); searchLocationPlace(); }"
+            class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+        <button type="button" onclick="searchLocationPlace()"
+          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1 active:scale-95">
+          검색
+        </button>
+      </div>
+
+      <div class="relative w-full h-56 sm:h-72 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 mb-3 shadow-inner">
+        <div id="admin-leaflet-map-container" class="w-full h-full z-10"></div>
+        <div class="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between pointer-events-none z-[400] shadow-sm">
+          <span class="flex items-center gap-1"><i data-lucide="mouse-pointer" class="w-3 h-3 text-emerald-600"></i>지도를 클릭하면 마커가 해당 위치로 이동합니다</span>
+          <span id="loc-latlng-indicator" class="text-[10px] text-slate-400 font-mono">위치 좌표</span>
+        </div>
+      </div>
+
+      <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl mb-3">
+        <label for="loc-selected-place-name" class="text-[11px] font-bold text-emerald-700 block mb-0.5">선택된 장소명</label>
+        <input type="text" id="loc-selected-place-name" placeholder="장소명을 입력하거나 지도에서 선택하세요"
+          class="w-full font-bold text-sm text-slate-900 bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+      </div>
+
+      <div class="flex gap-2">
+        <button type="button" onclick="closeLocationPickerModal()"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-slate-50 transition active:scale-95">
+          취소
+        </button>
+        <button type="button" onclick="applyLocationPicker()"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>이 위치로 장소 입력</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 일정 수정 모달 -->
+  <div id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 id="edit-modal-title" class="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <i data-lucide="edit" class="w-5 h-5 text-teal-500"></i>일정 수정
+        </h2>
+        <button onclick="closeEditModal()" aria-label="수정 창 닫기" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <form onsubmit="submitEdit(event)" class="space-y-4">
+        <input type="hidden" id="edit-schedule-id">
+        <input type="hidden" id="edit-plan-lat" value="">
+        <input type="hidden" id="edit-plan-lng" value="">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="edit-day" class="block text-xs font-medium text-slate-600 mb-1">일차 (Day)</label>
+            <input type="number" id="edit-day" min="1" max="30"
+              class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+          </div>
+          <div>
+            <label for="edit-time" class="block text-xs font-medium text-slate-600 mb-1">시간</label>
+            <div class="relative">
+              <input type="text" id="edit-time" readonly onclick="openTimePickerModal('edit-time')"
+                placeholder="시간 선택"
+                class="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white cursor-pointer hover:border-teal-400 transition">
+              <button type="button" onclick="openTimePickerModal('edit-time')" aria-label="시간 선택 팝업 열기"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 p-1 transition" title="시간 팝업 선택">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label for="edit-place" class="block text-xs font-medium text-slate-600 mb-1">장소 <span class="text-red-400">*</span></label>
+          <div class="relative">
+            <input type="text" id="edit-place" required
+              class="w-full pl-3 pr-9 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400">
+            <button type="button" onclick="openLocationPickerModal('edit-place')" aria-label="지도 위치 선택 팝업 열기"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-teal-600 p-1 transition" title="지도에서 위치 선택">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="edit-memo" class="block text-xs font-medium text-slate-600 mb-1">메모</label>
+          <textarea id="edit-memo" rows="2"
+            class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 resize-none"></textarea>
+        </div>
+        <div class="flex gap-3 pt-2">
+          <button type="button" onclick="closeEditModal()" class="flex-1 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">취소</button>
+          <button type="submit" class="flex-1 py-2.5 bg-teal-600 hover:bg-teal-700 rounded-xl text-sm font-semibold text-white transition">저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Time Picker Popup Modal (관리자 시간 선택 팝업 모달) -->
+  <div id="modal-time-picker" role="dialog" aria-modal="true" aria-labelledby="modal-time-picker-title"
+    class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative animate-scaleUp">
+      <!-- 닫기 버튼 -->
+      <button onclick="closeTimePickerModal()" aria-label="팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 헤더 -->
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+        </div>
+        <h3 id="modal-time-picker-title" class="text-lg font-bold text-slate-900">시간 선택</h3>
+      </div>
+      <p class="text-slate-500 text-xs mb-4">원하는 여행 시간대를 클릭하여 간편하게 선택하세요.</p>
+
+      <!-- 현재 선택된 시간 미리보기 카드 -->
+      <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 mb-4 text-center">
+        <span class="text-xs font-semibold text-emerald-700 block mb-0.5">선택된 시간</span>
+        <div id="tp-preview-time" class="text-3xl font-extrabold text-emerald-900 tracking-wider">
+          10:00
+        </div>
+        <span id="tp-preview-desc" class="text-xs text-emerald-600 font-medium">오전 10시 00분</span>
+      </div>
+
+      <!-- 간편 여행 프리셋 퀵 버튼 -->
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-slate-700 mb-2">간편 여행 시간 프리셋</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs">
+          <button type="button" onclick="selectTimePreset('09:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🌅 아침 09:00
+          </button>
+          <button type="button" onclick="selectTimePreset('11:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🍽️ 점심 11:30
+          </button>
+          <button type="button" onclick="selectTimePreset('14:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            ☕ 오후 14:00
+          </button>
+          <button type="button" onclick="selectTimePreset('16:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🏖️ 티타임 16:30
+          </button>
+          <button type="button" onclick="selectTimePreset('18:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🍖 저녁 18:30
+          </button>
+          <button type="button" onclick="selectTimePreset('21:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🌙 야간 21:00
+          </button>
+        </div>
+      </div>
+
+      <!-- 직접 상세 설정 (오전/오후, 시, 분) -->
+      <div class="space-y-3 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between gap-2">
+          <!-- 오전 / 오후 세그먼트 토글 -->
+          <div class="flex rounded-xl bg-slate-100 p-1 flex-1">
+            <button type="button" id="tp-btn-am" onclick="setTimeAmPm('AM')"
+              class="flex-1 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-700 shadow-sm">
+              오전 (AM)
+            </button>
+            <button type="button" id="tp-btn-pm" onclick="setTimeAmPm('PM')"
+              class="flex-1 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">
+              오후 (PM)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- 시 선택 드롭다운 -->
+          <div>
+            <label for="tp-select-hour" class="block text-[11px] font-semibold text-slate-600 mb-1.5">시 (Hour)</label>
+            <div class="relative">
+              <select id="tp-select-hour" onchange="onTimePickerChange()"
+                class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+                <!-- Dynamically populated 1 to 12 -->
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+          </div>
+          <!-- 분 선택 드롭다운 -->
+          <div>
+            <label for="tp-select-minute" class="block text-[11px] font-semibold text-slate-600 mb-1.5">분 (Minute)</label>
+            <div class="relative">
+              <select id="tp-select-minute" onchange="onTimePickerChange()"
+                class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+                <!-- Dynamically populated 00 to 55 -->
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 액션 버튼 -->
+      <div class="flex gap-2 mt-5">
+        <button type="button" onclick="closeTimePickerModal()"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition active:scale-95">
+          취소
+        </button>
+        <button type="button" onclick="applyTimePicker()"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>시간 적용</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 알림 -->
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 hidden flex items-center gap-3 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg transition-all">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+    <span id="toast-msg" class="text-sm font-medium">메시지</span>
+  </div>
+
+  <script src="js/common.js?v=20261117_02"></script>
+  <script>
+    const API = '';
+    let selectedGroupId = null;
+    let allSchedules = [];
+
+    // XSS 방지 HTML 엔티티 이스케이프 유틸
+    function escapeHtml(str) {
+      if (window.TravelMatesUtils && typeof window.TravelMatesUtils.escapeHtml === 'function') {
+        return window.TravelMatesUtils.escapeHtml(str);
+      }
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ===== 초기화 (jQuery) =====
+    $(function() {
+      lucide.createIcons();
+      checkAdminAuth();
+      checkAdminTestAccountPermission();
+    });
+
+    async function checkAdminTestAccountPermission() {
+      const $box = $('#admin-test-account-box');
+      if (!$box.length) return;
+      try {
+        const data = await $.ajax({
+          url: API + '/api/auth/client-info',
+          method: 'GET',
+          dataType: 'json'
+        });
+        if (data && data.success && data.showTestAccounts === true) {
+          $box.removeClass('hidden');
+        } else {
+          $box.addClass('hidden');
+        }
+      } catch (e) {
+        $box.addClass('hidden');
+      }
+    }
+
+    // ===== 관리자 인증 =====
+    function checkAdminAuth() {
+      const saved = localStorage.getItem('travelmates_user');
+      if (saved) {
+        try {
+          const user = JSON.parse(saved);
+          if (user.isAdmin) {
+            hideAuthOverlay(user.name);
+            return;
+          }
+        } catch(e) {}
+      }
+      // 오버레이 표시
+      $('#admin-auth-overlay').removeClass('hidden');
+    }
+
+    function hideAuthOverlay(name) {
+      $('#admin-auth-overlay').addClass('hidden');
+      $('#admin-name').text((name || '관리자') + '님');
+      loadAdminGroups();
+      loadAdminMembers();
+    }
+
+    async function adminLogin(e) {
+      e.preventDefault();
+      const username = ($('#auth-username').val() || '').trim();
+      const password = ($('#auth-password').val() || '').trim();
+      const $errEl = $('#auth-error');
+
+      try {
+        const data = await $.ajax({
+          url: API + '/api/auth/login',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ username, password }),
+          dataType: 'json'
+        });
+        if (data.success && data.isAdmin) {
+          localStorage.setItem('travelmates_user', JSON.stringify(data));
+          hideAuthOverlay(data.name);
+        } else if (data.success && !data.isAdmin) {
+          $errEl.text('관리자 계정이 아닙니다.').removeClass('hidden');
+        } else {
+          $errEl.text(data.message || '로그인에 실패했습니다.').removeClass('hidden');
+        }
+      } catch(err) {
+        // API 없을 때 로컬 인증 fallback
+        if (username === 'admin' && password === 'admin123') {
+          const data = { isAdmin: true, name: '총괄관리자', username: 'admin', memberId: 5 };
+          localStorage.setItem('travelmates_user', JSON.stringify(data));
+          hideAuthOverlay(data.name);
+        } else {
+          $errEl.text('아이디 또는 비밀번호가 올바르지 않습니다.').removeClass('hidden');
+        }
+      }
+    }
+
+    function adminLogout() {
+      localStorage.removeItem('travelmates_user');
+      window.location.href = 'index.html';
+    }
+
+    // =========================================================================
+    // SCHEDULE PLANNER MODULE (여행 모임별 일정 플래너 - 관리자 모드)
+    // =========================================================================
+    let adminGroups = [];
+    let adminSelectedGroupObj = null;
+    let currentAdminDay = 1;
+    let adminMaxDay = 3;
+    let adminInlineMaps = {};
+    let currentExpandedSchedId = null;
+
+    // 대표 여행지 및 명소 프리셋 (검색 및 지도 위치 추천 지원)
+    const PRESET_LOCATIONS = [
+      { name: '성산일출봉', desc: '유네스코 세계자연유산 및 일출 명소', lat: 33.4586, lng: 126.9427 },
+      { name: '협재해수욕장', desc: '에메랄드빛 바다와 비양도 뷰', lat: 33.3938, lng: 126.2397 },
+      { name: '섭지코지', desc: '해안 절경과 붉은 화산재 언덕', lat: 33.4243, lng: 126.9298 },
+      { name: '해운대 해수욕장', desc: '대한민국 대표 해변 및 동백섬', lat: 35.1587, lng: 129.1604 },
+      { name: '광안리 해변', desc: '광안대교 오션뷰와 드론쇼 명소', lat: 35.1532, lng: 129.1186 },
+      { name: '감천문화마을', desc: '알록달록 파스텔 마을', lat: 35.0975, lng: 129.0106 },
+      { name: '안목해변 커피거리', desc: '바다 전망 카페와 커피 명소', lat: 37.7718, lng: 128.9485 },
+      { name: '경포호수', desc: '산책로가 아름다운 석호', lat: 37.7997, lng: 128.9056 },
+      { name: '경복궁', desc: '조선 왕조 제일의 법궁', lat: 37.5796, lng: 126.9770 },
+      { name: '남산서울타워', desc: '서울 시내가 한눈에 내려다보이는 랜드마크', lat: 37.5512, lng: 126.9882 },
+      { name: '도톤보리', desc: '글리코상과 활기찬 먹거리 거리', lat: 34.6687, lng: 135.5013 },
+      { name: '오사카성', desc: '역사적인 천수각과 넓은 공원', lat: 34.6873, lng: 135.5262 },
+      { name: '유니버설 스튜디오 재팬', desc: '세계적인 테마파크', lat: 34.6654, lng: 135.4323 },
+      { name: '방콕 왕궁 & 왓 프라깨우', desc: '화려한 태국 왕실 건축', lat: 13.7500, lng: 100.4913 },
+      { name: '카오산 로드', desc: '전 세계 배낭여행자의 성지', lat: 13.7588, lng: 100.4974 }
+    ];
+
+    // 1. 모임 목록 로드 및 드롭다운 초기화
+    async function loadAdminGroups() {
+      const $sel = $('#admin-group-select');
+      try {
+        const groups = await $.ajax({
+          url: API + '/api/groups',
+          method: 'GET',
+          dataType: 'json'
+        });
+        adminGroups = Array.isArray(groups) ? groups : [];
+      } catch(e) {
+        const stored = localStorage.getItem('travelmates_groups');
+        adminGroups = stored ? JSON.parse(stored) : getDefaultGroups();
+      }
+
+      $sel.html('<option value="">-- 모임을 선택하세요 --</option>');
+      adminGroups.forEach(g => {
+        const gid = g.groupId || g.GROUP_ID || g.id;
+        const gname = g.groupName || g.GROUP_NAME || g.title || '여행 모임';
+        $sel.append($('<option>', {
+          value: gid,
+          text: gname
+        }));
+      });
+
+      if (selectedGroupId && adminGroups.some(g => (g.groupId || g.GROUP_ID || g.id) == selectedGroupId)) {
+        $sel.val(selectedGroupId);
+        await onAdminGroupSelectChange();
+      } else if (adminGroups.length > 0) {
+        $sel.val(adminGroups[0].groupId || adminGroups[0].GROUP_ID || adminGroups[0].id);
+        await onAdminGroupSelectChange();
+      } else {
+        $('#admin-no-group').removeClass('hidden');
+        $('#admin-schedule-panel').addClass('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    function getDefaultGroups() {
+      return [
+        { groupId: 1, groupName: '부산 해운대 여름 여행', tripType: '국내', startDate: '2026-11-15', endDate: '2026-11-17', location: '부산 해운대' },
+        { groupId: 2, groupName: '오사카 맛집 탐방', tripType: '해외', startDate: '2026-12-01', endDate: '2026-12-05', location: '일본 오사카' },
+        { groupId: 3, groupName: '제주도 힐링 여행', tripType: '국내', startDate: '2026-11-20', endDate: '2026-11-23', location: '제주 서귀포' }
+      ];
+    }
+
+    // 2. 모임 드롭다운 변경 시
+    async function onAdminGroupSelectChange() {
+      const val = $('#admin-group-select').val();
+      if (!val) {
+        selectedGroupId = null;
+        adminSelectedGroupObj = null;
+        $('#admin-no-group').removeClass('hidden');
+        $('#admin-schedule-panel').addClass('hidden');
+        return;
+      }
+
+      selectedGroupId = parseInt(val, 10);
+      adminSelectedGroupObj = adminGroups.find(g => (g.groupId || g.GROUP_ID || g.id) == selectedGroupId) || null;
+
+      if (adminSelectedGroupObj) {
+        adminMaxDay = calcTripDays(adminSelectedGroupObj);
+        const gname = adminSelectedGroupObj.groupName || adminSelectedGroupObj.GROUP_NAME || adminSelectedGroupObj.title || '여행 모임';
+        const type = adminSelectedGroupObj.tripType || adminSelectedGroupObj.TRIP_TYPE || '국내';
+        const sDate = adminSelectedGroupObj.startDate || adminSelectedGroupObj.START_DATE || '';
+        const eDate = adminSelectedGroupObj.endDate || adminSelectedGroupObj.END_DATE || '';
+        const loc = adminSelectedGroupObj.location || adminSelectedGroupObj.LOCATION || '';
+
+        $('#admin-selected-group-name').text(gname);
+        let metaText = type;
+        if (sDate && eDate) metaText += ' | ' + sDate + ' ~ ' + eDate;
+        if (loc) metaText += ' | ' + loc;
+        $('#admin-selected-group-meta').text(metaText);
+      }
+
+      $('#admin-no-group').addClass('hidden');
+      $('#admin-schedule-panel').removeClass('hidden');
+
+      currentAdminDay = 1;
+      renderAdminDayTabs();
+      await loadSchedules();
+    }
+
+    // 3. 여행 일수 계산
+    function calcTripDays(grp) {
+      try {
+        const s = grp.startDate || grp.START_DATE;
+        const e = grp.endDate || grp.END_DATE;
+        if (s && e) {
+          const sDate = new Date(s.replace(/\./g, '-'));
+          const eDate = new Date(e.replace(/\./g, '-'));
+          const diff = Math.round((eDate - sDate) / (1000 * 60 * 60 * 24)) + 1;
+          return Math.max(1, Math.min(diff, 14));
+        }
+      } catch (err) {}
+      return 3;
+    }
+
+    // 4. Day 탭 렌더링 ('전체 일정 📋' 탭 포함)
+    function renderAdminDayTabs() {
+      const $container = $('#admin-day-tabs');
+      if (!$container.length) return;
+
+      let tabsHtml = `
+        <button type="button" onclick="selectAdminDay('all')"
+          class="day-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-${currentAdminDay === 'all' ? 'bold' : 'medium'}
+                 ${currentAdminDay === 'all' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} transition flex items-center gap-1.5"
+          data-day="all">
+          전체 일정 📋
+        </button>
+      `;
+
+      for (let day = 1; day <= adminMaxDay; day++) {
+        tabsHtml += `
+          <button type="button" onclick="selectAdminDay(${day})"
+            class="day-tab flex-shrink-0 px-4 py-2 rounded-xl text-xs sm:text-sm font-${day === currentAdminDay ? 'bold' : 'medium'}
+                   ${day === currentAdminDay ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'} transition"
+            data-day="${day}">
+            Day ${day}
+          </button>
+        `;
+      }
+      $container.html(tabsHtml);
+    }
+
+    // 5. Day 탭 선택
+    function selectAdminDay(day) {
+      currentAdminDay = day;
+      renderAdminDayTabs();
+      renderAdminPlannerSchedules();
+      const $titleEl = $('#admin-day-title');
+      if ($titleEl.length) {
+        if (day === 'all') {
+          $titleEl.html(`<i data-lucide="layers" class="w-4 h-4 text-emerald-500"></i>전체 일정 (Day 1 ~ Day ${adminMaxDay})`);
+        } else {
+          $titleEl.html(`<i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>Day ${day} 일정`);
+        }
+      }
+      lucide.createIcons();
+    }
+
+    // 6. 일정 목록 로드
+    async function loadSchedules() {
+      if (!selectedGroupId) return;
+      cleanAllAdminInlineMaps();
+
+      try {
+        const data = await $.ajax({
+          url: API + '/api/groups/' + selectedGroupId + '/schedules',
+          method: 'GET',
+          dataType: 'json'
+        });
+        allSchedules = Array.isArray(data) ? data.map(s => ({
+          scheduleId: s.scheduleId || s.SCHEDULE_ID,
+          dayNumber: s.dayNumber || s.DAY_NUMBER || 1,
+          planTime: s.planTime || s.PLAN_TIME || '',
+          place: s.place || s.PLACE || '',
+          memo: s.memo || s.MEMO || '',
+          latitude: s.latitude != null ? s.latitude : (s.LATITUDE != null ? s.LATITUDE : null),
+          longitude: s.longitude != null ? s.longitude : (s.LONGITUDE != null ? s.LONGITUDE : null)
+        })) : [];
+      } catch(e) {
+        const stored = localStorage.getItem('travelmates_schedules_' + selectedGroupId);
+        allSchedules = stored ? JSON.parse(stored) : [];
+      }
+
+      $('#admin-schedule-total-count').text(allSchedules.length + '건');
+      renderAdminPlannerSchedules();
+    }
+
+    // 7. 인라인 지도 정리
+    function cleanAllAdminInlineMaps() {
+      Object.keys(adminInlineMaps).forEach(id => {
+        try {
+          if (adminInlineMaps[id] && adminInlineMaps[id].map) {
+            adminInlineMaps[id].map.remove();
+          }
+        } catch(e) {}
+      });
+      adminInlineMaps = {};
+      currentExpandedSchedId = null;
+    }
+
+    // 8. 일정 플래너 타임라인 렌더링
+    function renderAdminPlannerSchedules(highlightId) {
+      cleanAllAdminInlineMaps();
+      const $container = $('#admin-plan-timeline');
+      const $countEl = $('#admin-schedule-count');
+      if (!$container.length) return;
+
+      let displayItems = [];
+      if (currentAdminDay === 'all') {
+        displayItems = [...allSchedules].sort((a, b) => {
+          if ((a.dayNumber || 1) !== (b.dayNumber || 1)) return (a.dayNumber || 1) - (b.dayNumber || 1);
+          return (a.planTime || '').localeCompare(b.planTime || '');
+        });
+      } else {
+        displayItems = allSchedules
+          .filter(s => String(s.dayNumber || 1) === String(currentAdminDay))
+          .sort((a, b) => (a.planTime || '').localeCompare(b.planTime || ''));
+      }
+
+      $countEl.text(displayItems.length + '개');
+
+      if (displayItems.length === 0) {
+        $container.html(`
+          <div class="py-12 text-center text-slate-400">
+            <i data-lucide="calendar-x" class="w-10 h-10 mx-auto mb-3 text-slate-300"></i>
+            <p class="text-sm font-semibold">${currentAdminDay === 'all' ? '등록된 일정이 없습니다.' : `Day ${currentAdminDay}에 등록된 일정이 없습니다.`}</p>
+            <p class="text-xs text-slate-400 mt-1">상단 폼에서 새로운 방문 일정과 시간을 추가해보세요!</p>
+          </div>
+        `);
+        lucide.createIcons();
+        return;
+      }
+
+      const timeColors = ['bg-emerald-100 text-emerald-800', 'bg-teal-100 text-teal-800', 'bg-cyan-100 text-cyan-800', 'bg-blue-100 text-blue-800', 'bg-purple-100 text-purple-800'];
+      const dayColors = [
+        'bg-emerald-50 text-emerald-700 border border-emerald-200',
+        'bg-blue-50 text-blue-700 border border-blue-200',
+        'bg-purple-50 text-purple-700 border border-purple-200',
+        'bg-amber-50 text-amber-700 border border-amber-200',
+        'bg-rose-50 text-rose-700 border border-rose-200'
+      ];
+
+      $container.html(displayItems.map((item, idx) => {
+        const safeId = escapeHtml(item.scheduleId);
+        const dayNum = item.dayNumber || 1;
+        const isHighlighted = highlightId && (String(item.scheduleId) === String(highlightId));
+        const highlightClasses = isHighlighted
+          ? 'ring-2 ring-emerald-500 bg-emerald-50 shadow-md scale-[1.01] transition-all duration-300'
+          : 'bg-slate-50/70 hover:bg-emerald-50/50 transition';
+
+        const hasCoordinates = (item.latitude != null && item.longitude != null);
+        const safeTime = escapeHtml(item.planTime || '');
+        const safePlace = escapeHtml(item.place || '장소 미지정');
+        const safeMemo = escapeHtml(item.memo || '');
+        const dayStyle = dayColors[(dayNum - 1) % dayColors.length];
+
+        return `
+          <div id="plan-item-${safeId}"
+            onclick="toggleAdminScheduleMap('${safeId}')"
+            class="relative timeline-dot group ${highlightClasses} p-4 rounded-2xl border border-slate-200/90 mb-3 cursor-pointer hover:border-emerald-400 hover:shadow-md transition">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${dayStyle} whitespace-nowrap">Day ${dayNum}</span>
+                  ${safeTime ? `<span class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold ${timeColors[idx % timeColors.length]} whitespace-nowrap font-mono">${safeTime}</span>` : ''}
+                  ${isHighlighted ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-500 text-white animate-pulse">✨ 방금 등록됨</span>` : ''}
+                  ${hasCoordinates ? `
+                    <span id="sched-map-badge-${safeId}" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/60 group-hover:bg-emerald-100 transition shadow-2xs whitespace-nowrap">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-emerald-600"></i>
+                      <span id="sched-map-badge-text-${safeId}">지도 보기</span>
+                      <i id="sched-chevron-${safeId}" data-lucide="chevron-down" class="w-3 h-3 text-emerald-600 transition-transform duration-200"></i>
+                    </span>
+                  ` : `
+                    <button type="button" onclick="event.stopPropagation(); openLocationPickerForSchedule('${safeId}')"
+                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100 transition shadow-xs active:scale-95 whitespace-nowrap"
+                      title="클릭하여 지도에서 위치 지정" aria-label="클릭하여 지도에서 위치 지정">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-amber-600"></i>위치 지정하기
+                    </button>
+                  `}
+                </div>
+                <h4 class="text-base font-bold text-slate-900 break-words whitespace-normal leading-snug group-hover:text-emerald-700 transition">${safePlace}</h4>
+                ${safeMemo ? `<p class="text-xs text-slate-500 mt-1 flex items-center gap-1 break-words whitespace-normal leading-relaxed"><i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 flex-shrink-0"></i><span>${safeMemo}</span></p>` : ''}
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <button type="button" onclick="event.stopPropagation(); toggleAdminScheduleMap('${safeId}')"
+                  class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                  title="지도 펼치기/접기" aria-label="지도 펼치기 또는 접기">
+                  <i id="sched-action-icon-${safeId}" data-lucide="map" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="event.stopPropagation(); openEditModal(${safeId})"
+                  class="p-1.5 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition"
+                  title="일정 수정" aria-label="${safePlace} 일정 수정">
+                  <i data-lucide="edit-2" class="w-4 h-4"></i>
+                </button>
+                <button type="button" onclick="event.stopPropagation(); deleteSchedule(${safeId})"
+                  class="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                  title="일정 삭제" aria-label="${safePlace} 일정 삭제">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 인라인 확장 지도 컨테이너 (아코디언 방식) -->
+            <div id="sched-inline-map-wrapper-${safeId}" class="sched-inline-map-wrapper hidden mt-3 pt-3 border-t border-slate-200/80" onclick="event.stopPropagation()">
+              <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                <div class="flex items-center gap-1.5 text-xs text-slate-600">
+                  <i data-lucide="navigation" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0"></i>
+                  <span id="sched-inline-coord-${safeId}" class="text-[11px] font-mono text-slate-500">위치 좌표</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <a id="sched-inline-kakao-${safeId}" href="#" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-amber-300 hover:bg-amber-400 text-amber-950 transition shadow-2xs">
+                    <span>카카오맵 길찾기</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                  <a id="sched-inline-naver-${safeId}" href="#" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-2xs">
+                    <span>네이버지도 길찾기</span>
+                    <i data-lucide="external-link" class="w-3 h-3"></i>
+                  </a>
+                  <button type="button" onclick="event.stopPropagation(); toggleAdminScheduleMap('${safeId}', false)"
+                    class="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-[11px] font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-200 transition"
+                    title="지도 접기" aria-label="지도 접기">
+                    <span>접기</span>
+                    <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="sched-inline-leaflet-map-${safeId}" class="w-full h-56 rounded-xl border border-slate-200 shadow-inner bg-slate-100 z-10 overflow-hidden"></div>
+            </div>
+          </div>
+        `;
+      }).join(''));
+
+      lucide.createIcons();
+
+      if (highlightId) {
+        setTimeout(() => {
+          const $targetEl = $(`#plan-item-${highlightId}`);
+          if ($targetEl.length) {
+            $targetEl[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 120);
+      }
+    }
+
+    // 9. 인라인 지도 토글 (Leaflet)
+    function toggleAdminScheduleMap(scheduleId, forceState) {
+      const item = allSchedules.find(s => String(s.scheduleId) === String(scheduleId));
+      if (!item) return;
+
+      const safeId = escapeHtml(item.scheduleId);
+      const $wrapper = $(`#sched-inline-map-wrapper-${safeId}`);
+      const $badgeText = $(`#sched-map-badge-text-${safeId}`);
+      const $chevron = $(`#sched-chevron-${safeId}`);
+      const $card = $(`#plan-item-${safeId}`);
+
+      if (!$wrapper.length) return;
+
+      const isCurrentlyOpen = !$wrapper.hasClass('hidden');
+      const shouldOpen = (forceState !== undefined) ? forceState : !isCurrentlyOpen;
+
+      if (!shouldOpen) {
+        $wrapper.addClass('hidden');
+        if ($badgeText.length) $badgeText.text('지도 보기');
+        if ($chevron.length) $chevron.removeClass('rotate-180');
+        $card.removeClass('border-emerald-500 shadow-md ring-1 ring-emerald-400');
+        if (currentExpandedSchedId === scheduleId) currentExpandedSchedId = null;
+        return;
+      }
+
+      // 다른 열린 지도 닫기 (단일 아코디언)
+      if (currentExpandedSchedId && currentExpandedSchedId !== scheduleId) {
+        toggleAdminScheduleMap(currentExpandedSchedId, false);
+      }
+
+      let lat = item.latitude;
+      let lng = item.longitude;
+      if (lat == null || lng == null) {
+        const found = PRESET_LOCATIONS.find(p => item.place && item.place.includes(p.name));
+        if (found) { lat = found.lat; lng = found.lng; }
+        else { lat = 33.4586; lng = 126.9427; }
+      }
+
+      $(`#sched-inline-coord-${safeId}`).text(`위치 좌표: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+      $(`#sched-inline-kakao-${safeId}`).attr('href', `https://map.kakao.com/link/to/${encodeURIComponent(item.place)},${lat},${lng}`);
+      $(`#sched-inline-naver-${safeId}`).attr('href', `https://map.naver.com/v5/search/${encodeURIComponent(item.place)}`);
+
+      $wrapper.removeClass('hidden');
+      if ($badgeText.length) $badgeText.text('지도 접기');
+      if ($chevron.length) $chevron.addClass('rotate-180');
+      $card.addClass('border-emerald-500 shadow-md ring-1 ring-emerald-400');
+      currentExpandedSchedId = scheduleId;
+
+      setTimeout(() => {
+        const mapContainerId = `sched-inline-leaflet-map-${safeId}`;
+        const container = document.getElementById(mapContainerId);
+        if (!container) return;
+
+        if (adminInlineMaps[scheduleId] && adminInlineMaps[scheduleId].map) {
+          adminInlineMaps[scheduleId].map.invalidateSize();
+          adminInlineMaps[scheduleId].map.setView([lat, lng], 15);
+        } else if (window.L) {
+          try {
+            const map = L.map(mapContainerId, { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              maxZoom: 19,
+              attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            const marker = L.marker([lat, lng]).addTo(map);
+            marker.bindPopup(`<b>${escapeHtml(item.place)}</b><br><span style="font-size:11px;color:#666;">${escapeHtml(item.memo || '일정 장소')}</span>`).openPopup();
+
+            adminInlineMaps[scheduleId] = { map, marker };
+            map.invalidateSize();
+          } catch(err) {
+            console.warn('Leaflet inline map init error:', err);
+          }
+        }
+      }, 150);
+    }
+
+    // 10. 인라인 일정 추가 핸들러
+    async function handleAdminInlineAddPlan(e) {
+      e.preventDefault();
+      if (!selectedGroupId) {
+        showToast('일정을 추가할 여행 모임을 먼저 선택해주세요! ⚠️');
+        return;
+      }
+
+      const time = ($('#admin-inline-plan-time').val() || '').trim();
+      const place = ($('#admin-inline-plan-place').val() || '').trim();
+      const memo = ($('#admin-inline-plan-memo').val() || '').trim();
+      if (!place) return;
+
+      const latVal = $('#admin-inline-plan-lat').val();
+      const lngVal = $('#admin-inline-plan-lng').val();
+      let lat = latVal ? parseFloat(latVal) : null;
+      let lng = lngVal ? parseFloat(lngVal) : null;
+      if (lat == null || lng == null) {
+        const matched = PRESET_LOCATIONS.find(p => place.includes(p.name));
+        if (matched) { lat = matched.lat; lng = matched.lng; }
+      }
+
+      const targetDay = currentAdminDay === 'all' ? 1 : Number(currentAdminDay);
+      const payload = {
+        groupId: selectedGroupId,
+        dayNumber: targetDay,
+        planTime: time || null,
+        place,
+        memo,
+        latitude: lat,
+        longitude: lng
+      };
+
+      try {
+        const created = await $.ajax({
+          url: API + '/api/groups/' + selectedGroupId + '/schedules',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          dataType: 'json'
+        });
+        await loadSchedules();
+        const highlightId = (created && (created.scheduleId || created.id)) || null;
+        if (currentAdminDay !== 'all' && currentAdminDay !== targetDay) {
+          selectAdminDay(targetDay);
+        } else {
+          renderAdminPlannerSchedules(highlightId);
+        }
+        showToast(`Day ${targetDay}에 새 일정이 등록되었습니다! ✨`);
+      } catch(err) {
+        // Local fallback
+        const key = 'travelmates_schedules_' + selectedGroupId;
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        payload.scheduleId = Date.now();
+        list.push(payload);
+        localStorage.setItem(key, JSON.stringify(list));
+        allSchedules = list;
+        if (currentAdminDay !== 'all' && currentAdminDay !== targetDay) {
+          selectAdminDay(targetDay);
+        } else {
+          renderAdminPlannerSchedules(payload.scheduleId);
+        }
+        showToast(`Day ${targetDay}에 새 일정이 추가되었습니다. (로컬 동기화)`);
+      }
+
+      $('#admin-inline-add-plan-form').trigger('reset');
+      $('#admin-inline-plan-lat').val('');
+      $('#admin-inline-plan-lng').val('');
+    }
+
+    // 11. 모달 일정 추가 핸들러
+    function openAdminAddPlanModal() {
+      if (!selectedGroupId) {
+        showToast('일정을 추가할 여행 모임을 먼저 선택해주세요.');
+        return;
+      }
+      const $daySelect = $('#admin-plan-day-select');
+      let opts = '';
+      for (let d = 1; d <= adminMaxDay; d++) {
+        const isSel = (currentAdminDay !== 'all' && Number(currentAdminDay) === d) ? 'selected' : '';
+        opts += `<option value="${d}" ${isSel}>Day ${d}</option>`;
+      }
+      $daySelect.html(opts);
+      $('#modal-add-plan').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+    }
+
+    function closeAdminAddPlanModal() {
+      $('#modal-add-plan').addClass('hidden').removeClass('flex');
+    }
+
+    async function handleAdminAddPlan(e) {
+      e.preventDefault();
+      if (!selectedGroupId) return;
+
+      const targetDay = parseInt($('#admin-plan-day-select').val(), 10) || 1;
+      const time = ($('#admin-plan-time').val() || '').trim() || '12:00';
+      const place = ($('#admin-plan-place').val() || '').trim();
+      const memo = ($('#admin-plan-memo').val() || '').trim();
+      if (!place) return;
+
+      const latVal = $('#admin-plan-lat').val();
+      const lngVal = $('#admin-plan-lng').val();
+      let lat = latVal ? parseFloat(latVal) : null;
+      let lng = lngVal ? parseFloat(lngVal) : null;
+      if (lat == null || lng == null) {
+        const matched = PRESET_LOCATIONS.find(p => place.includes(p.name));
+        if (matched) { lat = matched.lat; lng = matched.lng; }
+      }
+
+      const payload = {
+        groupId: selectedGroupId,
+        dayNumber: targetDay,
+        planTime: time,
+        place,
+        memo,
+        latitude: lat,
+        longitude: lng
+      };
+
+      try {
+        const created = await $.ajax({
+          url: API + '/api/groups/' + selectedGroupId + '/schedules',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          dataType: 'json'
+        });
+        await loadSchedules();
+        const highlightId = (created && (created.scheduleId || created.id)) || null;
+        if (currentAdminDay !== 'all' && currentAdminDay !== targetDay) {
+          selectAdminDay(targetDay);
+        } else {
+          renderAdminPlannerSchedules(highlightId);
+        }
+        showToast(`Day ${targetDay}에 일정이 등록되었습니다! ✨`);
+      } catch(err) {
+        const key = 'travelmates_schedules_' + selectedGroupId;
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        payload.scheduleId = Date.now();
+        list.push(payload);
+        localStorage.setItem(key, JSON.stringify(list));
+        allSchedules = list;
+        if (currentAdminDay !== 'all' && currentAdminDay !== targetDay) {
+          selectAdminDay(targetDay);
+        } else {
+          renderAdminPlannerSchedules(payload.scheduleId);
+        }
+        showToast(`Day ${targetDay}에 새 일정이 추가되었습니다. (로컬)`);
+      }
+
+      $('#admin-add-plan-form').trigger('reset');
+      $('#admin-plan-lat').val('');
+      $('#admin-plan-lng').val('');
+      closeAdminAddPlanModal();
+    }
+
+    // 12. 일정 삭제
+    async function deleteSchedule(scheduleId) {
+      if (!confirm('이 일정을 삭제하시겠습니까?')) return;
+
+      try {
+        const data = await $.ajax({
+          url: API + '/api/schedules/' + scheduleId,
+          method: 'DELETE',
+          dataType: 'json'
+        });
+        if (data && data.success) {
+          showToast('일정이 삭제되었습니다.');
+          await loadSchedules();
+        }
+      } catch(err) {
+        const key = 'travelmates_schedules_' + selectedGroupId;
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        const filtered = list.filter(s => (s.scheduleId || s.SCHEDULE_ID) != scheduleId);
+        localStorage.setItem(key, JSON.stringify(filtered));
+        allSchedules = filtered;
+        renderAdminPlannerSchedules();
+        $('#admin-schedule-total-count').text(allSchedules.length + '건');
+        showToast('일정이 삭제되었습니다. (로컬)');
+      }
+    }
+
+    // 13. 일정 수정 모달
+    function openEditModal(id) {
+      const s = allSchedules.find(item => (item.scheduleId || item.SCHEDULE_ID) == id);
+      if (!s) {
+        showToast('수정할 일정 정보를 찾을 수 없습니다.');
+        return;
+      }
+
+      $('#edit-schedule-id').val(id);
+      $('#edit-day').val(s.dayNumber || s.DAY_NUMBER || 1);
+      $('#edit-time').val(s.planTime || s.PLAN_TIME || '');
+      $('#edit-place').val(s.place || s.PLACE || '');
+      $('#edit-memo').val(s.memo || s.MEMO || '');
+      $('#edit-plan-lat').val(s.latitude != null ? s.latitude : '');
+      $('#edit-plan-lng').val(s.longitude != null ? s.longitude : '');
+
+      $('#edit-modal').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+    }
+
+    function closeEditModal() {
+      $('#edit-modal').addClass('hidden').removeClass('flex');
+    }
+
+    async function submitEdit(e) {
+      e.preventDefault();
+      const id = parseInt($('#edit-schedule-id').val(), 10);
+      const placeVal = ($('#edit-place').val() || '').trim();
+      if (!placeVal) {
+        showToast('장소명을 입력해주세요.');
+        return;
+      }
+
+      const latVal = $('#edit-plan-lat').val();
+      const lngVal = $('#edit-plan-lng').val();
+
+      const payload = {
+        dayNumber: parseInt($('#edit-day').val(), 10) || 1,
+        planTime: $('#edit-time').val() || null,
+        place: placeVal,
+        memo: ($('#edit-memo').val() || '').trim(),
+        latitude: latVal ? parseFloat(latVal) : null,
+        longitude: lngVal ? parseFloat(lngVal) : null
+      };
+
+      try {
+        const data = await $.ajax({
+          url: API + '/api/schedules/' + id,
+          method: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          dataType: 'json'
+        });
+        if (data && (data.success || data.scheduleId)) {
+          closeEditModal();
+          showToast('일정이 성공적으로 수정되었습니다. 💾');
+          await loadSchedules();
+        } else {
+          throw new Error((data && data.message) || '일정 수정 실패');
+        }
+      } catch(err) {
+        const key = 'travelmates_schedules_' + selectedGroupId;
+        const list = JSON.parse(localStorage.getItem(key) || '[]');
+        const idx = list.findIndex(s => (s.scheduleId || s.SCHEDULE_ID) == id);
+        if (idx !== -1) {
+          list[idx] = { ...list[idx], ...payload };
+          localStorage.setItem(key, JSON.stringify(list));
+          allSchedules = list;
+          renderAdminPlannerSchedules(id);
+        }
+        closeEditModal();
+        showToast('일정이 수정되었습니다. (로컬 동기화)');
+      }
+    }
+
+    // 14. 위치 선택 모달 (Location Picker)
+    let adminLocMap = null;
+    let adminLocMarker = null;
+    let adminLocTargetInputId = 'admin-inline-plan-place';
+    let adminLocTargetScheduleId = null;
+    let adminPickedLoc = { name: '', lat: 33.4586, lng: 126.9427 };
+
+    function openLocationPickerModal(targetInputId) {
+      adminLocTargetInputId = targetInputId || 'admin-inline-plan-place';
+      adminLocTargetScheduleId = null;
+
+      const $input = $(`#${adminLocTargetInputId}`);
+      const currentVal = ($input.val() || '').trim();
+      if (currentVal) {
+        $('#loc-selected-place-name').val(currentVal);
+        adminPickedLoc.name = currentVal;
+      }
+
+      $('#modal-location-picker').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+
+      setTimeout(() => {
+        initAdminLocationMap();
+      }, 150);
+    }
+
+    function openLocationPickerForSchedule(scheduleId) {
+      const item = allSchedules.find(s => String(s.scheduleId) === String(scheduleId));
+      if (!item) return;
+
+      adminLocTargetScheduleId = scheduleId;
+      adminLocTargetInputId = null;
+
+      $('#loc-selected-place-name').val(item.place || '');
+      adminPickedLoc.name = item.place || '';
+      if (item.latitude && item.longitude) {
+        adminPickedLoc.lat = item.latitude;
+        adminPickedLoc.lng = item.longitude;
+      }
+
+      $('#modal-location-picker').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+
+      setTimeout(() => {
+        initAdminLocationMap();
+      }, 150);
+    }
+
+    function closeLocationPickerModal() {
+      $('#modal-location-picker').addClass('hidden').removeClass('flex');
+    }
+
+    function initAdminLocationMap() {
+      const container = document.getElementById('admin-leaflet-map-container');
+      if (!container || !window.L) return;
+
+      const initialLat = adminPickedLoc.lat || 33.4586;
+      const initialLng = adminPickedLoc.lng || 126.9427;
+
+      if (!adminLocMap) {
+        adminLocMap = L.map('admin-leaflet-map-container').setView([initialLat, initialLng], 14);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© OpenStreetMap'
+        }).addTo(adminLocMap);
+
+        adminLocMarker = L.marker([initialLat, initialLng], { draggable: true }).addTo(adminLocMap);
+
+        adminLocMap.on('click', function(e) {
+          updateAdminPickedCoords(e.latlng.lat, e.latlng.lng);
+        });
+
+        adminLocMarker.on('dragend', function(e) {
+          const pos = e.target.getLatLng();
+          updateAdminPickedCoords(pos.lat, pos.lng);
+        });
+      } else {
+        adminLocMap.invalidateSize();
+        adminLocMap.setView([initialLat, initialLng], 14);
+        if (adminLocMarker) adminLocMarker.setLatLng([initialLat, initialLng]);
+      }
+
+      updateAdminPickedCoords(initialLat, initialLng);
+    }
+
+    function updateAdminPickedCoords(lat, lng) {
+      adminPickedLoc.lat = lat;
+      adminPickedLoc.lng = lng;
+      if (adminLocMarker) adminLocMarker.setLatLng([lat, lng]);
+      $('#loc-latlng-indicator').text(`좌표: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
+    }
+
+    function searchLocationPlace() {
+      const q = ($('#loc-search-input').val() || '').trim();
+      if (!q) return;
+
+      const found = PRESET_LOCATIONS.find(p => p.name.includes(q) || q.includes(p.name));
+      if (found) {
+        $('#loc-selected-place-name').val(found.name);
+        adminPickedLoc.name = found.name;
+        updateAdminPickedCoords(found.lat, found.lng);
+        if (adminLocMap) adminLocMap.setView([found.lat, found.lng], 15);
+        showToast(`'${found.name}' 위치로 이동했습니다. 📍`);
+      } else {
+        $('#loc-selected-place-name').val(q);
+        showToast(`'${q}' 장소명을 입력했습니다. 지도를 클릭해 위치를 지정하세요.`);
+      }
+    }
+
+    async function applyLocationPicker() {
+      const placeName = ($('#loc-selected-place-name').val() || '').trim();
+      if (!placeName) {
+        showToast('장소명을 입력해주세요.');
+        return;
+      }
+
+      if (adminLocTargetScheduleId) {
+        // 특정 일정의 위치 업데이트
+        const item = allSchedules.find(s => String(s.scheduleId) === String(adminLocTargetScheduleId));
+        if (item) {
+          item.latitude = adminPickedLoc.lat;
+          item.longitude = adminPickedLoc.lng;
+          if (placeName) item.place = placeName;
+
+          try {
+            await $.ajax({
+              url: API + '/api/schedules/' + item.scheduleId,
+              method: 'PUT',
+              contentType: 'application/json',
+              data: JSON.stringify({
+                dayNumber: item.dayNumber || 1,
+                planTime: item.planTime,
+                place: item.place,
+                memo: item.memo,
+                latitude: item.latitude,
+                longitude: item.longitude
+              }),
+              dataType: 'json'
+            });
+            await loadSchedules();
+            renderAdminPlannerSchedules(item.scheduleId);
+            showToast(`'${item.place}' 위치가 성공적으로 저장되었습니다! 📍`);
+          } catch(e) {
+            renderAdminPlannerSchedules(item.scheduleId);
+            showToast(`'${item.place}' 위치가 설정되었습니다. (로컬)`);
+          }
+        }
+      } else if (adminLocTargetInputId) {
+        $(`#${adminLocTargetInputId}`).val(placeName);
+        if (adminLocTargetInputId === 'admin-inline-plan-place') {
+          $('#admin-inline-plan-lat').val(adminPickedLoc.lat);
+          $('#admin-inline-plan-lng').val(adminPickedLoc.lng);
+        } else if (adminLocTargetInputId === 'admin-plan-place') {
+          $('#admin-plan-lat').val(adminPickedLoc.lat);
+          $('#admin-plan-lng').val(adminPickedLoc.lng);
+        } else if (adminLocTargetInputId === 'edit-place') {
+          $('#edit-plan-lat').val(adminPickedLoc.lat);
+          $('#edit-plan-lng').val(adminPickedLoc.lng);
+        }
+        showToast(`'${placeName}' 장소와 위치가 입력되었습니다. 📍`);
+      }
+
+      closeLocationPickerModal();
+    }
+
+    // ===== Toast (jQuery) =====
+    let toastTimer;
+    function showToast(msg) {
+      const $toast = $('#toast');
+      $('#toast-msg').text(msg);
+      $toast.removeClass('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $toast.addClass('hidden'), 3000);
+    }
+
+    // ===== Time Picker Popup Modal Logic (jQuery) =====
+    let timePickerTargetInputId = 'new-time';
+    let tpAmPm = 'AM';
+    let tpHour = 10;
+    let tpMinute = '00';
+
+    // 1. 타임피커 옵션 초기화 (1~12시, 00~55분)
+    function initTimePickerOptions() {
+      const $hourSel = $('#tp-select-hour');
+      const $minSel = $('#tp-select-minute');
+      if (!$hourSel.length || !$minSel.length) return;
+
+      if ($hourSel.find('option').length === 0) {
+        let hourHtml = '';
+        for (let h = 1; h <= 12; h++) {
+          const text = (h < 10 ? '0' + h : h) + '시';
+          hourHtml += `<option value="${h}">${text}</option>`;
+        }
+        $hourSel.html(hourHtml);
+      }
+
+      if ($minSel.find('option').length === 0) {
+        let minHtml = '';
+        const minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
+        minutes.forEach(m => {
+          minHtml += `<option value="${m}">${m}분</option>`;
+        });
+        $minSel.html(minHtml);
+      }
+    }
+
+    // 2. 타임피커 팝업 열기
+    function openTimePickerModal(targetInputId) {
+      timePickerTargetInputId = targetInputId || 'new-time';
+      initTimePickerOptions();
+
+      const currentVal = ($('#' + timePickerTargetInputId).val() || '').trim();
+
+      if (currentVal && /^\d{1,2}:\d{2}$/.test(currentVal)) {
+        const parts = currentVal.split(':');
+        let h = parseInt(parts[0], 10);
+        const m = parts[1];
+
+        if (h >= 12) {
+          tpAmPm = 'PM';
+          if (h > 12) h -= 12;
+        } else {
+          tpAmPm = 'AM';
+          if (h === 0) h = 12;
+        }
+        tpHour = h;
+        tpMinute = m;
+      } else {
+        tpAmPm = 'AM';
+        tpHour = 10;
+        tpMinute = '00';
+      }
+
+      $('#tp-select-hour').val(tpHour);
+      $('#tp-select-minute').val(tpMinute);
+
+      updateTimePickerDisplay();
+
+      $('#modal-time-picker').removeClass('hidden').addClass('flex');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // 3. 타임피커 팝업 닫기
+    function closeTimePickerModal() {
+      $('#modal-time-picker').addClass('hidden').removeClass('flex');
+    }
+
+    // 4. 오전 / 오후 변경
+    function setTimeAmPm(ampm) {
+      tpAmPm = ampm;
+      updateTimePickerDisplay();
+    }
+
+    // 5. 드롭다운 변경 시 호출
+    function onTimePickerChange() {
+      tpHour = parseInt($('#tp-select-hour').val(), 10) || 10;
+      tpMinute = $('#tp-select-minute').val() || '00';
+      updateTimePickerDisplay();
+    }
+
+    // 6. 간편 프리셋 시간 선택
+    function selectTimePreset(timeStr) {
+      if (!timeStr) return;
+      const parts = timeStr.split(':');
+      let h = parseInt(parts[0], 10);
+      const m = parts[1];
+
+      if (h >= 12) {
+        tpAmPm = 'PM';
+        if (h > 12) h -= 12;
+      } else {
+        tpAmPm = 'AM';
+        if (h === 0) h = 12;
+      }
+      tpHour = h;
+      tpMinute = m;
+
+      $('#tp-select-hour').val(tpHour);
+      $('#tp-select-minute').val(tpMinute);
+
+      updateTimePickerDisplay();
+      applyTimePicker();
+    }
+
+    // 7. 디스플레이 갱신
+    function updateTimePickerDisplay() {
+      const $btnAm = $('#tp-btn-am');
+      const $btnPm = $('#tp-btn-pm');
+
+      if ($btnAm.length && $btnPm.length) {
+        if (tpAmPm === 'AM') {
+          $btnAm.attr('class', 'flex-1 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-700 shadow-sm');
+          $btnPm.attr('class', 'flex-1 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900');
+        } else {
+          $btnPm.attr('class', 'flex-1 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-700 shadow-sm');
+          $btnAm.attr('class', 'flex-1 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900');
+        }
+      }
+
+      let h24 = parseInt(tpHour, 10);
+      if (tpAmPm === 'PM' && h24 < 12) h24 += 12;
+      if (tpAmPm === 'AM' && h24 === 12) h24 = 0;
+      const formatted24 = (h24 < 10 ? '0' + h24 : h24) + ':' + tpMinute;
+
+      $('#tp-preview-time').text(formatted24);
+      const ampmText = tpAmPm === 'AM' ? '오전' : '오후';
+      $('#tp-preview-desc').text(`${ampmText} ${tpHour}시 ${tpMinute}분`);
+    }
+
+    // 8. 선택한 시간 적용하기
+    function applyTimePicker() {
+      let h24 = parseInt(tpHour, 10);
+      if (tpAmPm === 'PM' && h24 < 12) h24 += 12;
+      if (tpAmPm === 'AM' && h24 === 12) h24 = 0;
+      const formattedTime = (h24 < 10 ? '0' + h24 : h24) + ':' + tpMinute;
+
+      const $targetInput = $('#' + timePickerTargetInputId);
+      if ($targetInput.length) {
+        $targetInput.val(formattedTime);
+        $targetInput.addClass('ring-2 ring-emerald-500 bg-emerald-50/50');
+        setTimeout(() => {
+          $targetInput.removeClass('ring-2 ring-emerald-500 bg-emerald-50/50');
+        }, 1000);
+      }
+
+      closeTimePickerModal();
+      showToast(`시간이 '${formattedTime}'(${tpAmPm === 'AM' ? '오전' : '오후'} ${tpHour}시 ${tpMinute}분)로 입력되었습니다. ⏰`);
+    }
+
+    // =========================================================================
+    // MEMBER MANAGEMENT MODULE (가입 회원 관리)
+    // =========================================================================
+    let currentAdminTab = 'schedules';
+    let adminMembersList = [];
+    let deletingMemberId = null;
+
+    // 1. 관리자 탭 전환 (일정 관리 <-> 회원 관리)
+    function switchAdminTab(tabName) {
+      currentAdminTab = tabName;
+
+      if (tabName === 'schedules') {
+        $('#view-schedule-management').removeClass('hidden');
+        $('#view-member-management').addClass('hidden');
+
+        // 데스크톱 탭 스타일
+        $('#admin-tab-btn-schedules')
+          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs');
+        $('#admin-tab-btn-members')
+          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition');
+
+        // 모바일 탭 스타일
+        $('#mobile-tab-btn-schedules')
+          .attr('class', 'p-1.5 rounded-lg bg-white text-orange-600 transition');
+        $('#mobile-tab-btn-members')
+          .attr('class', 'p-1.5 rounded-lg text-slate-600 hover:text-orange-600 transition');
+      } else {
+        $('#view-schedule-management').addClass('hidden').removeClass('flex');
+        $('#view-member-management').removeClass('hidden');
+
+        // 데스크톱 탭 스타일
+        $('#admin-tab-btn-members')
+          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs');
+        $('#admin-tab-btn-schedules')
+          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition');
+
+        // 모바일 탭 스타일
+        $('#mobile-tab-btn-members')
+          .attr('class', 'p-1.5 rounded-lg bg-white text-orange-600 transition');
+        $('#mobile-tab-btn-schedules')
+          .attr('class', 'p-1.5 rounded-lg text-slate-600 hover:text-orange-600 transition');
+
+        loadAdminMembers();
+      }
+
+      lucide.createIcons();
+    }
+
+    // 2. 가입 회원 목록 로드
+    async function loadAdminMembers() {
+      const $tbody = $('#member-table-body');
+      if ($tbody.length) {
+        $tbody.html(`
+          <tr>
+            <td colspan="9" class="py-12 text-center text-slate-400 text-sm">
+              <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300"></i>
+              회원 정보를 불러오는 중...
+            </td>
+          </tr>
+        `);
+        if (window.lucide) lucide.createIcons();
+      }
+
+      try {
+        const res = await $.ajax({
+          url: API + '/api/admin/members',
+          method: 'GET',
+          dataType: 'json'
+        });
+        const list = (res && res.members) || (res && res.data) || (Array.isArray(res) ? res : []);
+        if (Array.isArray(list) && list.length > 0) {
+          adminMembersList = list.map(m => ({
+            memberId: Number(m.memberId || m.MEMBER_ID || m.id || 0),
+            username: String(m.username || m.USERNAME || ''),
+            name: String(m.name || m.NAME || ''),
+            email: String(m.email || m.EMAIL || ''),
+            phone: String(m.phone || m.PHONE || ''),
+            role: String(m.role || m.ROLE || (m.isAdmin ? 'ADMIN' : 'MEMBER') || 'MEMBER').toUpperCase(),
+            isAdmin: Boolean(m.isAdmin || (m.role || '').toUpperCase() === 'ADMIN'),
+            createdAt: String(m.createdAt || m.CREATED_AT || ''),
+            totalGroups: Number(m.totalGroups !== undefined ? m.totalGroups : (m.registeredGroups ? m.registeredGroups.length : (m.joinedGroups ? m.joinedGroups.length : 0))),
+            totalSchedules: Number(m.totalSchedules !== undefined ? m.totalSchedules : 0),
+            registeredGroups: m.registeredGroups || [],
+            joinedGroups: m.joinedGroups || []
+          }));
+        } else if (res && res.success && Array.isArray(res.members)) {
+          adminMembersList = res.members;
+        } else {
+          adminMembersList = [];
+        }
+      } catch (err) {
+        console.warn('loadAdminMembers API fallback:', err);
+        // 기본 회원 샘플 폴백 (각 회원의 참여 모임 및 일정 카운트 포함)
+        adminMembersList = [
+          { memberId: 1, username: 'mskim', name: '김민수', email: 'mskim@travelmates.com', phone: '010-1234-5678', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-04 10:15:00', totalGroups: 3, totalSchedules: 10, registeredGroups: [], joinedGroups: [] },
+          { memberId: 2, username: 'jylee', name: '이지연', email: 'jylee@travelmates.com', phone: '010-2345-6789', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-04 11:20:00', totalGroups: 3, totalSchedules: 10, registeredGroups: [], joinedGroups: [] },
+          { memberId: 3, username: 'chpark', name: '박찬호', email: 'chpark@travelmates.com', phone: '010-3456-7890', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-05 09:40:00', totalGroups: 2, totalSchedules: 6, registeredGroups: [], joinedGroups: [] },
+          { memberId: 4, username: 'swkang', name: '강수원', email: 'swkang@travelmates.com', phone: '010-4567-8901', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-06 14:10:00', totalGroups: 1, totalSchedules: 3, registeredGroups: [], joinedGroups: [] },
+          { memberId: 5, username: 'admin', name: '총괄관리자', email: 'admin@travelmates.com', phone: '010-9999-9999', role: 'ADMIN', isAdmin: true, createdAt: '2026-11-03 09:00:00', totalGroups: 0, totalSchedules: 0, registeredGroups: [], joinedGroups: [] }
+        ];
+      }
+
+      $('#admin-tab-member-count').text(adminMembersList.length + '명');
+      renderAdminMembers();
+    }
+
+    // 3. 필터 및 정렬 기반 회원 명단 렌더링
+    function filterAdminMembers() {
+      renderAdminMembers();
+    }
+
+    function renderAdminMembers() {
+      try {
+        const q = ($('#member-search-input').val() || '').toLowerCase().trim();
+        const roleFilter = $('#member-role-filter').val() || 'ALL';
+        const sortBy = $('#member-sort-select').val() || 'NEWEST';
+
+        // 통계 계산
+        const totalCount = adminMembersList.length;
+        const normalCount = adminMembersList.filter(m => (m.role || '').toUpperCase() === 'MEMBER' || !m.isAdmin).length;
+        const adminCount = adminMembersList.filter(m => (m.role || '').toUpperCase() === 'ADMIN' || m.isAdmin).length;
+
+        // 최근 7일 가입자
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const newCount = adminMembersList.filter(m => {
+          if (!m.createdAt) return false;
+          try {
+            const d = new Date(String(m.createdAt).replace(' ', 'T'));
+            return !isNaN(d.getTime()) && d >= sevenDaysAgo;
+          } catch (e) {
+            return false;
+          }
+        }).length;
+
+        $('#stat-total-members').text(`${totalCount}명`);
+        $('#stat-normal-members').text(`${normalCount}명`);
+        $('#stat-admin-members').text(`${adminCount}명`);
+        $('#stat-new-members').text(`${newCount}명`);
+
+        // 필터링
+        let filtered = adminMembersList.filter(m => {
+          if (roleFilter !== 'ALL') {
+            const mRole = ((m.role || (m.isAdmin ? 'ADMIN' : 'MEMBER'))).toUpperCase();
+            if (mRole !== roleFilter) return false;
+          }
+          if (q) {
+            const nameMatch = (m.name || '').toLowerCase().includes(q);
+            const userMatch = (m.username || '').toLowerCase().includes(q);
+            const emailMatch = (m.email || '').toLowerCase().includes(q);
+            const phoneMatch = (m.phone || '').includes(q);
+            if (!nameMatch && !userMatch && !emailMatch && !phoneMatch) return false;
+          }
+          return true;
+        });
+
+        // 정렬
+        filtered.sort((a, b) => {
+          if (sortBy === 'NAME') {
+            return (a.name || '').localeCompare(b.name || '', 'ko-KR');
+          } else if (sortBy === 'OLDEST') {
+            return (a.memberId || 0) - (b.memberId || 0);
+          } else {
+            // NEWEST
+            return (b.memberId || 0) - (a.memberId || 0);
+          }
+        });
+
+        $('#member-table-count').text(`${filtered.length}명`);
+
+        const $tbody = $('#member-table-body');
+        if (filtered.length === 0) {
+          $tbody.html(`
+            <tr>
+              <td colspan="9" class="py-12 text-center text-slate-400 text-sm">
+                <i data-lucide="user-x" class="w-8 h-8 mx-auto mb-2 text-slate-300 opacity-70"></i>
+                <p class="font-medium text-slate-600">조건에 일치하는 회원이 없습니다.</p>
+                <p class="text-xs text-slate-400 mt-1">검색어나 권한 필터를 변경해보세요.</p>
+              </td>
+            </tr>
+          `);
+          if (window.lucide) lucide.createIcons();
+          return;
+        }
+
+        const colorPalette = ['bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-indigo-500', 'bg-rose-500', 'bg-teal-500'];
+
+        $tbody.html(filtered.map((m) => {
+          const isAdmin = Boolean(m.isAdmin || (m.role || '').toUpperCase() === 'ADMIN');
+          const roleBadge = isAdmin
+            ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                 <i data-lucide="shield" class="w-3 h-3 text-rose-500"></i>관리자
+               </span>`
+            : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                 <i data-lucide="user" class="w-3 h-3 text-emerald-500"></i>일반회원
+               </span>`;
+
+          const mid = Number(m.memberId) || 0;
+          const avatarColor = colorPalette[mid % colorPalette.length] || 'bg-slate-500';
+          const initial = (m.name || m.username || 'M').charAt(0);
+          const safeName = escapeHtml(m.name || '');
+          const safeUser = escapeHtml(m.username || '');
+          const safeEmail = escapeHtml(m.email || '');
+          const safePhone = escapeHtml(m.phone || '-');
+          const safeDate = escapeHtml(m.createdAt || '-');
+
+          const isSuperAdmin = (m.username === 'admin');
+          const totalGroups = Number(m.totalGroups !== undefined ? m.totalGroups : (m.registeredGroups ? m.registeredGroups.length : 0));
+          const totalSchedules = Number(m.totalSchedules !== undefined ? m.totalSchedules : 0);
+
+          return `
+            <tr class="hover:bg-slate-50/80 transition">
+              <td class="py-3 px-4 text-center font-mono text-xs text-slate-400">${mid}</td>
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full ${avatarColor} text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                    ${initial}
+                  </div>
+                  <div>
+                    <span class="font-bold text-slate-800 block">${safeName}</span>
+                    ${isSuperAdmin ? '<span class="text-[10px] text-orange-600 font-semibold">최고관리자</span>' : ''}
+                  </div>
+                </div>
+              </td>
+              <td class="py-3 px-4 font-mono text-xs text-slate-600 font-medium">${safeUser}</td>
+              <td class="py-3 px-4 text-xs text-slate-600">${safeEmail}</td>
+              <td class="py-3 px-4 font-mono text-xs text-slate-600">${safePhone}</td>
+              <td class="py-3 px-4 text-center">
+                ${totalGroups > 0 ? `
+                  <button type="button" onclick="openMemberSchedulesModal(${mid})"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition shadow-2xs group"
+                    title="${safeName} 회원의 참여 일정 (${totalGroups}개 모임, ${totalSchedules}개 일정) 확인">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-orange-600"></i>
+                    <span><strong class="font-bold">${totalGroups}개 모임</strong> (${totalSchedules}개 일정)</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3 text-orange-400 group-hover:translate-x-0.5 transition-transform"></i>
+                  </button>
+                ` : `
+                  <button type="button" onclick="openMemberSchedulesModal(${mid})"
+                    class="inline-flex items-center gap-1 px-2.5 py-1 text-xs text-slate-400 bg-slate-100 hover:bg-slate-200/80 rounded-lg transition"
+                    title="${safeName} 회원은 등록된 참여 일정이 없습니다">
+                    <i data-lucide="calendar-off" class="w-3 h-3 text-slate-400"></i>
+                    <span>미등록</span>
+                  </button>
+                `}
+              </td>
+              <td class="py-3 px-4 text-center">${roleBadge}</td>
+              <td class="py-3 px-4 text-xs text-slate-400 font-mono">${safeDate}</td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <div class="flex items-center justify-end gap-1">
+                  <button type="button" onclick="openMemberSchedulesModal(${mid})"
+                    class="p-1.5 text-slate-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
+                    title="등록 일정 상세 확인" aria-label="${safeName} 등록 일정 상세 확인">
+                    <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                  </button>
+                  <button type="button" onclick="openMemberModal(${mid})"
+                    class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                    title="회원 정보 수정" aria-label="${safeName} 회원 정보 수정">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                  </button>
+                  ${isSuperAdmin ? `
+                    <button type="button" disabled class="p-1.5 text-slate-200 cursor-not-allowed rounded-lg" title="최고 관리자는 삭제 불가" aria-label="최고 관리자는 삭제할 수 없음">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  ` : `
+                    <button type="button" onclick="openMemberDeleteModal(${mid})"
+                      class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                      title="회원 삭제" aria-label="${safeName} 회원 삭제">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                  `}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join(''));
+
+        if (window.lucide) lucide.createIcons();
+      } catch (err) {
+        console.error('renderAdminMembers error:', err);
+        $('#member-table-body').html(`
+          <tr>
+            <td colspan="9" class="py-10 text-center text-rose-500 text-sm">
+              <i data-lucide="alert-circle" class="w-6 h-6 mx-auto mb-2 text-rose-400"></i>
+              회원 목록 렌더링 중 오류가 발생했습니다: ${escapeHtml(err.message)}
+            </td>
+          </tr>
+        `);
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    // 4. 회원 등록/수정 모달 열기
+    function openMemberModal(memberId) {
+      $('#member-form-error').addClass('hidden').text('');
+
+      if (memberId) {
+        // 수정 모드
+        const m = adminMembersList.find(x => x.memberId === memberId);
+        if (!m) return;
+
+        $('#modal-member-title').text('회원 정보 수정');
+        $('#modal-member-subtitle').text(`ID: ${m.memberId} (${m.username}) 회원의 정보를 변경합니다.`);
+        $('#member-form-id').val(m.memberId);
+
+        $('#member-form-username').val(m.username).prop('readonly', true).addClass('bg-slate-100 text-slate-500 cursor-not-allowed');
+        $('#member-form-username-hint').text('아이디는 변경할 수 없습니다.');
+
+        $('#member-form-name').val(m.name);
+        $('#member-form-email').val(m.email);
+        $('#member-form-phone').val(m.phone || '');
+        $('#member-form-password').val('').prop('required', false);
+        $('#member-form-pwd-req').addClass('hidden');
+        $('#member-form-pwd-hint').removeClass('hidden');
+
+        const roleVal = (m.isAdmin || (m.role || '').toUpperCase() === 'ADMIN') ? 'ADMIN' : 'MEMBER';
+        $('#member-form-role').val(roleVal);
+      } else {
+        // 신규 등록 모드
+        $('#modal-member-title').text('신규 회원 등록');
+        $('#modal-member-subtitle').text('새로운 관리자 또는 일반 회원을 직접 등록합니다.');
+        $('#member-form-id').val('');
+
+        $('#member-form-username').val('').prop('readonly', false).removeClass('bg-slate-100 text-slate-500 cursor-not-allowed');
+        $('#member-form-username-hint').text('영문, 숫자 4~20자로 입력하세요.');
+
+        $('#member-form-name').val('');
+        $('#member-form-email').val('');
+        $('#member-form-phone').val('');
+        $('#member-form-password').val('').prop('required', true);
+        $('#member-form-pwd-req').removeClass('hidden');
+        $('#member-form-pwd-hint').addClass('hidden');
+
+        $('#member-form-role').val('MEMBER');
+      }
+
+      $('#modal-member-edit').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+    }
+
+    // 5. 회원 등록/수정 모달 닫기
+    function closeMemberModal() {
+      $('#modal-member-edit').addClass('hidden').removeClass('flex');
+    }
+
+    // 6. 회원 전화번호 입력 시 실시간 하이픈 포맷팅
+    function handleMemberPhoneInput(el) {
+      if (window.TravelMatesUtils && TravelMatesUtils.formatPhoneNumber) {
+        el.value = TravelMatesUtils.formatPhoneNumber(el.value);
+      }
+    }
+
+    // 7. 회원 저장 (POST / PUT)
+    async function handleSaveMember(e) {
+      e.preventDefault();
+      const mid = $('#member-form-id').val();
+      const username = ($('#member-form-username').val() || '').trim();
+      const name = ($('#member-form-name').val() || '').trim();
+      const email = ($('#member-form-email').val() || '').trim();
+      const phone = ($('#member-form-phone').val() || '').trim();
+      const password = ($('#member-form-password').val() || '').trim();
+      const role = $('#member-form-role').val() || 'MEMBER';
+
+      if (!username || !name || !email) {
+        $('#member-form-error').removeClass('hidden').text('아이디, 이름, 이메일은 필수 입력 사항입니다.');
+        return;
+      }
+
+      if (!mid && !password) {
+        $('#member-form-error').removeClass('hidden').text('신규 회원 등록 시 비밀번호를 입력해야 합니다.');
+        return;
+      }
+
+      const payload = {
+        username,
+        name,
+        email,
+        phone,
+        role,
+        isAdmin: (role === 'ADMIN')
+      };
+      if (password) {
+        payload.password = password;
+      }
+
+      try {
+        if (mid) {
+          // 수정 (PUT)
+          const res = await $.ajax({
+            url: API + '/api/admin/members/' + mid,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            dataType: 'json'
+          });
+          showToast(`회원(${name}) 정보가 성공적으로 수정되었습니다! ✨`);
+        } else {
+          // 신규 등록 (POST)
+          const res = await $.ajax({
+            url: API + '/api/admin/members',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(payload),
+            dataType: 'json'
+          });
+          showToast(`신규 회원(${name})이 성공적으로 등록되었습니다! 👤`);
+        }
+
+        closeMemberModal();
+        await loadAdminMembers();
+      } catch (err) {
+        const errMsg = (err.responseJSON && err.responseJSON.message) ? err.responseJSON.message : '저장 중 오류가 발생했습니다.';
+        $('#member-form-error').removeClass('hidden').text(errMsg);
+      }
+    }
+
+    // 8. 회원 삭제 모달 열기
+    function openMemberDeleteModal(memberId) {
+      const m = adminMembersList.find(x => x.memberId === memberId);
+      if (!m) return;
+
+      if (m.username === 'admin') {
+        showToast('최고 관리자(admin) 계정은 삭제할 수 없습니다.');
+        return;
+      }
+
+      deletingMemberId = memberId;
+      $('#delete-member-name').text(m.name);
+      $('#delete-member-username').text(m.username);
+      $('#delete-member-email').text(m.email);
+
+      $('#modal-member-delete').removeClass('hidden').addClass('flex');
+      lucide.createIcons();
+    }
+
+    // 9. 회원 삭제 모달 닫기
+    function closeMemberDeleteModal() {
+      deletingMemberId = null;
+      $('#modal-member-delete').addClass('hidden').removeClass('flex');
+    }
+
+    // 10. 회원 삭제 실행 (DELETE)
+    async function confirmExecuteDeleteMember() {
+      if (!deletingMemberId) return;
+
+      try {
+        await $.ajax({
+          url: API + '/api/admin/members/' + deletingMemberId,
+          method: 'DELETE',
+          dataType: 'json'
+        });
+        showToast('회원이 안전하게 삭제되었습니다. 🗑️');
+      } catch (err) {
+        const msg = (err.responseJSON && err.responseJSON.message) || '삭제 중 오류가 발생했습니다.';
+        showToast(msg);
+      }
+
+      closeMemberDeleteModal();
+      await loadAdminMembers();
+    }
+
+    // ===== 회원별 등록 일정 모달 관리 =====
+    let currentSchedMemberId = null;
+
+    async function openMemberSchedulesModal(memberId) {
+      currentSchedMemberId = memberId;
+      const m = adminMembersList.find(x => x.memberId === memberId);
+      if (!m) return;
+
+      const isAdmin = Boolean(m.isAdmin || (m.role || '').toUpperCase() === 'ADMIN');
+      const safeName = escapeHtml(m.name || '회원');
+      const safeUser = escapeHtml(m.username || '');
+      const initial = (m.name || m.username || 'M').charAt(0);
+      const colorPalette = ['bg-orange-500', 'bg-emerald-500', 'bg-blue-500', 'bg-indigo-500', 'bg-rose-500', 'bg-teal-500'];
+      const avatarColor = colorPalette[memberId % colorPalette.length] || 'bg-slate-500';
+
+      $('#m-sched-avatar').attr('class', `w-11 h-11 rounded-2xl ${avatarColor} text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0`).text(initial);
+      $('#modal-member-schedules-title').text(`${safeName} 님의 등록/참여 일정`);
+      $('#modal-member-schedules-subtitle').text(`아이디: ${safeUser} | 이메일: ${escapeHtml(m.email || '-')}`);
+      
+      if (isAdmin) {
+        $('#m-sched-role-badge').attr('class', 'px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200').text('관리자');
+      } else {
+        $('#m-sched-role-badge').attr('class', 'px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200').text('일반회원');
+      }
+
+      $('#m-sched-total-groups').text('0개');
+      $('#m-sched-total-schedules').text('0개');
+
+      $('#m-sched-list-container').html(`
+        <div class="py-14 text-center text-slate-400 text-sm">
+          <i data-lucide="loader-2" class="w-7 h-7 animate-spin mx-auto mb-2 text-slate-300"></i>
+          참여 모임 및 일정 정보를 불러오는 중...
+        </div>
+      `);
+      $('#modal-member-schedules').removeClass('hidden').addClass('flex');
+      if (window.lucide) lucide.createIcons();
+
+      // 우선 캐시된 joinedGroups 가 있으면 선제 렌더링
+      if (Array.isArray(m.joinedGroups) && m.joinedGroups.length > 0) {
+        renderMemberSchedulesContent(m, m.joinedGroups);
+      }
+
+      // API 호출로 최신 상세 정보 갱신
+      try {
+        const res = await $.ajax({
+          url: API + '/api/admin/members/' + memberId + '/schedules',
+          method: 'GET',
+          dataType: 'json'
+        });
+        if (res && res.success && Array.isArray(res.groups)) {
+          m.joinedGroups = res.groups;
+          m.totalGroups = res.totalGroups !== undefined ? res.totalGroups : res.groups.length;
+          m.totalSchedules = res.totalSchedules !== undefined ? res.totalSchedules : 0;
+          renderMemberSchedulesContent(m, res.groups);
+        } else if (!m.joinedGroups || m.joinedGroups.length === 0) {
+          renderMemberSchedulesContent(m, []);
+        }
+      } catch (err) {
+        console.warn('openMemberSchedulesModal API fallback:', err);
+        // 캐시도 없으면 샘플 데이터 매핑 폴백
+        if (!m.joinedGroups || m.joinedGroups.length === 0) {
+          const fallbackGroups = getFallbackMemberGroups(memberId);
+          renderMemberSchedulesContent(m, fallbackGroups);
+        }
+      }
+    }
+
+    function closeMemberSchedulesModal() {
+      currentSchedMemberId = null;
+      $('#modal-member-schedules').addClass('hidden').removeClass('flex');
+    }
+
+    function renderMemberSchedulesContent(member, groups) {
+      const groupList = Array.isArray(groups) ? groups : [];
+      let totalSchedulesCount = 0;
+      groupList.forEach(g => {
+        totalSchedulesCount += (Array.isArray(g.schedules) ? g.schedules.length : 0);
+      });
+
+      $('#m-sched-total-groups').text(groupList.length + '개');
+      $('#m-sched-total-schedules').text(totalSchedulesCount + '개');
+
+      const $container = $('#m-sched-list-container');
+      if (groupList.length === 0) {
+        $container.html(`
+          <div class="py-14 text-center text-slate-400 bg-slate-50/70 border border-dashed border-slate-200 rounded-3xl p-8">
+            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-2xs">
+              <i data-lucide="calendar-x" class="w-6 h-6"></i>
+            </div>
+            <p class="font-bold text-slate-700 text-sm">참여 또는 등록된 여행 일정이 없습니다.</p>
+            <p class="text-xs text-slate-400 mt-1">해당 회원은 아직 개설하거나 참여 중인 여행 모임이 없습니다.</p>
+          </div>
+        `);
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      const dayStyles = [
+        'bg-emerald-50 text-emerald-700 border border-emerald-200',
+        'bg-blue-50 text-blue-700 border border-blue-200',
+        'bg-purple-50 text-purple-700 border border-purple-200',
+        'bg-amber-50 text-amber-700 border border-amber-200',
+        'bg-rose-50 text-rose-700 border border-rose-200'
+      ];
+
+      $container.html(groupList.map((g) => {
+        const isLeader = (g.role === 'LEADER');
+        const roleBadge = isLeader
+          ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex-shrink-0 whitespace-nowrap">
+               <i data-lucide="crown" class="w-3 h-3 text-amber-600 flex-shrink-0"></i>방장(개설자)
+             </span>`
+          : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200 flex-shrink-0 whitespace-nowrap">
+               <i data-lucide="user-check" class="w-3 h-3 text-blue-600 flex-shrink-0"></i>참여멤버
+             </span>`;
+
+        const typeBadge = (g.tripType === '해외')
+          ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex-shrink-0 whitespace-nowrap">해외</span>`
+          : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200 flex-shrink-0 whitespace-nowrap">국내</span>`;
+
+        const schedules = Array.isArray(g.schedules) ? g.schedules : [];
+        const schedCount = schedules.length;
+
+        let schedulesHtml = '';
+        if (schedCount === 0) {
+          schedulesHtml = `
+            <div class="px-4 py-6 text-center text-slate-400 text-xs bg-slate-50/70 border border-dashed border-slate-200 rounded-2xl">
+              <i data-lucide="calendar-minus" class="w-4 h-4 mx-auto mb-1 text-slate-300"></i>
+              등록된 세부 타임라인 일정이 없습니다.
+            </div>
+          `;
+        } else {
+          schedulesHtml = `
+            <div class="divide-y divide-slate-100 border border-slate-100/90 rounded-2xl overflow-hidden bg-white shadow-2xs">
+              ${schedules.map(s => {
+                const dayNum = s.dayNumber || 1;
+                const styleClass = dayStyles[(dayNum - 1) % dayStyles.length];
+                const hasLocation = Boolean(s.latitude && s.longitude);
+                return `
+                  <div class="p-3.5 hover:bg-slate-50/70 transition flex items-start justify-between gap-3 text-xs">
+                    <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                      <span class="flex-shrink-0 font-bold px-2 py-0.5 rounded-md text-[10px] ${styleClass} whitespace-nowrap mt-0.5">Day ${dayNum}</span>
+                      <span class="font-mono text-slate-600 font-semibold bg-slate-100/90 px-2 py-0.5 rounded text-[11px] w-14 text-center flex-shrink-0 whitespace-nowrap mt-0.5">${escapeHtml(s.planTime || '--:--')}</span>
+                      <div class="min-w-0 flex-1">
+                        <p class="font-bold text-slate-900 text-xs sm:text-sm break-words whitespace-normal leading-snug">${escapeHtml(s.place || '장소')}</p>
+                        ${s.memo ? `<p class="text-[11px] text-slate-500 break-words whitespace-normal leading-relaxed mt-1">${escapeHtml(s.memo)}</p>` : ''}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+                      ${hasLocation ? `
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/80 whitespace-nowrap" title="위치 좌표 등록됨 (${s.latitude}, ${s.longitude})">
+                          <i data-lucide="map-pin" class="w-3 h-3 text-emerald-500 flex-shrink-0"></i>좌표 등록됨
+                        </span>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        return `
+          <div class="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden transition-all duration-200 hover:shadow-md hover:border-slate-300">
+            <!-- 모임 헤더 배너 -->
+            <div class="bg-slate-50/90 px-4 py-3.5 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div class="flex items-center gap-2 flex-wrap min-w-0">
+                <div class="inline-flex items-center gap-1.5 flex-shrink-0">
+                  ${typeBadge}
+                  ${roleBadge}
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm break-words whitespace-normal leading-snug" title="${escapeHtml(g.groupName || '')}">${escapeHtml(g.groupName || '여행 모임')}</h4>
+              </div>
+              <div class="flex items-center gap-2.5 flex-shrink-0 flex-wrap">
+                <span class="text-xs text-slate-500 font-medium flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
+                  <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                  ${escapeHtml(g.location || '')}
+                </span>
+                <span class="text-slate-300">|</span>
+                <span class="text-xs text-slate-500 font-medium flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                  ${escapeHtml(g.startDate || '')} ~ ${escapeHtml(g.endDate || '')}
+                </span>
+                <button type="button" onclick="jumpToGroupSchedule(${g.groupId})"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition active:scale-95 shadow-2xs flex-shrink-0 whitespace-nowrap"
+                  title="이 모임의 일정 관리로 바로가기">
+                  <span>일정 바로가기</span>
+                  <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 모임 내 일정 목록 -->
+            <div class="p-4 pt-3.5">
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i data-lucide="list-todo" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  모임 등록 타임라인 일정
+                </span>
+                <span class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                  총 ${schedCount}개 일정
+                </span>
+              </div>
+              ${schedulesHtml}
+            </div>
+          </div>
+        `;
+      }).join(''));
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function jumpToGroupSchedule(groupId) {
+      closeMemberSchedulesModal();
+      switchAdminTab('schedules');
+      setTimeout(() => {
+        const $sel = $('#admin-group-select');
+        if ($sel.length) {
+          $sel.val(groupId);
+          onAdminGroupSelectChange();
+        }
+      }, 100);
+    }
+
+    function getFallbackMemberGroups(memberId) {
+      const sampleGroups = [
+        {
+          groupId: 1,
+          groupName: "방콕 & 치앙마이 힐링 배낭여행",
+          tripType: "해외",
+          location: "태국 (방콕/치앙마이)",
+          startDate: "2026-11-20",
+          endDate: "2026-11-27",
+          role: (memberId === 1 ? 'LEADER' : 'MEMBER'),
+          schedules: [
+            { scheduleId: 101, dayNumber: 1, planTime: "11:00", place: "방콕 수완나품 공항 도착", memo: "유심칩 수령 및 그랩 택시 탑승", latitude: 13.6900, longitude: 100.7501 },
+            { scheduleId: 102, dayNumber: 1, planTime: "14:00", place: "호텔 체크인 & 팟타이 점심", memo: "팁싸마이 본점", latitude: 13.7527, longitude: 100.5048 },
+            { scheduleId: 103, dayNumber: 1, planTime: "19:00", place: "카오산로드 야시장 탐방", memo: "로띠 간식 & 시원한 맥주 한잔", latitude: 13.7588, longitude: 100.4974 }
+          ]
+        },
+        {
+          groupId: 2,
+          groupName: "제주도 동쪽 힐링 & 올레길 드라이브",
+          tripType: "국내",
+          location: "제주 (구좌/성산)",
+          startDate: "2026-12-05",
+          endDate: "2026-12-08",
+          role: (memberId === 2 ? 'LEADER' : 'MEMBER'),
+          schedules: [
+            { scheduleId: 201, dayNumber: 1, planTime: "10:00", place: "제주공항 집결 및 렌터카 인수", memo: "3번 게이트 앞 만남, 완전자차 가입", latitude: 33.5066, longitude: 126.4930 },
+            { scheduleId: 202, dayNumber: 1, planTime: "12:30", place: "제주 흑돼지 고기국수 점심", memo: "자매국수 본점 웨이팅 확인", latitude: 33.5188, longitude: 126.5290 },
+            { scheduleId: 203, dayNumber: 1, planTime: "15:00", place: "함덕 해수욕장 & 서우봉 산책", memo: "에메랄드빛 바다 배경 단체 사진 촬영", latitude: 33.5434, longitude: 126.6698 },
+            { scheduleId: 204, dayNumber: 1, planTime: "18:30", place: "숙소 체크인 및 동문시장 야시장", memo: "딱새우회, 전복버터구이 포장해서 파티", latitude: 33.5126, longitude: 126.5284 }
+          ]
+        },
+        {
+          groupId: 3,
+          groupName: "강원도 양양 서핑 & 불멍 캠핑 트립",
+          tripType: "국내",
+          location: "강원 (양양 죽도해변)",
+          startDate: "2026-11-14",
+          endDate: "2026-11-16",
+          role: (memberId === 4 ? 'LEADER' : 'MEMBER'),
+          schedules: [
+            { scheduleId: 301, dayNumber: 1, planTime: "09:00", place: "양양 죽도해변 서핑 스쿨", memo: "슈트 및 보드 대여, 기초 강습", latitude: 37.9715, longitude: 128.7612 },
+            { scheduleId: 302, dayNumber: 1, planTime: "13:00", place: "인구해변 수제버거 점심", memo: "버거스테이지", latitude: 37.9658, longitude: 128.7645 },
+            { scheduleId: 303, dayNumber: 1, planTime: "18:00", place: "글램핑장 불멍 바비큐", memo: "삼겹살 및 마시멜로 굽기", latitude: 37.9750, longitude: 128.7500 }
+          ]
+        }
+      ];
+
+      if (memberId === 1) return [sampleGroups[0], sampleGroups[1], sampleGroups[2]];
+      if (memberId === 2) return [sampleGroups[0], sampleGroups[1], sampleGroups[2]];
+      if (memberId === 3) return [sampleGroups[0], sampleGroups[2]];
+      if (memberId === 4) return [sampleGroups[2]];
+      return [];
+    }
+
+    // ESC 모달 닫기 (jQuery)
+    $(document).on('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeEditModal();
+        closeTimePickerModal();
+        closeMemberModal();
+        closeMemberDeleteModal();
+        closeMemberSchedulesModal();
+      }
+    });
+
+    // 전역 스코프 바인딩
+    window.switchAdminTab = switchAdminTab;
+    window.loadAdminGroups = loadAdminGroups;
+    window.onAdminGroupSelectChange = onAdminGroupSelectChange;
+    window.selectAdminDay = selectAdminDay;
+    window.handleAdminInlineAddPlan = handleAdminInlineAddPlan;
+    window.openAdminAddPlanModal = openAdminAddPlanModal;
+    window.closeAdminAddPlanModal = closeAdminAddPlanModal;
+    window.handleAdminAddPlan = handleAdminAddPlan;
+    window.toggleAdminScheduleMap = toggleAdminScheduleMap;
+    window.openLocationPickerModal = openLocationPickerModal;
+    window.openLocationPickerForSchedule = openLocationPickerForSchedule;
+    window.closeLocationPickerModal = closeLocationPickerModal;
+    window.applyLocationPicker = applyLocationPicker;
+    window.searchLocationPlace = searchLocationPlace;
+    window.deleteSchedule = deleteSchedule;
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.submitEdit = submitEdit;
+    window.loadAdminMembers = loadAdminMembers;
+    window.filterAdminMembers = filterAdminMembers;
+    window.renderAdminMembers = renderAdminMembers;
+    window.openMemberModal = openMemberModal;
+    window.closeMemberModal = closeMemberModal;
+    window.saveMember = saveMember;
+    window.openMemberDeleteModal = openMemberDeleteModal;
+    window.closeMemberDeleteModal = closeMemberDeleteModal;
+    window.confirmExecuteDeleteMember = confirmExecuteDeleteMember;
+    window.handleMemberPhoneInput = handleMemberPhoneInput;
+    window.openMemberSchedulesModal = openMemberSchedulesModal;
+    window.closeMemberSchedulesModal = closeMemberSchedulesModal;
+    window.jumpToGroupSchedule = jumpToGroupSchedule;
+    window.escapeHtml = escapeHtml;
+  </script>
+</body>
+</html>
+

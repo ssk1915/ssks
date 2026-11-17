@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.travel.mapper.ExpenseMapper">
+
+    <!-- 모임별 지출 내역 및 결제자 정보 조회 -->
+    <select id="selectExpenseList" parameterType="int" resultType="egovframework.travel.vo.ExpenseVO">
+        SELECT 
+            E.SETTLEMENT_ID,
+            E.GROUP_ID,
+            E.PAYER_ID,
+            M.NAME AS PAYER_NAME,
+            E.TITLE,
+            E.EXPENSE_AMOUNT,
+            E.PAYMENT_METHOD,
+            E.CREATED_AT,
+            E.UPDATED_AT,
+            GROUP_CONCAT(PM.NAME SEPARATOR ', ') AS PARTICIPANT_NAMES,
+            COUNT(EP.MEMBER_ID) AS PARTICIPANT_COUNT
+        FROM EXPENSE_SETTLEMENT E
+        JOIN MEMBER M ON E.PAYER_ID = M.MEMBER_ID
+        LEFT JOIN EXPENSE_PARTICIPANT EP ON E.SETTLEMENT_ID = EP.SETTLEMENT_ID
+        LEFT JOIN MEMBER PM ON EP.MEMBER_ID = PM.MEMBER_ID
+        WHERE E.GROUP_ID = #{groupId}
+        GROUP BY E.SETTLEMENT_ID
+        ORDER BY E.CREATED_AT DESC
+    </select>
+
+    <!-- 모임 총 지출액 조회 -->
+    <select id="selectTotalExpenseAmount" parameterType="int" resultType="long">
+        SELECT COALESCE(SUM(EXPENSE_AMOUNT), 0)
+        FROM EXPENSE_SETTLEMENT
+        WHERE GROUP_ID = #{groupId}
+    </select>
+
+    <!-- 지출 영수증 등록 -->
+    <insert id="insertExpense" parameterType="egovframework.travel.vo.ExpenseVO" useGeneratedKeys="true" keyProperty="settlementId">
+        INSERT INTO EXPENSE_SETTLEMENT (
+            GROUP_ID,
+            PAYER_ID,
+            TITLE,
+            EXPENSE_AMOUNT,
+            PAYMENT_METHOD,
+            CREATED_AT,
+            UPDATED_AT
+        ) VALUES (
+            #{groupId},
+            #{payerId},
+            #{title},
+            #{expenseAmount},
+            #{paymentMethod},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 지출 참여자 분할 등록 -->
+    <insert id="insertExpenseParticipants" parameterType="list">
+        INSERT INTO EXPENSE_PARTICIPANT (SETTLEMENT_ID, MEMBER_ID, SPLIT_AMOUNT, CREATED_AT, UPDATED_AT)
+        VALUES 
+        <foreach collection="list" item="item" separator=",">
+            (#{item.settlementId}, #{item.memberId}, #{item.splitAmount}, NOW(), NOW())
+        </foreach>
+    </insert>
+
+    <!-- 지출 영수증 삭제 -->
+    <delete id="deleteExpense" parameterType="int">
+        DELETE FROM EXPENSE_SETTLEMENT
+        WHERE SETTLEMENT_ID = #{settlementId}
+    </delete>
+
+</mapper>

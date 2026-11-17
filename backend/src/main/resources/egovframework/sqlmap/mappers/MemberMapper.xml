@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.travel.mapper.MemberMapper">
+
+    <!-- 아이디/비밀번호로 회원 조회 (로그인) -->
+    <select id="selectMemberByLogin" parameterType="map" resultType="egovframework.travel.vo.LoginVO">
+        SELECT
+            MEMBER_ID,
+            USERNAME,
+            NAME,
+            EMAIL,
+            CASE WHEN USERNAME = 'admin' THEN 1 ELSE 0 END AS IS_ADMIN
+        FROM MEMBER
+        WHERE USERNAME = #{username}
+          AND (PASSWORD = #{password} OR PASSWORD = #{hashedPassword})
+    </select>
+
+    <!-- 아이디로 단일 회원 조회 -->
+    <select id="selectMemberByUsername" parameterType="string" resultType="egovframework.travel.vo.MemberVO">
+        SELECT
+            MEMBER_ID,
+            USERNAME,
+            PASSWORD,
+            NAME,
+            EMAIL,
+            PHONE,
+            PROFILE_IMAGE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM MEMBER
+        WHERE USERNAME = #{username}
+    </select>
+
+    <!-- 아이디 중복 체크 -->
+    <select id="countByUsername" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE USERNAME = #{username}
+    </select>
+
+    <!-- 이메일 중복 체크 -->
+    <select id="countByEmail" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM MEMBER
+        WHERE EMAIL = #{email}
+    </select>
+
+    <!-- 신규 회원 가입 (비밀번호 SHA-256 해시, 전화번호 AES 암호화 저장) -->
+    <insert id="insertMember" parameterType="egovframework.travel.vo.MemberVO" useGeneratedKeys="true" keyProperty="memberId">
+        INSERT INTO MEMBER (
+            USERNAME,
+            PASSWORD,
+            NAME,
+            EMAIL,
+            PHONE,
+            PROFILE_IMAGE,
+            CREATED_AT,
+            UPDATED_AT
+        ) VALUES (
+            #{username},
+            #{password},
+            #{name},
+            #{email},
+            #{phone},
+            #{profileImage},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 전체 회원 목록 조회 (관리자용) -->
+    <select id="selectMemberList" resultType="egovframework.travel.vo.LoginVO">
+        SELECT
+            MEMBER_ID,
+            USERNAME,
+            NAME,
+            EMAIL,
+            CASE WHEN USERNAME = 'admin' THEN 1 ELSE 0 END AS IS_ADMIN
+        FROM MEMBER
+        ORDER BY MEMBER_ID ASC
+    </select>
+
+</mapper>

@@ -1,0 +1,22 @@
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1 px-3 md:hidden shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+  <div class="grid grid-cols-4 gap-1 max-w-md mx-auto">
+    <a href="index.html" id="bottom-nav-groups" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-medium transition hover:text-slate-800">
+      <i data-lucide="users" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">여행 모임</span>
+    </a>
+    <a href="planner.html" id="bottom-nav-planner" onclick="return handleProtectedNav(event, 'planner.html')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-medium transition hover:text-slate-800">
+      <i data-lucide="calendar" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">일정 플래너</span>
+    </a>
+    <a href="settlement.html" id="bottom-nav-settlement" onclick="return handleProtectedNav(event, 'settlement.html')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-medium transition hover:text-slate-800">
+      <i data-lucide="receipt" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">회비 정산</span>
+    </a>
+    <a href="gallery.html" id="bottom-nav-gallery" onclick="return handleProtectedNav(event, 'gallery.html')" class="flex flex-col items-center justify-center py-1 rounded-xl text-slate-400 font-medium transition hover:text-slate-800">
+      <i data-lucide="image" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">추억 갤러리</span>
+    </a>
+  </div>
+</nav>
+

@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 친구와 함께하는 여행 모임 플래너</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            },
+            ocean: {
+              500: '#0ea5e9',
+              600: '#0284c7',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Header / Navigation -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('groups')">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-white shadow-md">
+          <i data-lucide="compass" class="w-6 h-6"></i>
+        </div>
+        <span class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">TravelMates</span>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-1">
+        <button onclick="switchTab('groups')" id="nav-groups" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition text-emerald-600 bg-emerald-50">
+          <i data-lucide="users" class="w-4 h-4 inline mr-1"></i>여행 모임
+        </button>
+        <button onclick="switchTab('planner')" id="nav-planner" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>일정 플래너
+        </button>
+        <button onclick="switchTab('settlement')" id="nav-settlement" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i data-lucide="receipt" class="w-4 h-4 inline mr-1"></i>N빵 회비 정산
+        </button>
+        <button onclick="switchTab('gallery')" id="nav-gallery" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+          <i data-lucide="image" class="w-4 h-4 inline mr-1"></i>추억 갤러리
+        </button>
+      </nav>
+
+      <div class="flex items-center gap-3">
+        <!-- 로그인 전: 로그인 버튼 -->
+        <div id="header-login-btn">
+          <button onclick="openLoginModal()" class="flex items-center gap-2 border border-slate-300 hover:border-emerald-400 text-slate-700 hover:text-emerald-600 text-sm font-medium px-4 py-2 rounded-xl transition">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>로그인</span>
+          </button>
+        </div>
+        <!-- 로그인 후: 사용자 정보 + 로그아웃 -->
+        <div id="header-user-info" class="hidden flex items-center gap-2">
+          <span id="header-username" class="text-sm font-semibold text-emerald-700"></span>
+          <a id="header-admin-link" href="admin.html" class="hidden flex items-center gap-1 text-xs font-semibold bg-orange-100 text-orange-600 hover:bg-orange-200 px-3 py-1.5 rounded-lg transition">
+            <i data-lucide="shield" class="w-3 h-3"></i>관리자
+          </a>
+          <button onclick="logout()" class="flex items-center gap-1 text-xs text-slate-500 hover:text-red-500 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-red-200 transition">
+            <i data-lucide="log-out" class="w-3 h-3"></i>로그아웃
+          </button>
+        </div>
+        <button onclick="openCreateGroupModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-md transition transform active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>새 모임 만들기</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 로그인 모달 -->
+  <div id="login-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-white">
+            <i data-lucide="log-in" class="w-5 h-5"></i>
+          </div>
+          <h2 class="text-xl font-bold text-slate-800">로그인</h2>
+        </div>
+        <button onclick="closeLoginModal()" class="text-slate-400 hover:text-slate-600 transition">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"></div>
+      <form onsubmit="submitLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">아이디</label>
+          <input type="text" id="login-username" placeholder="아이디를 입력하세요"
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm" required>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">비밀번호</label>
+          <input type="password" id="login-password" placeholder="비밀번호를 입력하세요"
+            class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm" required>
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2.5 rounded-xl transition transform active:scale-95">
+          로그인
+        </button>
+      </form>
+      <p class="mt-4 text-center text-xs text-slate-400">
+        테스트 계정: <strong>admin / admin123</strong> (관리자)
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- 1. Hero Banner (Always visible on groups tab) -->
+    <div id="hero-banner" class="relative rounded-3xl overflow-hidden mb-10 shadow-lg bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white p-8 md:p-12">
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
+          ✈️ 친구와 함께 떠나요!
+        </span>
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+          따로 또 같이, <br class="hidden sm:block"/>친구들과 완성하는 최고의 여행
+        </h1>
+        <p class="text-emerald-50 text-base md:text-lg mb-6 leading-relaxed">
+          일정 투표부터 코스 기획, 헷갈리는 회비 N빵 정산과 사진 공유까지 한 곳에서 간편하게 관리하세요!
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <button onclick="openCreateGroupModal()" class="bg-white text-emerald-700 hover:bg-emerald-50 px-5 py-2.5 rounded-xl font-bold shadow transition flex items-center gap-2">
+            <i data-lucide="plus" class="w-4 h-4"></i> 모임 만들기
+          </button>
+          <button onclick="switchTab('settlement')" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-5 py-2.5 rounded-xl font-semibold transition flex items-center gap-2">
+            <i data-lucide="calculator" class="w-4 h-4"></i> 회비 정산기 바로가기
+          </button>
+        </div>
+      </div>
+      <!-- Background pattern/art -->
+      <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+    </div>
+
+    <!-- TAB 1: Groups List -->
+    <section id="tab-groups" class="tab-content">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <span>참여 가능한 여행 모임</span>
+            <span id="group-count-badge" class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full">3</span>
+          </h2>
+          <p class="text-slate-500 text-sm mt-1">친구들이 만든 모임에 참여 신청하거나 새 모임을 모집해보세요.</p>
+        </div>
+
+        <!-- Filter buttons -->
+        <div class="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-xl text-xs font-medium">
+          <button onclick="filterGroups('all')" class="filter-btn px-3 py-1.5 rounded-lg transition bg-white text-slate-800 shadow-sm" data-filter="all">전체</button>
+          <button onclick="filterGroups('국내')" class="filter-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="국내">국내여행</button>
+          <button onclick="filterGroups('해외')" class="filter-btn px-3 py-1.5 rounded-lg transition text-slate-600 hover:text-slate-900" data-filter="해외">해외여행</button>
+        </div>
+      </div>
+
+      <!-- Groups Grid -->
+      <div id="groups-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- TAB 2: Planner (일정 플래너) -->
+    <section id="tab-planner" class="tab-content hidden">
+
+      <!-- 모임 선택 헤더 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="calendar-days" class="w-6 h-6 text-emerald-600"></i>
+              <span>여행 일정 플래너</span>
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 Day별 일정을 관리할 수 있습니다.</p>
+          </div>
+          <!-- 모임 선택 드롭다운 -->
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-slate-600 whitespace-nowrap">
+              <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+            </label>
+            <select id="planner-group-select" onchange="onPlannerGroupChange()"
+              class="text-sm border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white min-w-[200px]">
+              <option value="">-- 모임을 선택하세요 --</option>
+            </select>
+            <button onclick="refreshPlannerSchedules()" title="새로고침"
+              class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모임 미선택 안내 -->
+      <div id="planner-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+        <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="map" class="w-10 h-10 text-emerald-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-600 mb-2">여행 모임을 선택해주세요</h3>
+        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 Day별 일정 플래너가 열립니다.</p>
+        <button onclick="switchTab('groups')" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mx-auto">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>모임 만들러 가기
+        </button>
+      </div>
+
+      <!-- 플래너 본문 (모임 선택 후) -->
+      <div id="planner-body" class="hidden space-y-6">
+
+        <!-- 선택 모임 정보 배너 -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-emerald-100 text-xs font-medium mb-1">선택된 여행 모임</p>
+            <h3 id="planner-group-name" class="text-xl font-bold"></h3>
+            <p id="planner-group-meta" class="text-emerald-100 text-sm mt-0.5"></p>
+          </div>
+          <button onclick="openAddPlanModal()"
+            class="flex-shrink-0 flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>일정 추가
+          </button>
+        </div>
+
+        <!-- Day 탭 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex gap-2 overflow-x-auto pb-1" id="day-tabs">
+            <!-- Dynamically rendered -->
+          </div>
+        </div>
+
+        <!-- 타임라인 카드 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h4 id="planner-day-title" class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>Day 1 일정
+            </h4>
+            <span id="planner-schedule-count" class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">0개</span>
+          </div>
+
+          <!-- 인라인 일정 추가 폼 -->
+          <form id="inline-add-plan-form" onsubmit="handleInlineAddPlan(event)"
+            class="mb-6 p-4 bg-emerald-50/60 rounded-xl border border-emerald-100 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">시간</label>
+              <input type="time" id="inline-plan-time"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">장소 <span class="text-red-400">*</span></label>
+              <input type="text" id="inline-plan-place" placeholder="방문할 장소" required
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">메모</label>
+              <input type="text" id="inline-plan-memo" placeholder="준비물, 예약 등"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            </div>
+            <div class="flex items-end">
+              <button type="submit"
+                class="w-full flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 rounded-lg transition">
+                <i data-lucide="plus" class="w-4 h-4"></i>추가
+              </button>
+            </div>
+          </form>
+
+          <!-- Timeline -->
+          <div class="relative pl-6 border-l-2 border-emerald-200 space-y-5" id="plan-timeline">
+            <!-- Rendered dynamically via app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Settlement (N빵 회비 정산기 - 모임별 독립 관리) -->
+    <section id="tab-settlement" class="tab-content hidden">
+
+      <!-- 회비 정산 모임 선택 헤더 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="receipt" class="w-6 h-6 text-emerald-600"></i>
+              <span>모임별 N빵 회비 정산기</span>
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 해당 모임의 영수증과 N빵 송금 내역을 관리할 수 있습니다.</p>
+          </div>
+          <!-- 모임 선택 드롭다운 -->
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-slate-600 whitespace-nowrap">
+              <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+            </label>
+            <select id="settlement-group-select" onchange="onSettlementGroupChange()"
+              class="text-sm border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white min-w-[200px]">
+              <option value="">-- 모임을 선택하세요 --</option>
+            </select>
+            <button onclick="refreshSettlementExpenses()" title="새로고침"
+              class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모임 미선택 안내 -->
+      <div id="settlement-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+        <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="calculator" class="w-10 h-10 text-emerald-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-600 mb-2">정산할 여행 모임을 선택해주세요</h3>
+        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 해당 모임의 회비 및 N빵 정산 내역이 열립니다.</p>
+        <button onclick="switchTab('groups')" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mx-auto">
+          <i data-lucide="users" class="w-4 h-4"></i>여행 모임 보러가기
+        </button>
+      </div>
+
+      <!-- 모임 선택 후 메인 정산 패널 -->
+      <div id="settlement-body" class="hidden space-y-6">
+
+        <!-- 선택 모임 정보 배너 -->
+        <div class="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-teal-100 text-xs font-medium mb-1">선택된 여행 모임 정산</p>
+            <h3 id="settlement-group-name" class="text-xl font-bold"></h3>
+            <p id="settlement-group-meta" class="text-teal-100 text-sm mt-0.5"></p>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-teal-100 block">등록된 영수증</span>
+            <span id="settlement-expense-count" class="text-2xl font-extrabold text-white">0건</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Form: 지출 내역 입력 -->
+          <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <i data-lucide="credit-card" class="w-5 h-5 text-emerald-600"></i>
+              <span>새 지출 영수증 등록</span>
+            </h3>
+            <form id="expense-form" onsubmit="addExpense(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">지출 항목 <span class="text-red-400">*</span></label>
+                <input type="text" id="expense-title" placeholder="예: 첫날 흑돼지 저녁 식사" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">결제 금액 (원) <span class="text-red-400">*</span></label>
+                <input type="number" id="expense-amount" placeholder="120000" min="0" step="1000" required
+                  oninput="updateReceiptPerPersonPreview()"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">결제자 (누가 먼저 냈나요?)</label>
+                <select id="expense-payer-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white">
+                  <!-- 모임 참여 멤버 목록 동적 주입 -->
+                </select>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-600">함께한 친구들 (N빵 분할 참여자)</label>
+                  <button type="button" onclick="selectAllExpenseParticipants()" class="text-[11px] text-emerald-600 hover:text-emerald-700 font-semibold">
+                    전체 선택
+                  </button>
+                </div>
+                <!-- 참여자 체크박스 컨테이너 -->
+                <div id="expense-participants-checkboxes" class="space-y-1.5 bg-slate-50 p-3 rounded-xl border border-slate-200/80 max-h-40 overflow-y-auto">
+                  <!-- 동적 렌더링 -->
+                </div>
+              </div>
+
+              <!-- 영수증 가격 및 분할 참여자 대비 1인당 지출 금액 실시간 산정 뱃지 -->
+              <div id="receipt-per-person-preview" class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1 font-medium">
+                  <i data-lucide="calculator" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  <span>이 영수증의 1인당 분할 부담액:</span>
+                </span>
+                <span id="receipt-per-person-amount" class="text-sm font-extrabold text-emerald-700">₩0</span>
+              </div>
+
+              <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-1.5">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>지출 등록하기</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Summary & Expense List -->
+          <div class="lg:col-span-2 space-y-6">
+            <!-- 요약 지표 카드 (3분할) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <!-- 카드 1: 총 지출 -->
+              <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-emerald-700 uppercase flex items-center gap-1">
+                  <i data-lucide="receipt" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  모임 총 지출 금액
+                </span>
+                <div class="text-2xl font-black text-emerald-950 mt-1" id="total-expense-display">₩0</div>
+                <span class="text-[11px] text-slate-500 mt-0.5 block">등록된 모든 영수증 합계</span>
+              </div>
+
+              <!-- 카드 2: 1인당 평균 분담액 -->
+              <div class="bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-cyan-700 uppercase flex items-center gap-1">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-cyan-600"></i>
+                  1인당 평균 지출액
+                </span>
+                <div class="text-2xl font-black text-cyan-950 mt-1" id="average-expense-display">₩0</div>
+                <span class="text-[11px] text-slate-500 mt-0.5 block">전체 모임 인원 기준</span>
+              </div>
+
+              <!-- 카드 3: 등록 영수증 건수 -->
+              <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                <span class="text-xs font-semibold text-slate-500 uppercase flex items-center gap-1">
+                  <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+                  정산 영수증 건수
+                </span>
+                <div class="text-2xl font-black text-slate-800 mt-1" id="total-receipt-count">0건</div>
+                <span class="text-[11px] text-slate-400 mt-0.5 block">N빵 분할 처리 완료</span>
+              </div>
+            </div>
+
+            <!-- 멤버별 1인당 실제 분할 부담 금액 현황 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+              <h4 class="text-sm font-bold text-slate-900 mb-3 flex items-center justify-between">
+                <span class="flex items-center gap-2">
+                  <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+                  <span>참여자별 1인당 실제 분할 부담액 (영수증 참여 합계)</span>
+                </span>
+                <span class="text-xs text-slate-400 font-normal">각자 참여한 항목만 합산</span>
+              </h4>
+              <div id="member-breakdown-list" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- 동적 렌더링 -->
+              </div>
+            </div>
+
+            <!-- N빵 최종 정산 송금 안내 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <h4 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i data-lucide="arrow-right-left" class="w-5 h-5 text-cyan-600"></i>
+                <span>누가 누구에게 얼마를 보내야 할까요? (최소 송금 계산)</span>
+              </h4>
+              <div id="transfer-summary-list" class="space-y-2 text-sm text-slate-700">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- 지출 항목 리스트 -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <h4 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between">
+                <span>상세 영수증 목록</span>
+                <span id="expense-table-sub" class="text-xs text-slate-400 font-normal">최신순 정렬</span>
+              </h4>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                  <thead>
+                    <tr class="border-b border-slate-100 text-slate-400 font-medium text-xs">
+                      <th class="pb-3">항목</th>
+                      <th class="pb-3">결제자</th>
+                      <th class="pb-3">영수증 금액</th>
+                      <th class="pb-3">분할 참여자</th>
+                      <th class="pb-3 text-emerald-700 font-bold">1인당 분할 금액</th>
+                      <th class="pb-3 text-right">관리</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expense-table-body" class="divide-y divide-slate-100">
+                    <!-- Rendered dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Gallery (추억 갤러리) -->
+    <section id="tab-gallery" class="tab-content hidden">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="camera" class="w-6 h-6 text-emerald-600"></i>
+              <span>여행 사진 및 후기 공유</span>
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">친구들과 함께 찍은 멋진 순간들을 업로드하고 간직하세요.</p>
+          </div>
+          <button onclick="document.getElementById('photo-upload-input').click()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-sm">
+            <i data-lucide="upload" class="w-4 h-4"></i> 사진 올리기
+          </button>
+          <input type="file" id="photo-upload-input" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+        </div>
+
+        <div id="gallery-grid" class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Create Group Modal -->
+  <div id="modal-create-group" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative animate-scaleUp">
+      <button onclick="closeCreateGroupModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <h3 class="text-xl font-bold text-slate-900 mb-2">새 여행 모임 만들기</h3>
+      <p class="text-slate-500 text-xs mb-6">친구들과 떠날 여행 계획의 첫 발을 내딛어보세요!</p>
+
+      <form id="create-group-form" onsubmit="handleCreateGroup(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">모임명</label>
+          <input type="text" id="new-group-title" placeholder="예: 청춘 가득 제주도 3박 4일 힐링 투어" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">구분</label>
+            <select id="new-group-type" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+              <option value="국내">국내여행</option>
+              <option value="해외">해외여행</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">목적지</label>
+            <input type="text" id="new-group-location" placeholder="예: 제주도, 방콕" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+        </div>
+        <!-- 예상 일정 (달력 팝업) -->
+        <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
+          <label class="block text-xs font-semibold text-slate-700 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>여행 일정 (달력 선택)</span>
+            </span>
+            <span id="trip-duration-badge" class="hidden text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              0박 0일
+            </span>
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="block text-[11px] text-slate-500 mb-1">출발일 (시작)</span>
+              <input type="date" id="new-group-start-date" required onchange="handleTripDateChange()"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white text-slate-700">
+            </div>
+            <div>
+              <span class="block text-[11px] text-slate-500 mb-1">도착일 (종료)</span>
+              <input type="date" id="new-group-end-date" required onchange="handleTripDateChange()"
+                class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white text-slate-700">
+            </div>
+          </div>
+          <!-- 계산된 일정 요약 안내 -->
+          <div id="trip-period-summary" class="hidden text-xs text-emerald-700 bg-white p-2 rounded-lg border border-emerald-200 flex items-center gap-1.5 font-medium">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0"></i>
+            <span id="trip-period-text"></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">최대 인원 (명)</label>
+            <input type="number" id="new-group-max" placeholder="4" min="2" max="20" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">예상 1인 예산</label>
+            <input type="text" id="new-group-budget" placeholder="예: 약 350,000원" required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">모임 소개</label>
+          <textarea id="new-group-desc" rows="3" placeholder="여행 테마와 가고 싶은 스팟 등을 자유롭게 적어주세요!" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-md mt-2">
+          모임 등록 완료
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Plan Item Modal -->
+  <div id="modal-add-plan" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scaleUp">
+      <button onclick="closeAddPlanModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <h3 class="text-xl font-bold text-slate-900 mb-2">일정 항목 추가</h3>
+      <p class="text-slate-500 text-xs mb-4">선택된 일차의 방문지 및 세부 계획을 기록합니다.</p>
+
+      <form id="add-plan-form" onsubmit="handleAddPlan(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">시간대</label>
+          <input type="text" id="plan-time" placeholder="예: 11:30 또는 점심" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">장소 / 활동명</label>
+          <input type="text" id="plan-place" placeholder="예: 성산일출봉 하이킹 & 기념사진" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">메모 / 준비물</label>
+          <input type="text" id="plan-memo" placeholder="예: 편한 운동화 착용, 입장료 5,000원"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-md">
+          일정에 등록
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+    <span id="toast-message" class="text-sm font-medium">메시지</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-auto py-8">
+    <div class="max-w-6xl mx-auto px-4 text-center text-slate-400 text-xs">
+      <p>&copy; 2026 TravelMates. 친구와 함께 떠나는 설레는 여행 모임 플랫폼.</p>
+      <p class="mt-1">Powered by Local LLM (Gemma 2) & Antigravity</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    // ===== 로그인 / 로그아웃 기능 =====
+    const API_BASE = '';  // 동일 도메인
+
+    function openLoginModal() {
+      document.getElementById('login-modal').classList.remove('hidden');
+      document.getElementById('login-username').focus();
+      document.getElementById('login-error').classList.add('hidden');
+    }
+
+    function closeLoginModal() {
+      document.getElementById('login-modal').classList.add('hidden');
+    }
+
+    async function submitLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value.trim();
+      const errEl = document.getElementById('login-error');
+
+      try {
+        const res = await fetch(API_BASE + '/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          // LocalStorage에 사용자 정보 저장 (REST API 미연동 fallback용)
+          localStorage.setItem('travelmates_user', JSON.stringify(data));
+          closeLoginModal();
+          applyLoginUI(data);
+          showToast('환영합니다, ' + data.name + '님!');
+        } else {
+          errEl.textContent = data.message || '로그인에 실패했습니다.';
+          errEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        // API 미연동 시 간단한 로컬 인증 (테스트용)
+        if (username === 'admin' && password === 'admin123') {
+          const data = { success: true, memberId: 5, username: 'admin', name: '총괄관리자', isAdmin: true };
+          localStorage.setItem('travelmates_user', JSON.stringify(data));
+          closeLoginModal();
+          applyLoginUI(data);
+          showToast('관리자로 로그인되었습니다.');
+        } else {
+          errEl.textContent = '서버에 연결할 수 없습니다. 아이디/비밀번호를 확인하세요.';
+          errEl.classList.remove('hidden');
+        }
+      }
+    }
+
+    function applyLoginUI(user) {
+      document.getElementById('header-login-btn').classList.add('hidden');
+      const userInfo = document.getElementById('header-user-info');
+      userInfo.classList.remove('hidden');
+      userInfo.classList.add('flex');
+      document.getElementById('header-username').textContent = user.name + '님';
+      if (user.isAdmin) {
+        document.getElementById('header-admin-link').classList.remove('hidden');
+        document.getElementById('header-admin-link').classList.add('flex');
+      }
+      if (typeof renderGroups === 'function') renderGroups();
+      lucide.createIcons();
+    }
+
+    function logout() {
+      fetch(API_BASE + '/api/auth/logout', { method: 'POST' }).catch(() => {});
+      localStorage.removeItem('travelmates_user');
+      document.getElementById('header-login-btn').classList.remove('hidden');
+      const userInfo = document.getElementById('header-user-info');
+      userInfo.classList.add('hidden');
+      userInfo.classList.remove('flex');
+      document.getElementById('header-admin-link').classList.add('hidden');
+      if (typeof renderGroups === 'function') renderGroups();
+      showToast('로그아웃 되었습니다.');
+    }
+
+    // 페이지 로드 시 로그인 상태 복원
+    (function restoreSession() {
+      const saved = localStorage.getItem('travelmates_user');
+      if (saved) {
+        try { applyLoginUI(JSON.parse(saved)); } catch(e) {}
+      }
+    })();
+
+    // ESC로 모달 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLoginModal();
+    });
+  </script>
+</body>
+</html>
+

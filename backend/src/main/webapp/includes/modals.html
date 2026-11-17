@@ -1,0 +1,838 @@
+<!-- Login Modal (웹접근성: role="dialog" aria-modal="true" aria-labelledby="login-modal-title") -->
+<div id="login-modal" role="dialog" aria-modal="true" aria-labelledby="login-modal-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-white">
+          <i data-lucide="log-in" class="w-5 h-5"></i>
+        </div>
+        <h2 id="login-modal-title" class="text-xl font-bold text-slate-800">로그인</h2>
+      </div>
+      <button onclick="closeLoginModal()" aria-label="로그인 팝업 닫기" class="text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+    <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600"></div>
+    <form onsubmit="submitLogin(event)" class="space-y-4">
+      <div>
+        <label for="login-username" class="block text-sm font-medium text-slate-700 mb-1">아이디</label>
+        <input type="text" id="login-username" placeholder="아이디를 입력하세요"
+          class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm" required>
+      </div>
+      <div>
+        <label for="login-password" class="block text-sm font-medium text-slate-700 mb-1">비밀번호</label>
+        <input type="password" id="login-password" placeholder="비밀번호를 입력하세요"
+          class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm" required>
+      </div>
+      <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-2.5 rounded-xl transition transform active:scale-95">
+        로그인
+      </button>
+    </form>
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>아직 계정이 없으신가요?</span>
+      <button type="button" onclick="switchToRegisterModal()" class="text-emerald-600 font-semibold hover:underline flex items-center gap-1">
+        <span>회원가입</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </button>
+    </div>
+    <!-- [표시 제한] 현재 컴퓨터 MAC 주소에서만 동적으로 노출되는 테스트 계정 안내 박스 -->
+    <div id="login-test-accounts-box" class="hidden mt-3 p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl text-xs text-slate-600 transition animate-fadeIn">
+      <div class="flex items-center justify-between font-bold text-emerald-800 mb-1.5 pb-1 border-b border-emerald-100">
+        <span class="flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>로컬 개발 전용 테스트 계정
+        </span>
+        <span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-mono">MAC 인증됨</span>
+      </div>
+      <div class="space-y-1 text-[11px]">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">총괄관리자:</span>
+          <button type="button" onclick="fillTestAccount('admin', 'admin123')" class="font-semibold text-emerald-700 hover:text-emerald-900 hover:underline active:scale-95 transition" title="클릭하여 자동 입력">
+            admin / admin123 📋
+          </button>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-500">일반회원:</span>
+          <button type="button" onclick="fillTestAccount('mskim', 'pass1234')" class="font-semibold text-slate-700 hover:text-slate-900 hover:underline active:scale-95 transition" title="클릭하여 자동 입력">
+            mskim / pass1234 📋
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Register Modal (회원가입: 비밀번호 SHA-256 / 전화번호 AES 암호화, role="dialog" aria-modal="true") -->
+<div id="register-modal" role="dialog" aria-modal="true" aria-labelledby="register-modal-title" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 p-7 max-h-[92vh] overflow-y-auto animate-scaleUp">
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <i data-lucide="user-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 id="register-modal-title" class="text-xl font-bold text-slate-800">회원가입</h2>
+          <p class="text-xs text-slate-500">친구와 함께 떠나는 여행, 지금 시작해보세요!</p>
+        </div>
+      </div>
+      <button onclick="closeRegisterModal()" aria-label="회원가입 팝업 닫기" class="text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- 개인정보 보호 암호화 안내 뱃지 -->
+    <div class="mb-5 p-3 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/80 flex items-start gap-2.5 text-xs text-emerald-900">
+      <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+      <div class="leading-relaxed">
+        <span class="font-bold text-emerald-800">개인정보 암호화 보호 적용</span><br>
+        비밀번호는 <span class="font-semibold text-emerald-700 underline decoration-emerald-300">SHA-256 단방향 해시</span>, 전화번호는 <span class="font-semibold text-emerald-700 underline decoration-emerald-300">AES 양방향 암호화</span>되어 DB에 안전하게 보관됩니다.
+      </div>
+    </div>
+
+    <div id="register-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-medium"></div>
+
+    <form onsubmit="submitRegister(event)" class="space-y-3.5">
+      <div>
+        <label for="register-username" class="block text-xs font-semibold text-slate-700 mb-1">아이디 <span class="text-red-500">*</span></label>
+        <div class="flex gap-2">
+          <input type="text" id="register-username" placeholder="영문/숫자 4자 이상" required
+            class="flex-1 px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+          <button type="button" onclick="checkUsernameDuplicate()"
+            class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition border border-slate-200 whitespace-nowrap">
+            중복 확인
+          </button>
+        </div>
+        <p id="username-check-msg" class="text-[11px] mt-1 hidden"></p>
+      </div>
+
+      <div>
+        <label for="register-name" class="block text-xs font-semibold text-slate-700 mb-1">이름 / 닉네임 <span class="text-red-500">*</span></label>
+        <input type="text" id="register-name" placeholder="홍길동" required
+          class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+      </div>
+
+      <!-- 이메일 입력 및 자주 쓰는 이메일 도메인 자동완성 / 칩 리스트 -->
+      <div class="relative">
+        <label for="register-email" class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+          <span>이메일 주소 <span class="text-red-500">*</span></span>
+          <span class="text-[11px] text-slate-400 font-normal">도메인을 클릭하면 자동 입력됩니다</span>
+        </label>
+        <div class="relative">
+          <input type="email" id="register-email" placeholder="이메일 입력 (예: travelmate)" required autocomplete="off"
+            oninput="handleEmailInput(this.value)" onfocus="handleEmailFocus()"
+            class="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+          <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+
+          <!-- 자주 쓰는 이메일 실시간 드롭다운 -->
+          <div id="email-domain-dropdown" class="hidden absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 text-xs animate-scaleUp">
+          </div>
+        </div>
+
+        <!-- 자주 쓰는 이메일 도메인 칩(Pill) 빠른 선택 바 -->
+        <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+          <span class="text-[11px] text-slate-400 font-medium">자주 쓰는 도메인:</span>
+          <button type="button" onclick="selectEmailDomain('naver.com')" class="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-md text-[11px] font-medium transition active:scale-95">@naver.com</button>
+          <button type="button" onclick="selectEmailDomain('gmail.com')" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-md text-[11px] font-medium transition active:scale-95">@gmail.com</button>
+          <button type="button" onclick="selectEmailDomain('kakao.com')" class="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-md text-[11px] font-medium transition active:scale-95">@kakao.com</button>
+          <button type="button" onclick="selectEmailDomain('daum.net')" class="px-2 py-0.5 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-md text-[11px] font-medium transition active:scale-95">@daum.net</button>
+          <button type="button" onclick="selectEmailDomain('nate.com')" class="px-2 py-0.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-md text-[11px] font-medium transition active:scale-95">@nate.com</button>
+        </div>
+      </div>
+
+      <div>
+        <label for="register-phone" class="block text-xs font-semibold text-slate-700 mb-1">휴대폰 번호 <span class="text-slate-400 font-normal">(AES 암호화 저장)</span></label>
+        <div class="relative">
+          <input type="tel" id="register-phone" placeholder="010-1234-5678" maxlength="13"
+            oninput="handlePhoneNumberInput(this)"
+            class="w-full pl-9 pr-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+          <i data-lucide="phone" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-1">하이픈(-) 없이 숫자만 입력하셔도 자동으로 생성됩니다.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label for="register-password" class="block text-xs font-semibold text-slate-700 mb-1">비밀번호 <span class="text-red-500">*</span></label>
+          <input type="password" id="register-password" placeholder="6자리 이상" required minlength="4"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+        </div>
+        <div>
+          <label for="register-password-confirm" class="block text-xs font-semibold text-slate-700 mb-1">비밀번호 확인 <span class="text-red-500">*</span></label>
+          <input type="password" id="register-password-confirm" placeholder="동일하게 재입력" required minlength="4"
+            class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400 text-sm">
+        </div>
+      </div>
+
+      <button type="submit" id="btn-register-submit"
+        class="w-full mt-2 bg-gradient-to-r from-emerald-500 via-teal-600 to-cyan-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 rounded-xl transition transform active:scale-95 shadow-md shadow-emerald-500/20 text-sm">
+        회원가입 완료
+      </button>
+    </form>
+
+    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+      <span>이미 계정이 있으신가요?</span>
+      <button type="button" onclick="switchToLoginModal()" class="text-emerald-600 font-semibold hover:underline flex items-center gap-1">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        <span>로그인하기</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Group Modal (role="dialog" aria-modal="true" aria-labelledby="modal-create-group-title") -->
+<div id="modal-create-group" role="dialog" aria-modal="true" aria-labelledby="modal-create-group-title" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl relative animate-scaleUp">
+    <!-- 상단 고정 헤더 및 닫기 버튼 -->
+    <div class="sticky top-0 z-20 bg-white/95 backdrop-blur-md px-6 pt-5 pb-4 border-b border-slate-100 flex items-start justify-between gap-4 flex-shrink-0">
+      <div>
+        <h3 id="modal-create-group-title" class="text-xl font-bold text-slate-900">새 여행 모임 만들기</h3>
+        <p class="text-slate-500 text-xs mt-1">친구들과 떠날 여행 계획의 첫 발을 내딛어보세요!</p>
+      </div>
+      <button type="button" onclick="closeCreateGroupModal()" aria-label="새 여행 모임 만들기 팝업 닫기"
+        class="p-1.5 -mr-1 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex-shrink-0">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+
+    <!-- 스크롤 가능한 모달 본문 영역 -->
+    <div class="flex-1 overflow-y-auto p-6 pt-4">
+      <form id="create-group-form" onsubmit="handleCreateGroup(event)" class="space-y-4">
+      <div>
+        <label for="new-group-title" class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+          <span>모임명</span>
+          <span class="text-[11px] text-emerald-600 font-normal">💡 여행지 포함 시 목적지 자동 입력</span>
+        </label>
+        <input type="text" id="new-group-title" placeholder="예: 청춘 가득 제주도 3박 4일 힐링 투어" required
+          oninput="handleGroupTitleInput()"
+          class="w-full h-11 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white transition">
+      </div>
+      <div class="grid grid-cols-2 gap-3 items-end">
+        <div class="w-full">
+          <label for="new-group-type" class="block text-xs font-semibold text-slate-700 mb-1">구분</label>
+          <div class="relative w-full">
+            <select id="new-group-type" onchange="updateGroupPopularDestinations()"
+              class="w-full h-11 pl-3.5 pr-9 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer appearance-none transition">
+              <option value="국내">국내여행</option>
+              <option value="해외">해외여행</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+              <i data-lucide="chevron-down" class="w-4 h-4"></i>
+            </div>
+          </div>
+        </div>
+        <div class="w-full">
+          <label for="new-group-location" class="block text-xs font-semibold text-slate-700 mb-1">목적지</label>
+          <input type="text" id="new-group-location" placeholder="예: 제주도, 방콕" required
+            oninput="updateGroupPopularDestinations()"
+            class="w-full h-11 px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white transition">
+        </div>
+      </div>
+
+      <!-- 구분 및 목적지 기반 인기 여행지 추천 박스 -->
+      <div id="group-popular-dest-box" class="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-3 space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-emerald-800">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span id="group-popular-dest-title">인기 여행지 추천</span>
+          </span>
+          <span id="group-popular-dest-badge" class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+            국내 인기지
+          </span>
+        </div>
+        <p id="group-popular-dest-desc" class="text-[11px] text-emerald-700/80">추천 여행지 칩을 클릭하면 목적지와 모임명이 자동으로 제안됩니다.</p>
+        <div id="group-popular-dest-chips" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto scrollbar-none py-0.5">
+          <!-- 동적 추천 칩 -->
+        </div>
+      </div>
+
+      <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
+        <label class="block text-xs font-semibold text-slate-700 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>여행 일정 (달력 선택)</span>
+          </span>
+          <span id="trip-duration-badge" class="hidden text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+            0박 0일
+          </span>
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="new-group-start-date" class="block text-[11px] text-slate-500 mb-1">출발일 (시작)</label>
+            <input type="date" id="new-group-start-date" required onchange="handleTripDateChange()"
+              class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white text-slate-700">
+          </div>
+          <div>
+            <label for="new-group-end-date" class="block text-[11px] text-slate-500 mb-1">도착일 (종료)</label>
+            <input type="date" id="new-group-end-date" required onchange="handleTripDateChange()"
+              class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-xs bg-white text-slate-700">
+          </div>
+        </div>
+        <div id="trip-period-summary" class="hidden text-xs text-emerald-700 bg-white p-2 rounded-lg border border-emerald-200 flex items-center gap-1.5 font-medium">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0"></i>
+          <span id="trip-period-text"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label for="new-group-max" class="block text-xs font-semibold text-slate-700 mb-1">최대 인원 (명)</label>
+          <input type="number" id="new-group-max" placeholder="4" min="2" max="20" required
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <div>
+          <label for="new-group-budget" class="block text-xs font-semibold text-slate-700 mb-1">
+            <span>총 예산</span>
+            <span class="text-[11px] text-slate-400 font-normal ml-1">(원 단위 금액만 입력)</span>
+          </label>
+          <div class="relative">
+            <input type="text" id="new-group-budget" inputmode="numeric" placeholder="예: 1,500,000" required
+              oninput="handleBudgetInput(this)"
+              class="w-full px-3.5 py-2.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium">
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">원</span>
+          </div>
+          <p id="new-group-per-person-budget" class="text-[11px] text-emerald-600 font-medium mt-1 hidden"></p>
+        </div>
+      </div>
+
+      <!-- 대표 커버 이미지 직접 선택 및 업로드 영역 -->
+      <div class="bg-slate-50/80 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
+        <label class="block text-xs font-semibold text-slate-700 flex items-center justify-between">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="image" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>모임 대표 커버 이미지</span>
+          </span>
+          <span class="text-[11px] text-slate-400 font-normal">직접 사진 등록 또는 프리셋</span>
+        </label>
+
+        <div class="relative h-36 w-full rounded-2xl overflow-hidden border border-slate-200 bg-slate-200 group shadow-inner">
+          <img id="new-group-cover-preview" src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80"
+            alt="새 모임 커버 이미지 미리보기" class="w-full h-full object-cover transition duration-300">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end justify-between p-3">
+            <span id="new-group-image-badge" class="text-[11px] font-bold text-white px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm border border-white/20">
+              기본 이미지 (자연/힐링)
+            </span>
+            <button type="button" onclick="$('#new-group-file-input').trigger('click')"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/95 hover:bg-white text-slate-800 shadow-lg transition flex items-center gap-1.5 active:scale-95 border border-slate-100">
+              <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span>내 사진 올리기</span>
+            </button>
+          </div>
+        </div>
+
+        <label for="new-group-file-input" class="sr-only">내 컴퓨터 사진 파일 선택</label>
+        <input type="file" id="new-group-file-input" accept="image/*" class="hidden" onchange="handleCoverImageUpload(event)">
+        <input type="hidden" id="new-group-cover-url" value="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80">
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px] text-slate-500">
+            <span class="font-medium">또는 추천 이미지 선택:</span>
+            <button type="button" onclick="toggleCustomUrlInput()" class="text-emerald-600 hover:text-emerald-700 font-semibold hover:underline">
+              URL 직접 입력
+            </button>
+          </div>
+          <div class="grid grid-cols-4 gap-2">
+            <button type="button" aria-label="추천 이미지 - 자연/힐링 선택" onclick="selectPresetCover('https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80', '자연/힐링', this)"
+              class="relative h-14 rounded-xl overflow-hidden border-2 border-emerald-500 transition preset-cover-btn active:scale-95 focus:outline-none">
+              <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=300&q=60" alt="자연과 힐링 추천 썸네일" class="w-full h-full object-cover">
+              <span class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] text-center py-0.5 truncate">자연/힐링</span>
+            </button>
+            <button type="button" aria-label="추천 이미지 - 바다/휴양 선택" onclick="selectPresetCover('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=800&q=80', '바다/휴양', this)"
+              class="relative h-14 rounded-xl overflow-hidden border-2 border-transparent hover:border-slate-300 transition preset-cover-btn active:scale-95 focus:outline-none">
+              <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=300&q=60" alt="바다와 휴양 추천 썸네일" class="w-full h-full object-cover">
+              <span class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] text-center py-0.5 truncate">바다/휴양</span>
+            </button>
+            <button type="button" aria-label="추천 이미지 - 산/풍경 선택" onclick="selectPresetCover('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80', '산/풍경', this)"
+              class="relative h-14 rounded-xl overflow-hidden border-2 border-transparent hover:border-slate-300 transition preset-cover-btn active:scale-95 focus:outline-none">
+              <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=300&q=60" alt="산과 풍경 추천 썸네일" class="w-full h-full object-cover">
+              <span class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] text-center py-0.5 truncate">산/풍경</span>
+            </button>
+            <button type="button" aria-label="추천 이미지 - 해변/일몰 선택" onclick="selectPresetCover('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', '해변/일몰', this)"
+              class="relative h-14 rounded-xl overflow-hidden border-2 border-transparent hover:border-slate-300 transition preset-cover-btn active:scale-95 focus:outline-none">
+              <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=60" alt="해변과 일몰 추천 썸네일" class="w-full h-full object-cover">
+              <span class="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[9px] text-center py-0.5 truncate">해변/일몰</span>
+            </button>
+          </div>
+
+          <div id="custom-url-container" class="hidden mt-2 pt-2 border-t border-slate-200">
+            <div class="flex gap-2">
+              <label for="new-group-custom-url-input" class="sr-only">이미지 URL 직접 입력</label>
+              <input type="url" id="new-group-custom-url-input" placeholder="https://example.com/photo.jpg"
+                class="flex-1 px-3 py-1.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <button type="button" onclick="applyCustomImageUrl()"
+                class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold shadow-sm transition">
+                적용
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label for="new-group-desc" class="block text-xs font-semibold text-slate-700 mb-1">모임 소개</label>
+        <textarea id="new-group-desc" rows="3" placeholder="여행 테마와 가고 싶은 스팟 등을 자유롭게 적어주세요!" required
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"></textarea>
+      </div>
+      <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-md mt-2">
+        모임 등록 완료
+      </button>
+    </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Group Confirmation Modal (role="dialog" aria-modal="true" aria-labelledby="modal-confirm-delete-title") -->
+<div id="modal-confirm-delete-group" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-delete-title" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scaleUp border border-rose-100">
+    <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+      <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+    </div>
+    <h3 id="modal-confirm-delete-title" class="text-xl font-black text-slate-900 mb-1">여행 모임을 삭제하시겠습니까?</h3>
+    <p class="text-xs text-slate-500 mb-4">삭제된 모임 데이터는 복구할 수 없습니다.</p>
+
+    <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 mb-5">
+      <div class="text-xs font-bold text-rose-900 mb-1 flex items-center gap-1.5">
+        <i data-lucide="trash-2" class="w-4 h-4 text-rose-600"></i>
+        <span id="delete-group-target-name" class="font-extrabold truncate">선택된 모임</span>
+      </div>
+      <p class="text-[11px] text-rose-700 leading-relaxed">
+        모임 삭제 시 연결된 <b>여행 일정 타임라인</b>, <b>회비 정산 영수증 및 송금 내역</b>, <b>참가자 명단</b>이 모두 함께 영구 삭제됩니다.
+      </p>
+    </div>
+
+    <input type="hidden" id="delete-group-target-id" value="">
+
+    <div class="grid grid-cols-2 gap-3">
+      <button type="button" onclick="closeDeleteGroupModal()"
+        class="py-3 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-sm transition">
+        취소
+      </button>
+      <button type="button" onclick="executeDeleteGroup()"
+        class="py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-sm transition shadow-md flex items-center justify-center gap-1.5">
+        <i data-lucide="trash-2" class="w-4 h-4"></i>
+        <span>모임 영구 삭제</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Time Picker Popup Modal (시간 선택 팝업 모달, role="dialog" aria-modal="true" aria-labelledby="modal-time-picker-title") -->
+<div id="modal-time-picker" role="dialog" aria-modal="true" aria-labelledby="modal-time-picker-title"
+  class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+  <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative animate-scaleUp">
+    <!-- 닫기 버튼 -->
+    <button onclick="closeTimePickerModal()" aria-label="시간 선택 팝업 닫기"
+      class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 헤더 -->
+    <div class="flex items-center gap-2 mb-1">
+      <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+        <i data-lucide="clock" class="w-4 h-4"></i>
+      </div>
+      <h3 id="modal-time-picker-title" class="text-lg font-bold text-slate-900">시간 선택</h3>
+    </div>
+    <p class="text-slate-500 text-xs mb-4">원하는 여행 시간대를 클릭하여 간편하게 선택하세요.</p>
+
+    <!-- 현재 선택된 시간 미리보기 카드 -->
+    <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 mb-4 text-center">
+      <span class="text-xs font-semibold text-emerald-700 block mb-0.5">선택된 시간</span>
+      <div id="tp-preview-time" class="text-3xl font-extrabold text-emerald-900 tracking-wider">
+        10:00
+      </div>
+      <span id="tp-preview-desc" class="text-xs text-emerald-600 font-medium">오전 10시 00분</span>
+    </div>
+
+    <!-- 간편 여행 프리셋 퀵 버튼 -->
+    <div class="mb-4">
+      <label class="block text-xs font-bold text-slate-700 mb-2">간편 여행 시간 프리셋</label>
+      <div class="grid grid-cols-3 gap-1.5 text-xs">
+        <button type="button" onclick="selectTimePreset('09:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          🌅 아침 09:00
+        </button>
+        <button type="button" onclick="selectTimePreset('11:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          🍽️ 점심 11:30
+        </button>
+        <button type="button" onclick="selectTimePreset('14:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          ☕ 오후 14:00
+        </button>
+        <button type="button" onclick="selectTimePreset('16:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          🏖️ 티타임 16:30
+        </button>
+        <button type="button" onclick="selectTimePreset('18:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          🍖 저녁 18:30
+        </button>
+        <button type="button" onclick="selectTimePreset('21:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+          🌙 야간 21:00
+        </button>
+      </div>
+    </div>
+
+    <!-- 직접 상세 설정 (오전/오후, 시, 분) -->
+    <div class="space-y-3 pt-3 border-t border-slate-100">
+      <div class="flex items-center justify-between gap-2">
+        <!-- 오전 / 오후 세그먼트 토글 -->
+        <div class="flex rounded-xl bg-slate-100 p-1 flex-1">
+          <button type="button" id="tp-btn-am" onclick="setTimeAmPm('AM')"
+            class="flex-1 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-700 shadow-sm">
+            오전 (AM)
+          </button>
+          <button type="button" id="tp-btn-pm" onclick="setTimeAmPm('PM')"
+            class="flex-1 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">
+            오후 (PM)
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <!-- 시 선택 드롭다운 -->
+        <div>
+          <label for="tp-select-hour" class="block text-[11px] font-semibold text-slate-600 mb-1.5">시 (Hour)</label>
+          <div class="relative">
+            <select id="tp-select-hour" onchange="onTimePickerChange()"
+              class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+              <!-- Dynamically populated 1 to 12 -->
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+        <!-- 분 선택 드롭다운 -->
+        <div>
+          <label for="tp-select-minute" class="block text-[11px] font-semibold text-slate-600 mb-1.5">분 (Minute)</label>
+          <div class="relative">
+            <select id="tp-select-minute" onchange="onTimePickerChange()"
+              class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+              <!-- Dynamically populated 00 to 55 -->
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 액션 버튼 -->
+    <div class="flex gap-2 mt-5">
+      <button type="button" onclick="closeTimePickerModal()"
+        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition active:scale-95">
+        취소
+      </button>
+      <button type="button" onclick="applyTimePicker()"
+        class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        <span>시간 적용</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Location Picker Popup Modal (지도 위치 및 장소 선택 팝업 모달, role="dialog" aria-modal="true" aria-labelledby="modal-location-picker-title") -->
+<div id="modal-location-picker" role="dialog" aria-modal="true" aria-labelledby="modal-location-picker-title"
+  class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-scaleUp flex flex-col max-h-[92vh]">
+    <!-- 닫기 버튼 -->
+    <button onclick="closeLocationPickerModal()" aria-label="장소 선택 팝업 닫기"
+      class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 헤더 -->
+    <div class="flex items-center gap-2 mb-1">
+      <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+        <i data-lucide="map-pin" class="w-4 h-4"></i>
+      </div>
+      <div>
+        <h3 id="modal-location-picker-title" class="text-base sm:text-lg font-bold text-slate-900">지도에서 위치 / 장소 선택</h3>
+        <p class="text-slate-500 text-xs">지도 클릭 또는 추천 명소를 눌러 일정을 등록하세요.</p>
+      </div>
+    </div>
+
+    <!-- 검색창 및 지역 뱃지 -->
+    <div class="mt-3 mb-2 flex items-center gap-2">
+      <div class="relative flex-1">
+        <label for="loc-search-input" class="sr-only">장소명 또는 관광지 검색</label>
+        <input type="text" id="loc-search-input" placeholder="장소명 또는 관광지 검색 (예: 성산일출봉, 해운대)"
+          onkeydown="if(event.key === 'Enter'){ event.preventDefault(); searchLocationPlace(); }"
+          class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+      </div>
+      <button type="button" onclick="searchLocationPlace()"
+        class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1 active:scale-95">
+        검색
+      </button>
+    </div>
+
+    <!-- 추천 명소 프리셋 태그 칩 (모임 지역에 맞추어 동적 추천) -->
+    <div class="mb-3">
+      <div class="flex items-center justify-between text-[11px] text-slate-500 font-semibold mb-1.5">
+        <span class="flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-500"></i><span id="loc-region-name">인기 여행지 추천</span></span>
+        <span class="text-slate-400 text-[10px]">클릭 시 지도 이동</span>
+      </div>
+      <div id="loc-preset-chips" class="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto scrollbar-none py-0.5">
+        <!-- 동적으로 추천 칩 생성 -->
+      </div>
+    </div>
+
+    <!-- 지도 컨테이너 -->
+    <div class="relative w-full h-56 sm:h-72 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 mb-3 shadow-inner">
+      <div id="leaflet-map-container" class="w-full h-full z-10"></div>
+      <!-- 안내 힌트 오버레이 -->
+      <div class="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between pointer-events-none z-[400] shadow-sm">
+        <span class="flex items-center gap-1"><i data-lucide="mouse-pointer" class="w-3 h-3 text-emerald-600"></i>지도를 클릭하면 마커가 해당 위치로 이동합니다</span>
+        <span id="loc-latlng-indicator" class="text-[10px] text-slate-400 font-mono">위치 좌표</span>
+      </div>
+    </div>
+
+    <!-- 선택된 장소 정보 카드 -->
+    <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl mb-3">
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <label for="loc-selected-place-name" class="text-[11px] font-bold text-emerald-700 block mb-0.5">선택된 장소명</label>
+          <input type="text" id="loc-selected-place-name" placeholder="장소명을 입력하거나 지도에서 선택하세요"
+            class="w-full font-bold text-sm text-slate-900 bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+          <p id="loc-selected-place-desc" class="text-[11px] text-slate-500 mt-1 truncate">지도에서 원하는 위치를 클릭해 보세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 하단 액션 버튼 -->
+    <div class="flex gap-2">
+      <button type="button" onclick="closeLocationPickerModal()"
+        class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-slate-50 transition active:scale-95">
+        취소
+      </button>
+      <button type="button" onclick="applyLocationPicker()"
+        class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        <span>이 위치로 장소 입력</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Location Map Viewer Modal (일정 장소 지도 확인 모달, role="dialog" aria-modal="true" aria-labelledby="modal-sched-map-title") -->
+<div id="modal-schedule-map-viewer" role="dialog" aria-modal="true" aria-labelledby="modal-sched-map-title"
+  class="fixed inset-0 z-[75] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-scaleUp flex flex-col max-h-[92vh]">
+    <!-- 닫기 버튼 -->
+    <button onclick="closeScheduleMapModal()" aria-label="지도 확인 팝업 닫기"
+      class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+      <i data-lucide="x" class="w-6 h-6"></i>
+    </button>
+
+    <!-- 헤더 -->
+    <div class="flex items-center gap-2.5 mb-3">
+      <div class="w-9 h-9 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+        <i data-lucide="map-pin" class="w-5 h-5"></i>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2">
+          <span id="sched-map-day-badge" class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-white">Day 1</span>
+          <span id="sched-map-time-badge" class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">10:00</span>
+        </div>
+        <h3 id="modal-sched-map-title" class="text-lg font-bold text-slate-900 truncate mt-0.5">장소명</h3>
+      </div>
+    </div>
+
+    <!-- 메모 및 부가 정보 안내 -->
+    <div id="sched-map-memo-box" class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl mb-3 flex items-start gap-2 text-xs text-slate-600">
+      <i data-lucide="info" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+      <div class="flex-1 min-w-0">
+        <span id="sched-map-memo-text" class="block leading-relaxed">준비물 및 세부 계획</span>
+        <span id="sched-map-coord-text" class="block text-[10px] text-slate-400 font-mono mt-0.5">위치 좌표</span>
+      </div>
+    </div>
+
+    <!-- Leaflet 지도 뷰어 -->
+    <div class="relative w-full h-64 sm:h-80 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 mb-4 shadow-inner">
+      <div id="sched-view-leaflet-map" class="w-full h-full z-10"></div>
+      <div class="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between pointer-events-none z-[400] shadow-sm">
+        <span class="flex items-center gap-1"><i data-lucide="navigation" class="w-3 h-3 text-emerald-600"></i>마커를 누르면 상세 장소명이 안내됩니다</span>
+        <span class="text-[10px] text-emerald-600 font-bold">OpenStreetMap</span>
+      </div>
+    </div>
+
+    <!-- 외부 길찾기 연동 및 닫기 버튼 -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <a id="sched-map-kakao-link" href="#" target="_blank" rel="noopener noreferrer"
+          class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-amber-950 font-bold text-xs transition flex items-center justify-center gap-1 shadow-sm">
+          <span>카카오맵 길찾기</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+        <a id="sched-map-naver-link" href="#" target="_blank" rel="noopener noreferrer"
+          class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-sm">
+          <span>네이버지도 길찾기</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+      </div>
+      <button type="button" onclick="closeScheduleMapModal()"
+        class="w-full sm:w-auto px-5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs sm:text-sm transition">
+        닫기
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Group Detail Modal (여행 모임 상세 정보 모달, role="dialog" aria-modal="true" aria-labelledby="modal-group-detail-title") -->
+<div id="modal-group-detail" role="dialog" aria-modal="true" aria-labelledby="modal-group-detail-title"
+  class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-scaleUp">
+    <!-- 1. 헤더: 대표 이미지 + 오버레이 정보 + 닫기 버튼 -->
+    <div class="relative h-52 sm:h-60 w-full flex-shrink-0 bg-slate-900 overflow-hidden">
+      <img id="group-detail-image" src="" alt="여행 모임 대표 이미지" class="w-full h-full object-cover opacity-90 transition duration-500">
+      <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/30"></div>
+
+      <!-- 상단 닫기 버튼 -->
+      <button onclick="closeGroupDetailModal()" aria-label="모임 상세 팝업 닫기"
+        class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition backdrop-blur-md active:scale-95 border border-white/20">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 상단 뱃지 그룹 -->
+      <div class="absolute top-4 left-4 z-10 flex flex-wrap gap-2 items-center">
+        <span id="group-detail-type-badge" class="px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-md">
+          국내여행
+        </span>
+        <span id="group-detail-location-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/95 text-slate-800 backdrop-blur-md shadow-md flex items-center gap-1">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-rose-500"></i>
+          <span id="group-detail-location-text">위치</span>
+        </span>
+        <span id="group-detail-status-badge" class="px-2.5 py-1 rounded-full text-xs font-bold text-white shadow-md">
+          모집 중
+        </span>
+      </div>
+
+      <!-- 이미지 하단 제목 및 개설자 정보 -->
+      <div class="absolute bottom-4 left-4 right-4 z-10 text-white">
+        <h3 id="modal-group-detail-title" class="text-xl sm:text-2xl font-black tracking-tight leading-snug drop-shadow-md">
+          모임 제목
+        </h3>
+        <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-slate-200">
+          <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-400"></i> <span id="group-detail-date">일정</span></span>
+          <span class="text-slate-400">•</span>
+          <span class="flex items-center gap-1"><i data-lucide="crown" class="w-3.5 h-3.5 text-amber-400"></i> 개설자(방장): <span id="group-detail-creator" class="font-bold text-white">방장</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 본문 스크롤 영역 -->
+    <div class="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1 text-slate-700">
+      
+      <!-- 핵심 요약 카드 그리드 -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+          <span class="text-[11px] font-semibold text-slate-400 block mb-1 flex items-center gap-1">
+            <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i> 여행 일정
+          </span>
+          <p id="group-detail-date-val" class="text-xs font-bold text-slate-800 break-words">-</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+          <span class="text-[11px] font-semibold text-slate-400 block mb-1 flex items-center gap-1">
+            <i data-lucide="wallet" class="w-3.5 h-3.5 text-emerald-600"></i> 총 예산
+          </span>
+          <p id="group-detail-budget-val" class="text-xs font-bold text-emerald-700">-</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+          <span class="text-[11px] font-semibold text-slate-400 block mb-1 flex items-center gap-1">
+            <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-600"></i> 모집 현황
+          </span>
+          <p id="group-detail-members-val" class="text-xs font-bold text-slate-800">-</p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200/80 p-3 rounded-2xl">
+          <span class="text-[11px] font-semibold text-slate-400 block mb-1 flex items-center gap-1">
+            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> 개설일
+          </span>
+          <p id="group-detail-created-val" class="text-xs font-bold text-slate-700">-</p>
+        </div>
+      </div>
+
+      <!-- 모임 상세 소개 -->
+      <div>
+        <h4 class="text-sm font-bold text-slate-900 mb-2 flex items-center gap-1.5">
+          <i data-lucide="file-text" class="w-4 h-4 text-emerald-600"></i>
+          <span>모임 상세 소개</span>
+        </h4>
+        <div class="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line" id="group-detail-desc">
+          -
+        </div>
+      </div>
+
+      <!-- 참여 멤버 현황 프로그레스 & 참여자 칩스 -->
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <h4 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+              <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+              <span>참여 멤버 명단</span>
+            </h4>
+            <span id="group-detail-name-privacy-badge"></span>
+          </div>
+          <span id="group-detail-members-count" class="text-xs font-bold text-emerald-700">0 / 0명</span>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden mb-3">
+          <div id="group-detail-progress" class="bg-gradient-to-r from-emerald-500 to-teal-500 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <div id="group-detail-member-chips" class="flex flex-wrap gap-2">
+          <!-- 멤버 뱃지 동적 삽입 -->
+        </div>
+      </div>
+
+      <!-- 연계 메뉴 바로가기 -->
+      <div>
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+          이 모임의 전용 메뉴 바로가기
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <button type="button" id="detail-btn-schedule"
+            class="p-3 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition flex items-center gap-2.5 text-left group">
+            <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">일정 플래너</p>
+              <p class="text-[11px] text-slate-400">코스/지도 확인</p>
+            </div>
+          </button>
+          <button type="button" id="detail-btn-settlement"
+            class="p-3 rounded-2xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 transition flex items-center gap-2.5 text-left group">
+            <div class="w-8 h-8 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
+              <i data-lucide="calculator" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">회비 N빵 정산</p>
+              <p class="text-[11px] text-slate-400">영수증 & 송금액</p>
+            </div>
+          </button>
+          <button type="button" id="detail-btn-gallery"
+            class="p-3 rounded-2xl border border-slate-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition flex items-center gap-2.5 text-left group">
+            <div class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition">
+              <i data-lucide="image" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800">추억 갤러리</p>
+              <p class="text-[11px] text-slate-400">여행 사진 공유</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. 모달 하단 액션 버튼 바 -->
+    <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-3 flex-shrink-0">
+      <button type="button" onclick="closeGroupDetailModal()"
+        class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-white transition active:scale-95">
+        닫기
+      </button>
+      <div id="group-detail-action-box" class="flex items-center gap-2">
+        <!-- 동적 참여 신청 / 참여 취소 / 방장 뱃지 -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast Notification (role="status" aria-live="polite") -->
+<div id="toast" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+  <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+  <span id="toast-message" class="text-sm font-medium">메시지</span>
+</div>

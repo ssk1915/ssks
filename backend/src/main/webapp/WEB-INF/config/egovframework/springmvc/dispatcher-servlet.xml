@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- Controller 자동 스캔 -->
+    <context:component-scan base-package="egovframework.travel.web">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+    <!-- Spring MVC Annotation & Jackson JSON Converter 활성화 -->
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"/>
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>application/json;charset=UTF-8</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!-- 1:1 화면 매핑 ViewResolver 설정 (컨트롤러 반환 시 forward/view 매핑) -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/" />
+        <property name="suffix" value="" />
+    </bean>
+
+    <!-- 정적 리소스(HTML, CSS, JS, 이미지) 매핑 -->
+    <mvc:resources mapping="/css/**" location="/css/" />
+    <mvc:resources mapping="/js/**" location="/js/" />
+    <mvc:resources mapping="/*.html" location="/" />
+    <mvc:resources mapping="/index.html" location="/index.html" />
+    <mvc:resources mapping="/groups.html" location="/groups.html" />
+    <mvc:resources mapping="/planner.html" location="/planner.html" />
+    <mvc:resources mapping="/settlement.html" location="/settlement.html" />
+    <mvc:resources mapping="/gallery.html" location="/gallery.html" />
+    <mvc:resources mapping="/admin.html" location="/admin.html" />
+
+    <!-- 기본 서블릿 핸들러 (DispatcherServlet이 처리하지 않는 정적 자원은 톰캣 기본 서블릿에 위임) -->
+    <mvc:default-servlet-handler/>
+
+</beans>

@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelMates - 여행 일정 플래너</title>
+  <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
+  <script>
+    (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
+    (function(){var t=localStorage.getItem('travelmates_theme');if(t==='dark'||(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}})();
+  </script>
+  <script src="js/tailwind.cdn.js?v=20261117_03"></script>
+  <!-- jQuery 3.7.1 CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Leaflet CSS & JS (오픈스트리트맵 무료 지도 연동) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d' },
+            ocean: { 500: '#0ea5e9', 600: '#0284c7' }
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body data-active-tab="planner" class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans pb-16 md:pb-0">
+  <!-- Skip Navigation -->
+  <a href="#contents" class="skip-nav">본문 바로가기</a>
+
+  <!-- ==================== 1. HEADER ==================== -->
+  <header id="header"></header>
+
+  <!-- ==================== 2. CONTENTS ==================== -->
+  <main id="contents" tabindex="-1" class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <section id="tab-planner" class="tab-content">
+
+      <!-- 모임 선택 헤더 -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
+              <i data-lucide="calendar-days" class="w-6 h-6 text-emerald-600"></i>
+              <span>여행 일정 플래너</span>
+            </h2>
+            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 Day별 일정을 관리할 수 있습니다.</p>
+          </div>
+          <!-- 모임 선택 드롭다운 -->
+          <div class="flex items-center gap-3">
+            <label for="planner-group-select" class="text-sm font-medium text-slate-600 whitespace-nowrap">
+              <i data-lucide="users" class="w-4 h-4 inline mr-1 text-emerald-500"></i>모임 선택
+            </label>
+            <div class="relative w-full sm:w-72 md:w-80">
+              <select id="planner-group-select" onchange="onPlannerGroupChange()"
+                class="h-10.5 w-full pl-3.5 pr-9 border border-slate-200 rounded-xl text-sm font-medium bg-white text-slate-700 appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 hover:border-slate-300 transition shadow-2xs">
+                <option value="">-- 모임을 선택하세요 --</option>
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+            <button onclick="refreshPlannerSchedules()" title="새로고침" aria-label="모임 목록 새로고침"
+              class="h-10.5 px-3.5 rounded-xl border border-slate-200 text-slate-600 hover:text-emerald-700 hover:bg-emerald-50 transition shadow-2xs flex items-center justify-center active:scale-95">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모임 미선택 안내 -->
+      <div id="planner-no-group" class="bg-white rounded-2xl border border-dashed border-slate-300 p-16 text-center">
+        <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <i data-lucide="map" class="w-10 h-10 text-emerald-400"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-slate-600 mb-2">여행 모임을 선택해주세요</h3>
+        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 Day별 일정 플래너가 열립니다.</p>
+        <a href="index.html" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mx-auto inline-flex">
+          <i data-lucide="users" class="w-4 h-4"></i>여행 모임 보러가기
+        </a>
+      </div>
+
+      <!-- 플래너 본문 (모임 선택 후) -->
+      <div id="planner-body" class="hidden space-y-6">
+
+        <!-- 선택 모임 정보 배너 -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl p-5 text-white shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p class="text-emerald-100 text-xs font-medium mb-1">선택된 여행 모임</p>
+            <h3 id="planner-group-name" class="text-xl font-bold"></h3>
+            <p id="planner-group-meta" class="text-emerald-100 text-sm mt-0.5"></p>
+          </div>
+          <button onclick="openAddPlanModal()"
+            class="flex-shrink-0 flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition shadow-sm active:scale-95">
+            <i data-lucide="plus" class="w-4 h-4"></i>일정 추가
+          </button>
+        </div>
+
+        <!-- Day 탭 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+          <div class="flex gap-2 overflow-x-auto pb-1" id="day-tabs">
+            <!-- Dynamically rendered (Day 1, Day 2, ... 전체 일정 📋) -->
+          </div>
+        </div>
+
+        <!-- 타임라인 카드 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h4 id="planner-day-title" class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-emerald-500"></i>Day 1 일정
+            </h4>
+            <span id="planner-schedule-count" class="text-xs bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full font-semibold">0개</span>
+          </div>
+
+          <!-- 인라인 일정 추가 폼 -->
+          <form id="inline-add-plan-form" onsubmit="handleInlineAddPlan(event)"
+            class="mb-6 p-4 bg-emerald-50/60 rounded-xl border border-emerald-100 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <input type="hidden" id="inline-plan-lat" value="">
+            <input type="hidden" id="inline-plan-lng" value="">
+            <div>
+              <label for="inline-plan-time" class="block text-xs font-medium text-slate-600 mb-1">시간</label>
+              <div class="relative">
+                <input type="text" id="inline-plan-time" readonly onclick="openTimePickerModal('inline-plan-time')"
+                  placeholder="시간 선택"
+                  class="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white cursor-pointer hover:border-emerald-400 transition">
+                <button type="button" onclick="openTimePickerModal('inline-plan-time')" aria-label="시간 선택 팝업 열기"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="시간 팝업 선택">
+                  <i data-lucide="clock" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label for="inline-plan-place" class="block text-xs font-medium text-slate-600 mb-1">장소 <span class="text-red-400">*</span></label>
+              <div class="relative">
+                <input type="text" id="inline-plan-place" placeholder="방문할 장소" required
+                  class="w-full pl-3 pr-8 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+                <button type="button" onclick="openLocationPickerModal('inline-plan-place')" aria-label="지도 위치 선택 팝업 열기"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="지도에서 위치 선택">
+                  <i data-lucide="map-pin" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label for="inline-plan-memo" class="block text-xs font-medium text-slate-600 mb-1">메모</label>
+              <input type="text" id="inline-plan-memo" placeholder="준비물, 예약 등"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white">
+            </div>
+            <div class="flex items-end">
+              <button type="submit"
+                class="w-full flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-2 rounded-lg transition shadow-sm active:scale-95">
+                <i data-lucide="plus" class="w-4 h-4"></i>추가
+              </button>
+            </div>
+          </form>
+
+          <!-- Timeline -->
+          <div class="relative pl-6 border-l-2 border-emerald-200 space-y-5" id="plan-timeline">
+            <!-- Rendered dynamically via app.js -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Plan Item Modal (일정 플래너 전용 팝업 모달) -->
+  <div id="modal-add-plan" role="dialog" aria-modal="true" aria-labelledby="modal-add-plan-title" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-scaleUp">
+      <button onclick="closeAddPlanModal()" aria-label="모달 닫기" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+      <h3 id="modal-add-plan-title" class="text-xl font-bold text-slate-900 mb-2">일정 항목 추가</h3>
+      <p class="text-slate-500 text-xs mb-4">선택된 일차의 방문지 및 세부 계획을 기록합니다.</p>
+
+      <form id="add-plan-form" onsubmit="handleAddPlan(event)" class="space-y-4">
+        <input type="hidden" id="plan-lat" value="">
+        <input type="hidden" id="plan-lng" value="">
+        <div>
+          <label for="plan-day-select" class="block text-xs font-semibold text-slate-700 mb-1">일차 (Day)</label>
+          <div class="relative w-full">
+            <select id="plan-day-select" class="w-full h-11 pl-3.5 pr-9 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer appearance-none transition">
+              <!-- Dynamically populated -->
+            </select>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+          </div>
+        </div>
+        <div>
+          <label for="plan-time" class="block text-xs font-semibold text-slate-700 mb-1">시간대</label>
+          <div class="relative">
+            <input type="text" id="plan-time" readonly onclick="openTimePickerModal('plan-time')"
+              placeholder="시간 선택 (클릭)" required
+              class="w-full pl-3.5 pr-9 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white cursor-pointer hover:border-emerald-400 transition">
+            <button type="button" onclick="openTimePickerModal('plan-time')" aria-label="시간 선택 팝업 열기"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="시간 팝업 선택">
+              <i data-lucide="clock" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="plan-place" class="block text-xs font-semibold text-slate-700 mb-1">장소 / 활동명 <span class="text-red-400">*</span></label>
+          <div class="relative">
+            <input type="text" id="plan-place" placeholder="예: 성산일출봉 하이킹 & 기념사진" required
+              class="w-full pl-3.5 pr-9 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+            <button type="button" onclick="openLocationPickerModal('plan-place')" aria-label="지도 위치 선택 팝업 열기"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 p-1 transition" title="지도에서 위치 선택">
+              <i data-lucide="map-pin" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label for="plan-memo" class="block text-xs font-semibold text-slate-700 mb-1">메모 / 준비물</label>
+          <input type="text" id="plan-memo" placeholder="예: 편한 운동화 착용, 입장료 5,000원"
+            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span>일정에 즉시 등록</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Time Picker Popup Modal (시간 선택 팝업 모달) -->
+  <div id="modal-time-picker" role="dialog" aria-modal="true" aria-labelledby="modal-time-picker-title"
+    class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl relative animate-scaleUp">
+      <!-- 닫기 버튼 -->
+      <button onclick="closeTimePickerModal()" aria-label="팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 헤더 -->
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+        </div>
+        <h3 id="modal-time-picker-title" class="text-lg font-bold text-slate-900">시간 선택</h3>
+      </div>
+      <p class="text-slate-500 text-xs mb-4">원하는 여행 시간대를 클릭하여 간편하게 선택하세요.</p>
+
+      <!-- 현재 선택된 시간 미리보기 카드 -->
+      <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3.5 mb-4 text-center">
+        <span class="text-xs font-semibold text-emerald-700 block mb-0.5">선택된 시간</span>
+        <div id="tp-preview-time" class="text-3xl font-extrabold text-emerald-900 tracking-wider">
+          10:00
+        </div>
+        <span id="tp-preview-desc" class="text-xs text-emerald-600 font-medium">오전 10시 00분</span>
+      </div>
+
+      <!-- 간편 여행 프리셋 퀵 버튼 -->
+      <div class="mb-4">
+        <label class="block text-xs font-bold text-slate-700 mb-2">간편 여행 시간 프리셋</label>
+        <div class="grid grid-cols-3 gap-1.5 text-xs">
+          <button type="button" onclick="selectTimePreset('09:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🌅 아침 09:00
+          </button>
+          <button type="button" onclick="selectTimePreset('11:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🍽️ 점심 11:30
+          </button>
+          <button type="button" onclick="selectTimePreset('14:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            ☕ 오후 14:00
+          </button>
+          <button type="button" onclick="selectTimePreset('16:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🏖️ 티타임 16:30
+          </button>
+          <button type="button" onclick="selectTimePreset('18:30')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🍖 저녁 18:30
+          </button>
+          <button type="button" onclick="selectTimePreset('21:00')" class="tp-preset-btn py-1.5 px-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 font-medium transition text-center active:scale-95">
+            🌙 야간 21:00
+          </button>
+        </div>
+      </div>
+
+      <!-- 직접 상세 설정 (오전/오후, 시, 분) -->
+      <div class="space-y-3 pt-3 border-t border-slate-100">
+        <div class="flex items-center justify-between gap-2">
+          <!-- 오전 / 오후 세그먼트 토글 -->
+          <div class="flex rounded-xl bg-slate-100 p-1 flex-1">
+            <button type="button" id="tp-btn-am" onclick="setTimeAmPm('AM')"
+              class="flex-1 py-1.5 rounded-lg text-xs font-bold transition bg-white text-emerald-700 shadow-sm">
+              오전 (AM)
+            </button>
+            <button type="button" id="tp-btn-pm" onclick="setTimeAmPm('PM')"
+              class="flex-1 py-1.5 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900">
+              오후 (PM)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <!-- 시 선택 드롭다운 -->
+          <div>
+            <label for="tp-select-hour" class="block text-[11px] font-semibold text-slate-600 mb-1.5">시 (Hour)</label>
+            <div class="relative">
+              <select id="tp-select-hour" onchange="onTimePickerChange()"
+                class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+                <!-- Dynamically populated 1 to 12 -->
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+          </div>
+          <!-- 분 선택 드롭다운 -->
+          <div>
+            <label for="tp-select-minute" class="block text-[11px] font-semibold text-slate-600 mb-1.5">분 (Minute)</label>
+            <div class="relative">
+              <select id="tp-select-minute" onchange="onTimePickerChange()"
+                class="w-full h-10.5 pl-3.5 pr-8 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white font-semibold text-slate-800 appearance-none cursor-pointer transition text-center">
+                <!-- Dynamically populated 00 to 55 -->
+              </select>
+              <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 액션 버튼 -->
+      <div class="flex gap-2 mt-5">
+        <button type="button" onclick="closeTimePickerModal()"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition active:scale-95">
+          취소
+        </button>
+        <button type="button" onclick="applyTimePicker()"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>시간 적용</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Picker Popup Modal (지도 위치 및 장소 선택 팝업 모달) -->
+  <div id="modal-location-picker" role="dialog" aria-modal="true" aria-labelledby="modal-location-picker-title"
+    class="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-scaleUp flex flex-col max-h-[92vh]">
+      <!-- 닫기 버튼 -->
+      <button onclick="closeLocationPickerModal()" aria-label="팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 헤더 -->
+      <div class="flex items-center gap-2 mb-1">
+        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h3 id="modal-location-picker-title" class="text-base sm:text-lg font-bold text-slate-900">지도에서 위치 / 장소 선택</h3>
+          <p class="text-slate-500 text-xs">지도 클릭 또는 추천 명소를 눌러 일정을 등록하세요.</p>
+        </div>
+      </div>
+
+      <!-- 검색창 및 지역 뱃지 -->
+      <div class="mt-3 mb-2 flex items-center gap-2">
+        <div class="relative flex-1">
+          <label for="loc-search-input" class="sr-only">장소명 또는 관광지 검색</label>
+          <input type="text" id="loc-search-input" placeholder="장소명 또는 관광지 검색 (예: 성산일출봉, 해운대)"
+            onkeydown="if(event.key === 'Enter'){ event.preventDefault(); searchLocationPlace(); }"
+            class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+        </div>
+        <button type="button" onclick="searchLocationPlace()"
+          class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1 active:scale-95">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>검색</span>
+        </button>
+      </div>
+
+      <!-- 유사 / 비슷한 장소 제안 컨테이너 (결과가 없거나 추천이 필요할 때 노출) -->
+      <div id="loc-suggestions-box" class="hidden mb-3 p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl animate-fadeIn">
+        <div class="flex items-center justify-between text-xs font-bold text-amber-900 mb-1">
+          <span class="flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span id="loc-suggestions-title">비슷한 장소 제안</span>
+          </span>
+          <button type="button" onclick="closeLocationSuggestions()" class="text-amber-500 hover:text-amber-700 p-0.5" aria-label="제안 닫기">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p id="loc-suggestions-desc" class="text-[11px] text-amber-800/80 mb-2">원하시는 위치와 유사한 추천 장소를 클릭하면 해당 위치로 지도 핀이 즉시 이동합니다.</p>
+        <div id="loc-suggestions-list" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto scrollbar-none">
+          <!-- 동적으로 유사 추천 칩 생성 -->
+        </div>
+      </div>
+
+      <!-- 추천 명소 프리셋 태그 칩 (모임 지역에 맞추어 동적 추천) -->
+      <div class="mb-3">
+        <div class="flex items-center justify-between text-[11px] text-slate-500 font-semibold mb-1.5">
+          <span class="flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-500"></i><span id="loc-region-name">인기 여행지 추천</span></span>
+          <span class="text-slate-400 text-[10px]">클릭 시 지도 이동</span>
+        </div>
+        <div id="loc-preset-chips" class="flex flex-wrap gap-1.5 max-h-16 overflow-y-auto scrollbar-none py-0.5">
+          <!-- 동적으로 추천 칩 생성 -->
+        </div>
+      </div>
+
+      <!-- 지도 컨테이너 -->
+      <div class="relative w-full h-56 sm:h-72 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 mb-3 shadow-inner">
+        <div id="leaflet-map-container" class="w-full h-full z-10"></div>
+        <!-- 안내 힌트 오버레이 -->
+        <div class="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between pointer-events-none z-[400] shadow-sm">
+          <span class="flex items-center gap-1"><i data-lucide="mouse-pointer" class="w-3 h-3 text-emerald-600"></i>지도를 클릭하면 마커가 해당 위치로 이동합니다</span>
+          <span id="loc-latlng-indicator" class="text-[10px] text-slate-400 font-mono">위치 좌표</span>
+        </div>
+      </div>
+
+      <!-- 선택된 장소 정보 카드 -->
+      <div class="p-3 bg-emerald-50/70 border border-emerald-200/80 rounded-2xl mb-3">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <label for="loc-selected-place-name" class="text-[11px] font-bold text-emerald-700 block mb-0.5">선택된 장소명</label>
+            <input type="text" id="loc-selected-place-name" placeholder="장소명을 입력하거나 지도에서 선택하세요"
+              class="w-full font-bold text-sm text-slate-900 bg-white border border-emerald-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <p id="loc-selected-place-desc" class="text-[11px] text-slate-500 mt-1 truncate">지도에서 원하는 위치를 클릭해 보세요.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 하단 액션 버튼 -->
+      <div class="flex gap-2">
+        <button type="button" onclick="closeLocationPickerModal()"
+          class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs sm:text-sm hover:bg-slate-50 transition active:scale-95">
+          취소
+        </button>
+        <button type="button" onclick="applyLocationPicker()"
+          class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-1.5 active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>이 위치로 장소 입력</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Location Map Viewer Modal (일정 장소 지도 확인 모달) -->
+  <div id="modal-schedule-map-viewer" role="dialog" aria-modal="true" aria-labelledby="modal-sched-map-title"
+    class="fixed inset-0 z-[75] bg-black/50 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative animate-scaleUp flex flex-col max-h-[92vh]">
+      <!-- 닫기 버튼 -->
+      <button onclick="closeScheduleMapModal()" aria-label="팝업 닫기"
+        class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- 헤더 -->
+      <div class="flex items-center gap-2.5 mb-3">
+        <div class="w-9 h-9 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+          <i data-lucide="map-pin" class="w-5 h-5"></i>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span id="sched-map-day-badge" class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-800 text-white">Day 1</span>
+            <span id="sched-map-time-badge" class="px-2 py-0.5 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">10:00</span>
+          </div>
+          <h3 id="modal-sched-map-title" class="text-lg font-bold text-slate-900 truncate mt-0.5">장소명</h3>
+        </div>
+      </div>
+
+      <!-- 메모 및 부가 정보 안내 -->
+      <div id="sched-map-memo-box" class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl mb-3 flex items-start gap-2 text-xs text-slate-600">
+        <i data-lucide="info" class="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5"></i>
+        <div class="flex-1 min-w-0">
+          <span id="sched-map-memo-text" class="block leading-relaxed">준비물 및 세부 계획</span>
+          <span id="sched-map-coord-text" class="block text-[10px] text-slate-400 font-mono mt-0.5">위치 좌표</span>
+        </div>
+      </div>
+
+      <!-- Leaflet 지도 뷰어 -->
+      <div class="relative w-full h-64 sm:h-80 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 mb-4 shadow-inner">
+        <div id="sched-view-leaflet-map" class="w-full h-full z-10"></div>
+        <div class="absolute bottom-2 left-2 right-2 bg-white/95 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-slate-200 text-[11px] text-slate-600 flex items-center justify-between pointer-events-none z-[400] shadow-sm">
+          <span class="flex items-center gap-1"><i data-lucide="navigation" class="w-3 h-3 text-emerald-600"></i>마커를 누르면 상세 장소명이 안내됩니다</span>
+          <span class="text-[10px] text-emerald-600 font-bold">OpenStreetMap</span>
+        </div>
+      </div>
+
+      <!-- 외부 길찾기 연동 및 닫기 버튼 -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <a id="sched-map-kakao-link" href="#" target="_blank" rel="noopener noreferrer"
+            class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-amber-300 hover:bg-amber-400 text-amber-950 font-bold text-xs transition flex items-center justify-center gap-1 shadow-sm">
+            <span>카카오맵 길찾기</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+          <a id="sched-map-naver-link" href="#" target="_blank" rel="noopener noreferrer"
+            class="flex-1 sm:flex-none px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1 shadow-sm">
+            <span>네이버지도 길찾기</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+        <button type="button" onclick="closeScheduleMapModal()"
+          class="w-full sm:w-auto px-5 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-xs sm:text-sm transition">
+          닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. FOOTER ==================== -->
+  <footer id="footer"></footer>
+
+  <!-- 공통 모달 및 모바일 하단 탭바 -->
+  <div id="modals"></div>
+  <div id="bottom-nav"></div>
+
+  <!-- 공통 컴포넌트 스크립트 및 앱 로직 -->
+  <script src="js/common.js?v=20261117_02"></script>
+  <script src="js/components.js?v=20261117_02"></script>
+  <script src="js/app.js?v=20261117_02"></script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- SqlSessionFactoryBean for MyBatis -->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configLocation" value="classpath:/egovframework/sqlmap/sql-mapper-config.xml" />
+        <property name="mapperLocations" value="classpath:/egovframework/sqlmap/mappers/**/*.xml" />
+    </bean>
+
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg ref="sqlSession" />
+    </bean>
+
+    <!-- Mapper Interface 자동 스캔 (org.egovframe.rte.psl.dataaccess.mapper.Mapper 어노테이션 기준) -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="egovframework.travel.**.mapper" />
+    </bean>
+
+</beans>
+

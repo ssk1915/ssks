@@ -1,0 +1,60 @@
+# ==============================================================================
+# TravelMates Git Ignore Configuration
+# ==============================================================================
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Maven / Build Output
+target/
+backend/target/
+*.class
+*.war
+*.ear
+*.nar
+*.jar
+*.zip
+*.tar.gz
+*.rar
+
+# Logs & Runtime
+logs/
+*.log
+*.tmp
+*.swp
+*.bak
+*~
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+
+# IDE & Editor Specific
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/*
+!.vscode/settings.json
+.history/
+*.sublime-project
+*.sublime-workspace
+
+# Eclipse metadata
+.metadata/
+bin/
+tmp/
+local.properties
+.loadpath
+.recommenders

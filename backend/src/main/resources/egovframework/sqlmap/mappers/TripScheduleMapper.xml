@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="egovframework.travel.mapper.TripScheduleMapper">
+
+    <!-- 일차별 일정 목록 조회 -->
+    <select id="selectScheduleList" parameterType="map" resultType="egovframework.travel.vo.TripScheduleVO">
+        SELECT 
+            SCHEDULE_ID,
+            GROUP_ID,
+            DAY_NUMBER,
+            PLAN_TIME,
+            PLACE,
+            MEMO,
+            LATITUDE,
+            LONGITUDE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM TRIP_SCHEDULE
+        WHERE GROUP_ID = #{groupId}
+        <if test="dayNumber != null and dayNumber > 0">
+            AND DAY_NUMBER = #{dayNumber}
+        </if>
+        ORDER BY DAY_NUMBER ASC, PLAN_TIME ASC
+    </select>
+
+    <!-- 일정 등록 -->
+    <insert id="insertSchedule" parameterType="egovframework.travel.vo.TripScheduleVO" useGeneratedKeys="true" keyProperty="scheduleId">
+        INSERT INTO TRIP_SCHEDULE (
+            GROUP_ID,
+            DAY_NUMBER,
+            PLAN_TIME,
+            PLACE,
+            MEMO,
+            LATITUDE,
+            LONGITUDE,
+            CREATED_AT,
+            UPDATED_AT
+        ) VALUES (
+            #{groupId},
+            #{dayNumber},
+            #{planTime},
+            #{place},
+            #{memo},
+            #{latitude},
+            #{longitude},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 일정 단건 상세 조회 -->
+    <select id="selectScheduleDetail" parameterType="int" resultType="egovframework.travel.vo.TripScheduleVO">
+        SELECT 
+            SCHEDULE_ID,
+            GROUP_ID,
+            DAY_NUMBER,
+            PLAN_TIME,
+            PLACE,
+            MEMO,
+            LATITUDE,
+            LONGITUDE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM TRIP_SCHEDULE
+        WHERE SCHEDULE_ID = #{scheduleId}
+    </select>
+
+    <!-- 일정 수정 -->
+    <update id="updateSchedule" parameterType="egovframework.travel.vo.TripScheduleVO">
+        UPDATE TRIP_SCHEDULE
+        SET 
+            DAY_NUMBER = #{dayNumber},
+            PLAN_TIME = #{planTime},
+            PLACE = #{place},
+            MEMO = #{memo},
+            LATITUDE = #{latitude},
+            LONGITUDE = #{longitude},
+            UPDATED_AT = NOW()
+        WHERE SCHEDULE_ID = #{scheduleId}
+    </update>
+
+    <!-- 일정 삭제 -->
+    <delete id="deleteSchedule" parameterType="int">
+        DELETE FROM TRIP_SCHEDULE
+        WHERE SCHEDULE_ID = #{scheduleId}
+    </delete>
+
+</mapper>
