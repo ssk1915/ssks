@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 106건
+- **총 실행 프롬프트 수**: 107건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1703,6 +1703,33 @@
   6. **문서 동기화 및 Git 자동 커밋 & 푸시**:
      - `README.md` (Changelog v1.84) 및 `PROMPT.md` 최신화.
      - Git 커밋 및 `origin/main` 푸시 완료.
+
+---
+
+### #129. @local 관리자 화면에서 관리자 로그인 시 에러 발생
+- **입력 일시**: `2026-11-17 17:32:14 KST`
+- **분류 태그**: `관리자 화면 로그인 JS 구문 오류 해결 및 예외 처리 고도화`
+- **실제 원문 프롬프트**:
+```text
+@local 관리자 화면에서 관리자 로그인 시 에러 발생
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 디버깅 체크리스트 수립**:
+     - 엔드포인트(`/api/auth/login`), 파라미터(username, password), 세션 바인딩, DB 계정(`admin`/`admin123`) 및 클라이언트 JS 파싱/실행 상태 점검.
+  2. **원인 규명 및 JS 구문 오류(SyntaxError) 해결**:
+     - `admin.html` 인라인 스크립트 내부 `renderAdminMembers` 함수의 예외 처리부(`catch (err)`)에 잔류하던 미완료 HTML 닫는 태그(`</td></tr>`);)로 인해 전체 스크립트 파싱 시 `SyntaxError: Unexpected token '<'` 발생 확인.
+     - 이로 인해 `adminLogin(e)` 함수가 브라우저 런타임에 등록되지 않아 로그인 폼 제출 시 함수 미정의 오류 발생.
+     - 불필요한 잔류 코드를 완전 제거하고 Node.js 기반 전체 인라인 스크립트 AST 문법 유효성(Syntax OK) 검증 완료.
+  3. **로그인 예외 처리 및 폼 유효성 검증 고도화**:
+     - 아이디/비밀번호 미입력 시 즉각 경고 메시지 표시 가드 추가.
+     - 백엔드 400 Bad Request 응답 시 반환되는 `responseJSON.message`를 에러 영역에 정확히 출력하도록 보강.
+     - 로컬 폴백 인증(`admin`/`admin123`) 및 세션 스토리지 연동 정상화.
+  4. **웹접근성 및 보안 감사 통과**:
+     - 10개 HTML 웹접근성 0건 및 보안 취약점 0건 안전 검증.
+  5. **문서 동기화 및 Git 자동 커밋 & 푸시**:
+     - `README.md` (Changelog v1.85) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 `origin/main` 푸시 완료.
+
 
 
 

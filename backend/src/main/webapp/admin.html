@@ -977,6 +977,12 @@
       const username = ($('#auth-username').val() || '').trim();
       const password = ($('#auth-password').val() || '').trim();
       const $errEl = $('#auth-error');
+      $errEl.addClass('hidden').text('');
+
+      if (!username || !password) {
+        $errEl.text('아이디와 비밀번호를 모두 입력해주세요.').removeClass('hidden');
+        return;
+      }
 
       try {
         const data = await $.ajax({
@@ -990,18 +996,19 @@
           localStorage.setItem('travelmates_user', JSON.stringify(data));
           hideAuthOverlay(data.name);
         } else if (data.success && !data.isAdmin) {
-          $errEl.text('관리자 계정이 아닙니다.').removeClass('hidden');
+          $errEl.text('관리자 권한이 없는 계정입니다.').removeClass('hidden');
         } else {
           $errEl.text(data.message || '로그인에 실패했습니다.').removeClass('hidden');
         }
       } catch(err) {
-        // API 없을 때 로컬 인증 fallback
+        // 서버 응답 오류 메시지 추출 또는 로컬 인증 fallback
+        const serverMsg = err.responseJSON && err.responseJSON.message;
         if (username === 'admin' && password === 'admin123') {
           const data = { isAdmin: true, name: '총괄관리자', username: 'admin', memberId: 5 };
           localStorage.setItem('travelmates_user', JSON.stringify(data));
           hideAuthOverlay(data.name);
         } else {
-          $errEl.text('아이디 또는 비밀번호가 올바르지 않습니다.').removeClass('hidden');
+          $errEl.text(serverMsg || '아이디 또는 비밀번호가 올바르지 않습니다.').removeClass('hidden');
         }
       }
     }
@@ -2464,9 +2471,6 @@
         `;
         $('#member-table-body').html(`<tr><td colspan="9">${errHtml}</td></tr>`);
         $('#member-cards-body').html(errHtml);
-            </td>
-          </tr>
-        `);
         if (window.lucide) lucide.createIcons();
       }
     }
