@@ -594,6 +594,7 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 | **v1.78**| **2026-11** | **🚀 GitHub Personal Access Token (PAT) 자격 증명 연동 및 원격 저장소 최초 푸시(Push) 완료: 1) 사용자 PAT 인증 토큰 기반 origin URL 자격 증명 바인딩, 2) GitHub 원격 저장소(`https://github.com/ssk1915/ssks.git`)로 main 브랜치 및 93개 프로젝트 소스 최초 푸시 성공(134개 객체, 406KB), 3) 로컬 브랜치와 원격 추적 브랜치(`origin/main`) 동기화 완료** |
 | **v1.79**| **2026-11** | **🛡️ Git 형상관리 상시 수행 및 자동 동기화 원칙(Git Version Control Always Commit & Push Rule) 공식 수립: 1) 프로젝트 내 모든 수정사항(신규 기능, 버그 해결, UI 개선, 설정 변경) 발생 시 즉시 Git 커밋 및 원격 저장소(`origin/main`) 푸시 의무화 규칙(`GEMINI.md`) 제정, 2) Conventional Commits 표준 커밋 메시지 규격 준수, 3) 빌드 산출물 오염 방지 및 실시간 원격 백업 체계 확립** |
 | **v1.80**| **2026-11** | **🔒 README.md 보안 민감 정보(DB 비밀번호, 계정 패스워드, CLI 평문 인증 인자) 전면 마스킹 및 제거: 1) DB 접속 정보 표 내 비밀번호(Password) 마스킹 처리, 2) 테스트 계정 목록 패스워드 마스킹, 3) MySQL CLI 명령어 인자(`-prhflffk12`)를 `-p` 대화형 보안 입력으로 전환, 4) 공개 리포지토리 안전성 확보 및 Git 커밋 & 원격 푸시 완료** |
+| **v1.81**| **2026-11** | **✨ 상단 메뉴 네비게이션 텍스트 줄바꿈(Wrap) 원천 차단 및 반응형 레이아웃 최적화: 1) 전역 CSS(`style.css`)에 `.nav-btn` 및 내부 `span { white-space: nowrap !important; flex-shrink: 0 !important; }` 강제 규칙 탑재, 2) 768px~1024px 태블릿/중간 화면 구간 네비게이션 버튼 패딩(`px-2.5 lg:px-3.5 xl:px-4`), 폰트(`text-xs lg:text-sm`), 아이콘 간격(`gap-1 lg:gap-1.5`) 반응형 미세 조정, 3) 좁은 데스크톱 화면에서 "N빵 회비 정산"을 "회비 정산"으로 스마트 반응형 축약, 4) 우측 새 모임 만들기 버튼 텍스트(만들기 / 새 모임 만들기) 반응형 분기 적용으로 헤더 메뉴 찌그러짐 및 텍스트 2줄 쪼개짐 현상 완전 해결, 5) Git 커밋 및 origin/main 푸시 완료** |
 
 ---
 

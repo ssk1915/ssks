@@ -50,18 +50,18 @@
           <span class="hidden sm:inline-block text-[10px] sm:text-xs bg-orange-100 dark:bg-orange-950/60 text-orange-600 dark:text-orange-400 font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800">ADMIN</span>
         </div>
 
-        <!-- 데스크톱 관리자 메뉴 탭 (h-9 sm:h-10 일치화) -->
-        <nav class="hidden md:flex items-center gap-1 ml-2 lg:ml-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-9 sm:h-10">
+        <!-- 데스크톱 관리자 메뉴 탭 (h-9 sm:h-10 일치화, 텍스트 줄바꿈 방지) -->
+        <nav class="hidden md:flex items-center gap-1 ml-2 lg:ml-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-9 sm:h-10 flex-shrink-0">
           <button id="admin-tab-btn-schedules" type="button" onclick="switchAdminTab('schedules')"
-            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs">
+            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs whitespace-nowrap flex-shrink-0">
             <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
-            <span>일정 관리</span>
+            <span class="whitespace-nowrap">일정 관리</span>
           </button>
           <button id="admin-tab-btn-members" type="button" onclick="switchAdminTab('members')"
-            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition">
+            class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition whitespace-nowrap flex-shrink-0">
             <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
-            <span>가입 회원 관리</span>
-            <span id="admin-tab-member-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold ml-0.5">5명</span>
+            <span class="whitespace-nowrap">가입 회원 관리</span>
+            <span id="admin-tab-member-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold ml-0.5 whitespace-nowrap">5명</span>
           </button>
         </nav>
       </div>

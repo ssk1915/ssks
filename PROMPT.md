@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 102건
+- **총 실행 프롬프트 수**: 103건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1609,6 +1609,29 @@
   3. **문서 동기화 및 Git 자동 커밋 & 푸시**:
      - `README.md` (Changelog v1.80) 및 `PROMPT.md` 최신화.
      - `git commit` 및 `git push origin main` 자동 수행 완료.
+
+### #125. @local 상단메뉴 텍스트가 줄바꿈으로 인해 디자인 요소를 해침
+- **입력 일시**: `2026-11-17 16:26:16 KST`
+- **분류 태그**: `헤더 네비게이션 텍스트 줄바꿈 방지 및 반응형 레이아웃 최적화`
+- **실제 원문 프롬프트**:
+```text
+@local 상단메뉴 텍스트가 줄바꿈으로 인해 디자인 요소를 해침
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 메뉴 줄바꿈 원인 분석**:
+     - 768px~1024px 태블릿/중간 화면 구간에서 헤더 내 가용 너비 축소로 인해 `.nav-btn` 내부의 `span` 텍스트("여행\n모임", "일정\n플래너", "N빵\n회비 정산", "추억\n갤러리")가 세로로 2줄 줄바꿈되며 고정 높이(`h-9 sm:h-10`)를 벗어나는 디자인 훼손 현상 파악.
+  2. **전역 CSS 줄바꿈 원천 차단 (`css/style.css`)**:
+     - `.nav-btn`, `.nav-btn span { white-space: nowrap !important; flex-shrink: 0 !important; }` 규칙 강제 적용.
+  3. **헤더 마크업 및 컴포넌트 반응형 고도화 (`header.html`, `components.js`, `admin.html`)**:
+     - 네비게이션 컨테이너 `gap-0.5 lg:gap-1 flex-shrink-0` 적용.
+     - 네비게이션 버튼 반응형 패딩(`px-2.5 lg:px-3.5 xl:px-4`) 및 폰트(`text-xs lg:text-sm`), 아이콘 간격(`gap-1 lg:gap-1.5`) 도입.
+     - 좁은 화면에서 "N빵 회비 정산"을 `<span class="hidden xl:inline">N빵 </span>회비 정산`으로 스마트 축약.
+     - 우측 새 모임 만들기 버튼 텍스트(`hidden lg:inline` "새 모임 만들기" / `lg:hidden` "만들기") 반응형 분기.
+  4. **검증 및 Git 자동 커밋 & 푸시**:
+     - JavaScript 문법 검사 및 웹접근성/보안 감사 10개 파일 0건 통과.
+     - `README.md` (Changelog v1.81) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 `origin/main` 푸시 완료.
+
 
 
 

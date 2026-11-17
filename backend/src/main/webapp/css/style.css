@@ -128,7 +128,16 @@ html.dark #bottom-nav nav, html.dark #app-bottom-nav nav {
   border-color: #334155 !important;
 }
 
-/* 네비게이션 버튼 다크 대비 */
+/* 네비게이션 버튼 다크 대비 및 줄바꿈 원천 차단 */
+.nav-btn {
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.nav-btn span {
+  white-space: nowrap !important;
+}
+
 html.dark .nav-btn {
   color: #cbd5e1 !important;
 }

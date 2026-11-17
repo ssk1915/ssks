@@ -45,8 +45,8 @@
     const isGallery = active === 'gallery';
 
     const getDesktopClass = (isActive) => isActive
-      ? 'nav-btn h-9 sm:h-10 px-3.5 lg:px-4 rounded-xl text-sm font-bold transition text-emerald-600 bg-emerald-50 flex items-center gap-1.5'
-      : 'nav-btn h-9 sm:h-10 px-3.5 lg:px-4 rounded-xl text-sm font-medium transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1.5';
+      ? 'nav-btn h-9 sm:h-10 px-2.5 lg:px-3.5 xl:px-4 rounded-xl text-xs lg:text-sm font-bold transition text-emerald-600 bg-emerald-50 flex items-center gap-1 lg:gap-1.5 whitespace-nowrap flex-shrink-0'
+      : 'nav-btn h-9 sm:h-10 px-2.5 lg:px-3.5 xl:px-4 rounded-xl text-xs lg:text-sm font-medium transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-1 lg:gap-1.5 whitespace-nowrap flex-shrink-0';
 
     const getMobileClass = (isActive) => isActive
       ? 'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold text-emerald-600 bg-emerald-50 transition'
@@ -65,23 +65,23 @@
         <span class="text-lg sm:text-xl font-bold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent whitespace-nowrap tracking-tight">TravelMates</span>
       </a>
 
-      <!-- 2. 중앙 데스크톱 네비게이션 메뉴 (md 이상에서만 표시, h-9 sm:h-10 통일) -->
-      <nav class="hidden md:flex items-center gap-1">
+      <!-- 2. 중앙 데스크톱 네비게이션 메뉴 (md 이상에서만 표시, h-9 sm:h-10 통일, 텍스트 줄바꿈 방지) -->
+      <nav class="hidden md:flex items-center gap-0.5 lg:gap-1 flex-shrink-0">
         <a href="index.html" id="nav-groups" class="${getDesktopClass(isGroups)}">
           <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
-          <span>여행 모임</span>
+          <span class="whitespace-nowrap">여행 모임</span>
         </a>
         <a href="planner.html" id="nav-planner" onclick="return handleProtectedNav(event, 'planner.html')" class="${getDesktopClass(isPlanner)}">
           <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
-          <span>일정 플래너</span>
+          <span class="whitespace-nowrap">일정 플래너</span>
         </a>
         <a href="settlement.html" id="nav-settlement" onclick="return handleProtectedNav(event, 'settlement.html')" class="${getDesktopClass(isSettlement)}">
           <i data-lucide="receipt" class="w-4 h-4 flex-shrink-0"></i>
-          <span>N빵 회비 정산</span>
+          <span class="whitespace-nowrap"><span class="hidden xl:inline">N빵 </span>회비 정산</span>
         </a>
         <a href="gallery.html" id="nav-gallery" onclick="return handleProtectedNav(event, 'gallery.html')" class="${getDesktopClass(isGallery)}">
           <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
-          <span>추억 갤러리</span>
+          <span class="whitespace-nowrap">추억 갤러리</span>
         </a>
       </nav>
 
@@ -107,10 +107,10 @@
         </div>
 
         <!-- 새 모임 만들기 버튼 (h-9 sm:h-10) -->
-        <button onclick="openCreateGroupModal()" class="h-9 sm:h-10 flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-semibold px-3 sm:px-3.5 rounded-xl shadow-md transition transform active:scale-95 flex-shrink-0 whitespace-nowrap" title="새 여행 모임 만들기">
+        <button onclick="openCreateGroupModal()" class="h-9 sm:h-10 flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-xs sm:text-sm font-semibold px-2.5 sm:px-3 lg:px-3.5 rounded-xl shadow-md transition transform active:scale-95 flex-shrink-0 whitespace-nowrap" title="새 여행 모임 만들기">
           <i data-lucide="plus-circle" class="w-4 h-4 flex-shrink-0"></i>
-          <span class="hidden sm:inline">새 모임 만들기</span>
-          <span class="sm:hidden font-medium">만들기</span>
+          <span class="hidden lg:inline">새 모임 만들기</span>
+          <span class="lg:hidden font-medium">만들기</span>
         </button>
 
         <!-- 다크 모드 토글 버튼 (w-9 h-9 sm:w-10 sm:h-10, 아이콘 w-4 h-4) -->
