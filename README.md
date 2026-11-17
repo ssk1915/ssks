@@ -292,7 +292,7 @@
 | **Port** | `3306` | 기본 MySQL 포트 |
 | **Database (Schema)** | `TRAVELMATES_DB` | 프로젝트 전용 스키마 |
 | **User (계정명)** | `localtest` | 전용 개발자 계정 |
-| **Password (비밀번호)** | `rhflffk12` | |
+| **Password (비밀번호)** | `********` (보안 마스킹) | 로컬 DB 설정 또는 globals.properties 참조 |
 | **JDBC Driver** | `com.mysql.cj.jdbc.Driver` | MySQL Connector/J 8.0 |
 | **JDBC URL** | `jdbc:mysql://localhost:3306/TRAVELMATES_DB?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true` | |
 | **설정 파일 경로** | `backend/src/main/resources/egovframework/egovProps/globals.properties` | eGovFrame 프로퍼티 |
@@ -319,11 +319,13 @@
 
 | USERNAME | PASSWORD | 역할 | 비고 |
 |---|---|---|---|
-| `admin` | `admin123` | 총괄관리자 | `admin.html` 접근 가능 |
-| `mskim` | `pass1234` | 일반회원 | 김민수 |
-| `jylee` | `pass1234` | 일반회원 | 이지연 |
-| `chpark` | `pass1234` | 일반회원 | 박찬호 |
-| `swkang` | `pass1234` | 일반회원 | 강수원 |
+| `admin` | `********` | 총괄관리자 | `admin.html` 접근 가능 |
+| `mskim` | `********` | 일반회원 | 김민수 |
+| `jylee` | `********` | 일반회원 | 이지연 |
+| `chpark` | `********` | 일반회원 | 박찬호 |
+| `swkang` | `********` | 일반회원 | 강수원 |
+
+> **안내**: 테스트 계정 비밀번호는 보안상 마스킹 처리되었습니다. 데이터베이스 초기화(`database/init_data.sql`) 시 생성되는 계정 정보를 참조하세요.
 
 ---
 
@@ -406,14 +408,14 @@ backend/
 ## 🚀 7. 실행 및 설정 가이드
 
 ### 1) 데이터베이스 설정 (MySQL)
-1. **접속 계정**: `localtest` / `rhflffk12`
+1. **접속 계정**: `localtest` / `********` (마스킹)
 2. **테이블 생성 및 테스트 데이터 적재**:
    ```bash
-   # 1. DDL 실행 (데이터베이스 및 테이블 생성)
-   mysql -u localtest -prhflffk12 < database/schema.sql
+   # 1. DDL 실행 (데이터베이스 및 테이블 생성, 실행 시 DB 비밀번호 입력)
+   mysql -u localtest -p < database/schema.sql
 
    # 2. 초기 테스트 데이터 적재 (샘플 모임, 일정, 영수증, 관리자 계정)
-   mysql -u localtest -prhflffk12 < database/init_data.sql
+   mysql -u localtest -p < database/init_data.sql
    ```
 
 ### 2) 웹 서비스 실행
@@ -484,11 +486,11 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 ### 로그인 절차
 1. `http://localhost:8080/` 메인 페이지 접속
 2. 헤더 우측 **로그인** 버튼 클릭
-3. 아이디 / 비밀번호 입력 후 로그인 (테스트 계정: `mskim` / `pass1234` 또는 `admin` / `admin123`)
+3. 아이디 / 비밀번호 입력 후 로그인 (테스트 계정: `mskim` 또는 관리자 `admin`)
 4. 성공 시 헤더에 사용자 이름 표시
 
 ### 관리자 화면 접속
-1. 테스트 계정 `admin` / `admin123` 으로 로그인
+1. 테스트 관리자 계정(`admin`)으로 로그인
 2. 헤더에 🔶 **관리자** 버튼 클릭 → `admin.html` 이동
 3. 좌측 사이드바에서 여행 모임 선택 후 일정 추가 / 수정 / 삭제 관리
 
@@ -591,6 +593,7 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 | **v1.77**| **2026-11** | **🔗 GitHub 원격 저장소(`origin`) 연동 구성: 1) 로컬 Git 사용자 계정(`ssk1915`) 연동, 2) 원격 저장소 origin URL(`https://github.com/ssk1915/ssks.git`) 등록 완료, 3) GitHub 2021 보안 정책(PAT 필수) 및 최초 푸시(`git push -u origin main`) 가이드 수립** |
 | **v1.78**| **2026-11** | **🚀 GitHub Personal Access Token (PAT) 자격 증명 연동 및 원격 저장소 최초 푸시(Push) 완료: 1) 사용자 PAT 인증 토큰 기반 origin URL 자격 증명 바인딩, 2) GitHub 원격 저장소(`https://github.com/ssk1915/ssks.git`)로 main 브랜치 및 93개 프로젝트 소스 최초 푸시 성공(134개 객체, 406KB), 3) 로컬 브랜치와 원격 추적 브랜치(`origin/main`) 동기화 완료** |
 | **v1.79**| **2026-11** | **🛡️ Git 형상관리 상시 수행 및 자동 동기화 원칙(Git Version Control Always Commit & Push Rule) 공식 수립: 1) 프로젝트 내 모든 수정사항(신규 기능, 버그 해결, UI 개선, 설정 변경) 발생 시 즉시 Git 커밋 및 원격 저장소(`origin/main`) 푸시 의무화 규칙(`GEMINI.md`) 제정, 2) Conventional Commits 표준 커밋 메시지 규격 준수, 3) 빌드 산출물 오염 방지 및 실시간 원격 백업 체계 확립** |
+| **v1.80**| **2026-11** | **🔒 README.md 보안 민감 정보(DB 비밀번호, 계정 패스워드, CLI 평문 인증 인자) 전면 마스킹 및 제거: 1) DB 접속 정보 표 내 비밀번호(Password) 마스킹 처리, 2) 테스트 계정 목록 패스워드 마스킹, 3) MySQL CLI 명령어 인자(`-prhflffk12`)를 `-p` 대화형 보안 입력으로 전환, 4) 공개 리포지토리 안전성 확보 및 Git 커밋 & 원격 푸시 완료** |
 
 ---
 
