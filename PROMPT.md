@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 100건
+- **총 실행 프롬프트 수**: 101건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1573,6 +1573,24 @@
      - 134개 객체(406KB) GitHub 원격 저장소 전송 완료 및 `origin/main` 브랜치 자동 추적 매핑 성공.
   4. **문서 동기화**:
      - `README.md` (Changelog v1.78) 및 `PROMPT.md` 최신화 완료.
+
+### #123. @local 이제부터 수정사항 발생 시 git으로 형상관리 해줘
+- **입력 일시**: `2026-11-17 16:03:42 KST`
+- **분류 태그**: `Git 형상관리 상시 수행 및 자동 동기화 원칙 수립`
+- **실제 원문 프롬프트**:
+```text
+@local 이제부터 수정사항 발생 시 git으로 형상관리 해줘
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 형상관리 상시 운영 규칙 수립**:
+     - 소스 코드 수정, 기능 개발, 버그 픽스, UI 개선, 설정 파일 변경 작업 완료 시 즉각적인 Git 커밋 및 원격 저장소(`origin/main`) 푸시 워크플로우 정립.
+  2. **프로젝트 개발 지침(`GEMINI.md`)에 공식 규칙 영구 등재**:
+     - `Git Version Control Always Commit & Push Rule` 신설.
+     - 작업 후 `git status` 변경사항 검증, Conventional Commits 규칙 준수, 로컬 커밋 및 원격 푸시(`git push origin main`) 즉각 수행 의무화.
+  3. **문서 동기화 및 Git 커밋 & 푸시 완료**:
+     - `README.md` (Changelog v1.79) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 원격 저장소 푸시 완료.
+
 
 
 

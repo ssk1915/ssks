@@ -590,6 +590,7 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 | **v1.76**| **2026-11** | **📦 Git 형상관리 (Version Control System) 체계 공식 구축 및 저장소 초기화: 1) Maven 빌드 산출물(`target/`), 시스템 파일(`.DS_Store`), 런타임 로그(`logs/*.log`) 및 캐시를 안전하게 배제하는 최적화 `.gitignore` 작성, 2) Git 저장소 초기화(`git init`, 기본 브랜치 `main`) 및 로컬 사용자 설정, 3) 5대 화면 전 영역 및 전자정부 백엔드 전체 최신 소스 형상관리 최초 커밋 완료** |
 | **v1.77**| **2026-11** | **🔗 GitHub 원격 저장소(`origin`) 연동 구성: 1) 로컬 Git 사용자 계정(`ssk1915`) 연동, 2) 원격 저장소 origin URL(`https://github.com/ssk1915/ssks.git`) 등록 완료, 3) GitHub 2021 보안 정책(PAT 필수) 및 최초 푸시(`git push -u origin main`) 가이드 수립** |
 | **v1.78**| **2026-11** | **🚀 GitHub Personal Access Token (PAT) 자격 증명 연동 및 원격 저장소 최초 푸시(Push) 완료: 1) 사용자 PAT 인증 토큰 기반 origin URL 자격 증명 바인딩, 2) GitHub 원격 저장소(`https://github.com/ssk1915/ssks.git`)로 main 브랜치 및 93개 프로젝트 소스 최초 푸시 성공(134개 객체, 406KB), 3) 로컬 브랜치와 원격 추적 브랜치(`origin/main`) 동기화 완료** |
+| **v1.79**| **2026-11** | **🛡️ Git 형상관리 상시 수행 및 자동 동기화 원칙(Git Version Control Always Commit & Push Rule) 공식 수립: 1) 프로젝트 내 모든 수정사항(신규 기능, 버그 해결, UI 개선, 설정 변경) 발생 시 즉시 Git 커밋 및 원격 저장소(`origin/main`) 푸시 의무화 규칙(`GEMINI.md`) 제정, 2) Conventional Commits 표준 커밋 메시지 규격 준수, 3) 빌드 산출물 오염 방지 및 실시간 원격 백업 체계 확립** |
 
 ---
 
