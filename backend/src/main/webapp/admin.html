@@ -375,6 +375,11 @@
           <span id="member-table-count" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-2xs">0명</span>
         </div>
         <div class="flex items-center gap-3">
+          <!-- 좌우 가로 스크롤 직관적 안내 배지 -->
+          <div class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-orange-50 dark:bg-orange-950/60 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 shadow-2xs">
+            <i data-lucide="chevrons-left-right" class="w-3.5 h-3.5 text-orange-500 animate-pulse"></i>
+            <span>가로 스크롤 가능</span>
+          </div>
           <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">총 회원 관리 및 권한 설정</span>
         </div>
       </div>
@@ -387,31 +392,44 @@
         </div>
       </div>
 
-      <!-- 데스크톱 & 태블릿 테이블 뷰 (hidden md:block) -->
-      <div class="hidden md:block overflow-x-auto">
-        <table class="w-full text-left text-sm border-collapse">
-          <thead>
-            <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider">
-              <th scope="col" class="py-3.5 px-4 w-16 text-center">ID</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[190px]">회원 정보</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[130px]">아이디 (계정)</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[180px]">이메일</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[130px]">전화번호</th>
-              <th scope="col" class="py-3.5 px-4 text-center min-w-[160px]">참여 / 등록 일정</th>
-              <th scope="col" class="py-3.5 px-4 text-center min-w-[110px]">권한</th>
-              <th scope="col" class="py-3.5 px-4 min-w-[155px] whitespace-nowrap">가입일시</th>
-              <th scope="col" class="py-3.5 px-4 text-center w-28 whitespace-nowrap">관리</th>
-            </tr>
-          </thead>
-          <tbody id="member-table-body" class="divide-y divide-slate-100 dark:divide-slate-700/60 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-            <tr>
-              <td colspan="9" class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
-                <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300 dark:text-slate-600"></i>
-                회원 정보를 불러오는 중...
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 데스크톱 & 태블릿 테이블 뷰 (hidden md:block) with Relative Wrapper for Scroll Shadows -->
+      <div class="hidden md:block relative group">
+        <!-- 좌측 스크롤 페이드 섀도우 & 인디케이터 -->
+        <div id="member-scroll-left-hint" class="pointer-events-none absolute left-0 top-0 bottom-0 w-9 bg-gradient-to-r from-white dark:from-slate-800 via-white/80 dark:via-slate-800/80 to-transparent z-10 opacity-0 transition-opacity flex items-center justify-start pl-1 text-orange-500 drop-shadow-sm">
+          <i data-lucide="chevron-left" class="w-5 h-5 animate-pulse"></i>
+        </div>
+
+        <!-- 우측 스크롤 페이드 섀도우 & 인디케이터 -->
+        <div id="member-scroll-right-hint" class="pointer-events-none absolute right-0 top-0 bottom-0 w-9 bg-gradient-to-l from-white dark:from-slate-800 via-white/80 dark:via-slate-800/80 to-transparent z-10 opacity-0 transition-opacity flex items-center justify-end pr-1 text-orange-500 drop-shadow-sm">
+          <i data-lucide="chevron-right" class="w-5 h-5 animate-pulse"></i>
+        </div>
+
+        <!-- 스크롤 컨테이너 -->
+        <div id="member-table-scroll" class="overflow-x-auto table-scroll-container">
+          <table class="w-full text-left text-sm border-collapse min-w-[980px]">
+            <thead>
+              <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-100/80 dark:bg-slate-900/70 text-slate-700 dark:text-slate-200 font-bold text-xs uppercase tracking-wider">
+                <th scope="col" class="py-3.5 px-4 w-16 text-center">ID</th>
+                <th scope="col" class="py-3.5 px-4 min-w-[190px]">회원 정보</th>
+                <th scope="col" class="py-3.5 px-4 min-w-[130px]">아이디 (계정)</th>
+                <th scope="col" class="py-3.5 px-4 min-w-[180px]">이메일</th>
+                <th scope="col" class="py-3.5 px-4 min-w-[130px]">전화번호</th>
+                <th scope="col" class="py-3.5 px-4 text-center min-w-[160px]">참여 / 등록 일정</th>
+                <th scope="col" class="py-3.5 px-4 text-center min-w-[110px]">권한</th>
+                <th scope="col" class="py-3.5 px-4 min-w-[155px] whitespace-nowrap">가입일시</th>
+                <th scope="col" class="py-3.5 px-4 text-center w-28 whitespace-nowrap">관리</th>
+              </tr>
+            </thead>
+            <tbody id="member-table-body" class="divide-y divide-slate-100 dark:divide-slate-700/60 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+              <tr>
+                <td colspan="9" class="py-12 text-center text-slate-400 dark:text-slate-500 text-sm">
+                  <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-300 dark:text-slate-600"></i>
+                  회원 정보를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -928,6 +946,7 @@
       lucide.createIcons();
       checkAdminAuth();
       checkAdminTestAccountPermission();
+      initTableScrollIndicators();
     });
 
     async function checkAdminTestAccountPermission() {
@@ -947,6 +966,42 @@
       } catch (e) {
         $box.addClass('hidden');
       }
+    }
+
+    // 테이블 좌우 스크롤 상태 감지 및 인디케이터(페이드 그림자) 동적 갱신
+    function initTableScrollIndicators() {
+      const $scrollEl = $('#member-table-scroll');
+      if (!$scrollEl.length) return;
+
+      const updateShadows = () => {
+        const el = $scrollEl[0];
+        const $left = $('#member-scroll-left-hint');
+        const $right = $('#member-scroll-right-hint');
+        if (!el || !$left.length || !$right.length) return;
+
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll <= 4) {
+          $left.addClass('opacity-0').removeClass('opacity-100');
+          $right.addClass('opacity-0').removeClass('opacity-100');
+          return;
+        }
+
+        if (el.scrollLeft > 10) {
+          $left.removeClass('opacity-0').addClass('opacity-100');
+        } else {
+          $left.addClass('opacity-0').removeClass('opacity-100');
+        }
+
+        if (el.scrollLeft < maxScroll - 10) {
+          $right.removeClass('opacity-0').addClass('opacity-100');
+        } else {
+          $right.addClass('opacity-0').removeClass('opacity-100');
+        }
+      };
+
+      $scrollEl.on('scroll', updateShadows);
+      $(window).on('resize', updateShadows);
+      setTimeout(updateShadows, 300);
     }
 
     // ===== 관리자 인증 =====
@@ -2107,6 +2162,10 @@
           </tr>
         `);
         if (window.lucide) lucide.createIcons();
+        setTimeout(() => {
+          const $scrollEl = $('#member-table-scroll');
+          if ($scrollEl.length) $scrollEl.trigger('scroll');
+        }, 100);
       }
 
       try {
@@ -2237,6 +2296,10 @@
           $tbody.html(`<tr><td colspan="9">${emptyHtml}</td></tr>`);
           $cards.html(emptyHtml);
           if (window.lucide) lucide.createIcons();
+        setTimeout(() => {
+          const $scrollEl = $('#member-table-scroll');
+          if ($scrollEl.length) $scrollEl.trigger('scroll');
+        }, 100);
           return;
         }
 
@@ -2501,6 +2564,10 @@
         }).join(''));
 
         if (window.lucide) lucide.createIcons();
+        setTimeout(() => {
+          const $scrollEl = $('#member-table-scroll');
+          if ($scrollEl.length) $scrollEl.trigger('scroll');
+        }, 100);
       } catch (err) {
         console.error('renderAdminMembers error:', err);
         const errHtml = `
@@ -2512,6 +2579,10 @@
         $('#member-table-body').html(`<tr><td colspan="9">${errHtml}</td></tr>`);
         $('#member-cards-body').html(errHtml);
         if (window.lucide) lucide.createIcons();
+        setTimeout(() => {
+          const $scrollEl = $('#member-table-scroll');
+          if ($scrollEl.length) $scrollEl.trigger('scroll');
+        }, 100);
       }
     }
 
@@ -2778,6 +2849,10 @@
           </div>
         `);
         if (window.lucide) lucide.createIcons();
+        setTimeout(() => {
+          const $scrollEl = $('#member-table-scroll');
+          if ($scrollEl.length) $scrollEl.trigger('scroll');
+        }, 100);
         return;
       }
 

@@ -754,6 +754,52 @@ html.dark #member-cards-body > div:hover {
   box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4) !important;
 }
 
+/* ==================== 가로 스크롤 직관성 및 고가시성 스타일 ==================== */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 #f1f5f9;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 9px !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 9999px !important;
+  margin: 0 12px !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #f97316, #fb923c) !important;
+  border-radius: 9999px !important;
+  border: 2px solid #f1f5f9 !important;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #ea580c, #f97316) !important;
+}
+
+html.dark .table-scroll-container {
+  scrollbar-color: #f97316 #1e293b;
+}
+
+html.dark .table-scroll-container::-webkit-scrollbar-track {
+  background: #1e293b !important;
+}
+
+html.dark .table-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #ea580c, #f97316) !important;
+  border: 2px solid #1e293b !important;
+}
+
+html.dark .table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #c2410c, #ea580c) !important;
+}
+
+
 
 
 
