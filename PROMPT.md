@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 98건
+- **총 실행 프롬프트 수**: 99건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1535,6 +1535,27 @@
      - `git add .` 및 `git commit -m "feat: TravelMates 프로젝트 초기 소스 형상관리 최초 커밋 (v1.76)"` 실행 완료.
   5. **문서 및 가이드 최신화**:
      - `README.md` 기술 스택 및 Changelog v1.76 반영, 원격 저장소 연동 가이드 정리 완료.
+
+### #121. @local 원격 저장소 연동해줘 / 내 git계정(ssk1915)에 연동해줘
+- **입력 일시**: `2026-11-17 15:49:27 KST`
+- **분류 태그**: `GitHub 원격 저장소 연동 및 PAT 인증 설정`
+- **실제 원문 프롬프트**:
+```text
+@local 원격 저장소 연동해줘
+@local 내 git계정(ssk1915/rhflffk!2)에 연동해줘
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 GitHub 인증 정책 분석**:
+     - GitHub 2021년 8월 보안 정책에 따라 일반 패스워드 인증이 차단되고 **Personal Access Token (PAT)** 또는 SSH 키 기반 인증이 필수임을 확인.
+     - 원격 리포지토리 명명 규칙 및 `origin` 등록 URL(`https://github.com/ssk1915/ssks.git`) 도출.
+  2. **원격 저장소(origin) 등록 및 사용자 구성**:
+     - `git config --local user.name "ssk1915"` 및 `git config --local user.email "ssk1915@github.com"` 구성.
+     - `git remote add origin https://github.com/ssk1915/ssks.git` 등록 완료.
+  3. **푸시(Push) 및 PAT 발급 가이드 수립**:
+     - GitHub에서 Personal Access Token(PAT, `repo` 권한) 발급 절차 및 원클릭 푸시 명령어 정리.
+  4. **문서 동기화**:
+     - `README.md` (Changelog v1.77) 및 `PROMPT.md` 최신화 완료.
+
 
 
 
