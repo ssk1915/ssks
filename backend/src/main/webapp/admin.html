@@ -61,7 +61,7 @@
             class="h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition whitespace-nowrap flex-shrink-0">
             <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
             <span class="whitespace-nowrap">가입 회원 관리</span>
-            <span id="admin-tab-member-count" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-bold ml-0.5 whitespace-nowrap">5명</span>
+            <span id="admin-tab-member-count" class="px-2 py-0.5 rounded-full text-xs font-black bg-orange-100 text-orange-700 border border-orange-200 dark:bg-orange-950/80 dark:text-orange-300 dark:border-orange-800 ml-1 whitespace-nowrap shadow-2xs">0명</span>
           </button>
         </nav>
       </div>
@@ -73,8 +73,9 @@
           <button id="mobile-tab-btn-schedules" type="button" onclick="switchAdminTab('schedules')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-orange-600 transition" title="일정 관리" aria-label="일정 관리 탭">
             <i data-lucide="calendar" class="w-4 h-4 flex-shrink-0"></i>
           </button>
-          <button id="mobile-tab-btn-members" type="button" onclick="switchAdminTab('members')" class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-orange-600 transition" title="회원 관리" aria-label="회원 관리 탭">
+          <button id="mobile-tab-btn-members" type="button" onclick="switchAdminTab('members')" class="relative w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 hover:text-orange-600 transition" title="회원 관리" aria-label="회원 관리 탭">
             <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i>
+            <span id="mobile-tab-member-count" class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-orange-600 text-white text-[9px] font-black flex items-center justify-center shadow-xs">0</span>
           </button>
         </div>
 
@@ -264,43 +265,43 @@
     <!-- 상단 요약 통계 카드 (4분할) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <!-- 전체 회원 -->
-      <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 rounded-2xl p-4 shadow-xs">
-        <span class="text-xs font-semibold text-orange-700 uppercase flex items-center gap-1.5">
-          <i data-lucide="users" class="w-4 h-4 text-orange-600"></i>
+      <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-slate-800 dark:to-orange-950/40 border border-orange-200 dark:border-orange-800 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <span class="text-xs font-bold text-orange-700 dark:text-orange-400 uppercase flex items-center gap-1.5">
+          <i data-lucide="users" class="w-4 h-4 text-orange-600 dark:text-orange-400"></i>
           전체 가입 회원
         </span>
-        <div class="text-2xl font-black text-slate-900 mt-1" id="stat-total-members">0명</div>
-        <span class="text-[11px] text-slate-500 mt-0.5 block">시스템 등록 계정 수</span>
+        <div class="text-2xl sm:text-3xl font-black text-orange-600 dark:text-orange-400 mt-1.5 tracking-tight" id="stat-total-members">0명</div>
+        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block font-medium">시스템 등록 총 계정 수</span>
       </div>
 
       <!-- 일반 회원 -->
-      <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 shadow-xs">
-        <span class="text-xs font-semibold text-emerald-700 uppercase flex items-center gap-1.5">
-          <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+      <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1.5">
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
           일반 회원 (MEMBER)
         </span>
-        <div class="text-2xl font-black text-emerald-950 mt-1" id="stat-normal-members">0명</div>
-        <span class="text-[11px] text-slate-500 mt-0.5 block">여행 모임 참여 멤버</span>
+        <div class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 mt-1.5 tracking-tight" id="stat-normal-members">0명</div>
+        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block font-medium">여행 모임 참여 멤버</span>
       </div>
 
       <!-- 관리자 계정 -->
-      <div class="bg-gradient-to-br from-rose-50 to-red-50 border border-rose-200 rounded-2xl p-4 shadow-xs">
-        <span class="text-xs font-semibold text-rose-700 uppercase flex items-center gap-1.5">
-          <i data-lucide="shield-check" class="w-4 h-4 text-rose-600"></i>
+      <div class="bg-gradient-to-br from-rose-50 to-red-50 dark:from-slate-800 dark:to-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <span class="text-xs font-bold text-rose-700 dark:text-rose-400 uppercase flex items-center gap-1.5">
+          <i data-lucide="shield-check" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
           관리자 (ADMIN)
         </span>
-        <div class="text-2xl font-black text-rose-950 mt-1" id="stat-admin-members">0명</div>
-        <span class="text-[11px] text-slate-500 mt-0.5 block">시스템 총괄 관리 권한</span>
+        <div class="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400 mt-1.5 tracking-tight" id="stat-admin-members">0명</div>
+        <span class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 block font-medium">시스템 총괄 관리 권한</span>
       </div>
 
       <!-- 신규 가입 -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
-        <span class="text-xs font-semibold text-slate-600 uppercase flex items-center gap-1.5">
+      <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-5 shadow-xs">
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
           신규 가입 회원
         </span>
-        <div class="text-2xl font-black text-slate-800 mt-1" id="stat-new-members">0명</div>
-        <span class="text-[11px] text-slate-400 mt-0.5 block">최근 등록된 계정</span>
+        <div class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-slate-100 mt-1.5 tracking-tight" id="stat-new-members">0명</div>
+        <span class="text-[11px] text-slate-400 dark:text-slate-400 mt-0.5 block font-medium">최근 7일 내 등록 계정</span>
       </div>
     </div>
 
@@ -364,15 +365,15 @@
 
     <!-- 회원 목록 테이블 -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+      <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
         <div class="flex items-center gap-2">
-          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
             <i data-lucide="users-2" class="w-4 h-4 text-orange-500"></i>
             <span>가입 회원 명단</span>
           </h3>
-          <span id="member-table-count" class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">0명</span>
+          <span id="member-table-count" class="text-xs font-black px-2.5 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-2xs">0명</span>
         </div>
-        <span class="text-xs text-slate-400">총 회원 관리 및 권한 설정</span>
+        <span class="text-xs text-slate-400 font-medium">총 회원 관리 및 권한 설정</span>
       </div>
 
       <div class="overflow-x-auto">
@@ -2037,30 +2038,36 @@
 
         // 데스크톱 탭 스타일
         $('#admin-tab-btn-schedules')
-          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs');
+          .attr('class', 'h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold transition bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-xs whitespace-nowrap flex-shrink-0');
         $('#admin-tab-btn-members')
-          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition');
+          .attr('class', 'h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-orange-600 hover:bg-white/60 transition whitespace-nowrap flex-shrink-0');
+
+        $('#admin-tab-member-count')
+          .attr('class', 'px-2 py-0.5 rounded-full text-xs font-black bg-orange-100 text-orange-700 border border-orange-200 dark:bg-orange-950/80 dark:text-orange-300 dark:border-orange-800 ml-1 whitespace-nowrap shadow-2xs');
 
         // 모바일 탭 스타일
         $('#mobile-tab-btn-schedules')
-          .attr('class', 'p-1.5 rounded-lg bg-white text-orange-600 transition');
+          .attr('class', 'w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 transition shadow-2xs');
         $('#mobile-tab-btn-members')
-          .attr('class', 'p-1.5 rounded-lg text-slate-600 hover:text-orange-600 transition');
+          .attr('class', 'relative w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-orange-600 transition');
       } else {
         $('#view-schedule-management').addClass('hidden').removeClass('flex');
         $('#view-member-management').removeClass('hidden');
 
         // 데스크톱 탭 스타일
         $('#admin-tab-btn-members')
-          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-white text-orange-600 shadow-xs');
+          .attr('class', 'h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-bold transition bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 shadow-xs whitespace-nowrap flex-shrink-0');
         $('#admin-tab-btn-schedules')
-          .attr('class', 'flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:text-orange-600 hover:bg-white/60 transition');
+          .attr('class', 'h-7 sm:h-8 flex items-center gap-1.5 px-3 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-orange-600 hover:bg-white/60 transition whitespace-nowrap flex-shrink-0');
+
+        $('#admin-tab-member-count')
+          .attr('class', 'px-2 py-0.5 rounded-full text-xs font-black bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-xs ml-1 whitespace-nowrap');
 
         // 모바일 탭 스타일
         $('#mobile-tab-btn-members')
-          .attr('class', 'p-1.5 rounded-lg bg-white text-orange-600 transition');
+          .attr('class', 'relative w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-slate-700 text-orange-600 dark:text-orange-400 transition shadow-2xs');
         $('#mobile-tab-btn-schedules')
-          .attr('class', 'p-1.5 rounded-lg text-slate-600 hover:text-orange-600 transition');
+          .attr('class', 'w-7 h-7 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-orange-600 transition');
 
         loadAdminMembers();
       }
@@ -2123,6 +2130,7 @@
       }
 
       $('#admin-tab-member-count').text(adminMembersList.length + '명');
+      $('#mobile-tab-member-count').text(adminMembersList.length);
       renderAdminMembers();
     }
 
@@ -2159,6 +2167,8 @@
         $('#stat-normal-members').text(`${normalCount}명`);
         $('#stat-admin-members').text(`${adminCount}명`);
         $('#stat-new-members').text(`${newCount}명`);
+        $('#admin-tab-member-count').text(`${totalCount}명`);
+        $('#mobile-tab-member-count').text(`${totalCount}`);
 
         // 필터링
         let filtered = adminMembersList.filter(m => {
@@ -2188,7 +2198,11 @@
           }
         });
 
-        $('#member-table-count').text(`${filtered.length}명`);
+        if (filtered.length === totalCount) {
+          $('#member-table-count').text(`총 ${filtered.length}명`);
+        } else {
+          $('#member-table-count').text(`${filtered.length}명 / 전체 ${totalCount}명`);
+        }
 
         const $tbody = $('#member-table-body');
         if (filtered.length === 0) {

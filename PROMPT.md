@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 104건
+- **총 실행 프롬프트 수**: 105건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1652,6 +1652,29 @@
   4. **문서 동기화 및 Git 자동 커밋 & 푸시**:
      - `README.md` (아키텍처 구조도 및 Changelog v1.82) 및 `PROMPT.md` 최신화.
      - Git 커밋 및 `origin/main` 푸시 완료.
+
+### #127. @local 관리자 패널의 가입 회원 관리 메뉴에서 회원 수 표시가 가시적으로 보이지 않음
+- **입력 일시**: `2026-11-17 17:13:38 KST`
+- **분류 태그**: `관리자 패널 가입 회원 수 시각적 가시성 및 고대비 뱃지 개선`
+- **실제 원문 프롬프트**:
+```text
+@local 관리자 패널의 가입 회원 관리 메뉴에서 회원 수 표시가 가시적으로 보이지 않음
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 시각적 가시성 저하 원인 분석**:
+     - 상단 네비게이션 탭의 회원 수 뱃지(`#admin-tab-member-count`)가 저대비 회색(`bg-slate-200 text-slate-700`) 및 비정상 스타일(`py-0.2`, `text-[10px]`)로 인해 묻히던 현상 분석.
+     - 회원 관리 화면 4대 통계 카드의 폰트 크기 및 다크 모드 시 어두운 텍스트(`text-slate-900`)로 인한 숫자 식별 불가 현상 파악.
+  2. **상단 네비게이션 탭 회원 수 뱃지 전면 개편**:
+     - 데스크톱 탭: 비활성 시 `bg-orange-100 text-orange-700 border border-orange-200`, 활성 시 `bg-gradient-to-r from-orange-500 to-amber-500 text-white` 고대비 뱃지 적용.
+     - 모바일 탭 바(`#mobile-tab-btn-members`): 회원 수 미니 뱃지(`#mobile-tab-member-count`) 신설 및 실시간 동기화.
+     - `switchAdminTab()` 탭 전환 스크립트 시 뱃지 스타일 및 버튼 크기(`h-7 sm:h-8 whitespace-nowrap`) 유지 보정.
+  3. **통계 카드 및 테이블 헤더 카운트 시각적 강조**:
+     - 4대 요약 카드(`#stat-total-members` 등): 폰트 크기를 `text-3xl font-black`으로 확대하고, 라이트/다크 전용 고선명 색상(`orange-600/400`, `emerald-600/400`, `rose-600/400`) 전수 매핑.
+     - 테이블 헤더 카운트(`#member-table-count`): 선명한 오렌지/앰버 그라디언트 뱃지로 전환하고 필터 시 "N명 / 전체 M명" 상세 표시.
+  4. **문서 동기화 및 Git 자동 커밋 & 푸시**:
+     - `README.md` (Changelog v1.83) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 `origin/main` 푸시 완료.
+
 
 
 

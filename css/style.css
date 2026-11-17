@@ -698,6 +698,39 @@ html.dark .timeline-dot::before {
   }
 }
 
+/* ==================== 관리자 패널 회원 수 표시 가시성 보강 (라이트/다크 모드 전용) ==================== */
+#stat-total-members {
+  color: #ea580c !important; /* orange-600 */
+}
+html.dark #stat-total-members {
+  color: #fb923c !important; /* orange-400 */
+}
+
+#stat-normal-members {
+  color: #059669 !important; /* emerald-600 */
+}
+html.dark #stat-normal-members {
+  color: #34d399 !important; /* emerald-400 */
+}
+
+#stat-admin-members {
+  color: #e11d48 !important; /* rose-600 */
+}
+html.dark #stat-admin-members {
+  color: #fb7185 !important; /* rose-400 */
+}
+
+#stat-new-members {
+  color: #1e293b !important; /* slate-800 */
+}
+html.dark #stat-new-members {
+  color: #f1f5f9 !important; /* slate-100 */
+}
+
+html.dark #admin-tab-member-count {
+  border-color: #9a3412 !important;
+}
+
 
 
 
