@@ -731,6 +731,30 @@ html.dark #admin-tab-member-count {
   border-color: #9a3412 !important;
 }
 
+/* ==================== 관리자 패널 회원 명단(테이블 및 모바일 카드) 가시성 보강 ==================== */
+#member-table-body tr {
+  transition: background-color 0.15s ease-in-out;
+}
+#member-table-body tr:hover {
+  background-color: rgba(255, 237, 213, 0.45) !important; /* orange-100/45 */
+}
+html.dark #member-table-body tr:hover {
+  background-color: rgba(51, 65, 85, 0.55) !important; /* slate-700/55 */
+}
+
+#member-cards-body > div {
+  transition: all 0.2s ease-in-out;
+}
+#member-cards-body > div:hover {
+  border-color: #fdba74 !important; /* orange-300 */
+  box-shadow: 0 4px 12px -2px rgba(234, 88, 12, 0.08) !important;
+}
+html.dark #member-cards-body > div:hover {
+  border-color: #ea580c !important; /* orange-600 */
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4) !important;
+}
+
+
 
 
 
