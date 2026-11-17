@@ -8,7 +8,7 @@
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <!-- Controller 자동 스캔 -->
+    <!-- Controller 자동 스캔 (API: egovframework.travel.web.api, View: egovframework.travel.web.view 통합 스캔) -->
     <context:component-scan base-package="egovframework.travel.web">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
         <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>

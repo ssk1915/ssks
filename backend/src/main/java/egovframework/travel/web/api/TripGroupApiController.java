@@ -1,4 +1,4 @@
-package egovframework.travel.web;
+package egovframework.travel.web.api;
 
 import egovframework.travel.service.TripGroupService;
 import egovframework.travel.vo.TripGroupVO;

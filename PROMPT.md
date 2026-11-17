@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 103건
+- **총 실행 프롬프트 수**: 104건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1631,6 +1631,28 @@
      - JavaScript 문법 검사 및 웹접근성/보안 감사 10개 파일 0건 통과.
      - `README.md` (Changelog v1.81) 및 `PROMPT.md` 최신화.
      - Git 커밋 및 `origin/main` 푸시 완료.
+
+### #126. @local 컨트롤러 파일들이 너무 지저분하게 분류되어 있음, 정리해줘
+- **입력 일시**: `2026-11-17 16:36:50 KST`
+- **분류 태그**: `백엔드 컨트롤러 패키지 계층 구조화 및 리팩토링`
+- **실제 원문 프롬프트**:
+```text
+@local 컨트롤러 파일들이 너무 지저분하게 분류되어 있음, 정리해줘
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 패키지 구조 분석**:
+     - 단일 `egovframework.travel.web` 패키지에 11개의 API 컨트롤러와 View 컨트롤러가 평평하게 혼재되어 있던 문제를 식별하고 역할 기반 서브 패키지 분리 가이드 도출.
+  2. **`web.api` 및 `web.view` 계층적 패키지 분리**:
+     - **`egovframework.travel.web.api` (RESTful API 계층, 6개)**: `AdminApiController`, `AuthApiController`, `ExpenseApiController`, `GalleryApiController`, `TripGroupApiController`, `TripScheduleApiController`
+     - **`egovframework.travel.web.view` (1:1 화면 포워딩 계층, 5개)**: `AdminViewController`, `ExpenseSettlementViewController`, `GalleryViewController`, `TripGroupViewController`, `TripScheduleViewController`
+     - `git mv` 명령어를 통해 파일 히스토리를 보존하며 깔끔하게 이동.
+  3. **코드 및 설정 호환성 검증**:
+     - 각 컨트롤러의 `package` 선언문 11개 전수 업데이트.
+     - `dispatcher-servlet.xml`의 `context:component-scan`이 `egovframework.travel.web` 하위 모든 서브패키지를 정상 스캔함을 확인.
+  4. **문서 동기화 및 Git 자동 커밋 & 푸시**:
+     - `README.md` (아키텍처 구조도 및 Changelog v1.82) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 `origin/main` 푸시 완료.
+
 
 
 
