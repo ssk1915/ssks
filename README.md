@@ -15,7 +15,7 @@
 
 | 구분 | 기술 / 도구 | 설명 |
 |---|---|---|
-| **Frontend** | HTML5, Tailwind CSS, **jQuery 3.7.1**, JavaScript (ES6+), Lucide Icons | jQuery 기반 전면 DOM/이벤트/AJAX 제어, 반응형 모던 UI, 컴포넌트 기반 조립(Header-Contents-Footer), 모바일 하단 탭바, LocalStorage 연동 |
+| **Frontend** | HTML5, Tailwind CSS, **Vue.js 3**, **jQuery 3.7.1**, JavaScript (ES6+), Lucide Icons | Vue.js 3 기반 웹 퍼블리셔 UI 시스템·컴포넌트 킷, jQuery 기반 DOM/AJAX 제어, 반응형 모던 UI, 컴포넌트 기반 조립(Header-Contents-Footer), 모바일 하단 탭바, LocalStorage 연동 |
 | **Backend** | eGovFrame 4.1.0 (Spring MVC 5.3, MyBatis 3.5) | 전자정부 표준 프레임워크 기반 계층형 아키텍처 및 RESTful API |
 | **Database** | MySQL 8.4 (InnoDB, UTF8mb4) | 테이블 및 컬럼명 전체 **대문자(UPPERCASE)** 표기 규칙 준수 |
 | **Connection Pool** | Apache Commons DBCP2 | MySQL Connector/J 8.0 연동 |
@@ -612,6 +612,7 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 | **v1.88**| **2026-11** | **🧹 'N빵' 비표준 구어체 문구 전면 제거 및 '회비 정산' 표준 용어 전환: 1) 상단 네비게이션, 모바일 메뉴, 페이지 타이틀, 모달 팝업, 툴팁, 버튼 내 'N빵' 문구를 '회비 정산' 및 '분할 분담' 표준 용어로 개편, 2) settlement.html 및 index.html 영수증 정산 문구 전수 정제, 3) 백엔드 컨트롤러(ExpenseApiController, ExpenseSettlementViewController) 및 서비스(ExpenseService) 주석/로깅 동기화, 4) DB 테이블 COMMENT 및 문서 최신화, 5) Git 커밋 및 origin/main 푸시 완료** |
 | **v1.89**| **2026-11** | **💾 샘플 데이터 데이터베이스(MySQL) 전면 적재 및 뷰(View)·컨트롤러(Controller) 인라인 샘플 코드 완전 제거: 1) MySQL TRAVELMATES_DB 7개 전체 업무 테이블(MEMBER, TRIP_GROUP, TRIP_MEMBER, TRIP_SCHEDULE, EXPENSE_SETTLEMENT, EXPENSE_PARTICIPANT, TRIP_GALLERY)에 풍부한 실데이터 시드(18개 일정, 7건 영수증/23명 분할, 7건 갤러리 피드) 전수 적재(database/init_data.sql), 2) View(app.js, admin.html, index.html) 내 하드코딩된 모의 객체(DEFAULT_GROUPS, DEFAULT_PLANS, DEFAULT_EXPENSES, DEFAULT_PHOTOS, sampleGroups) 및 폴백 샘플 배열 전면 소거, 3) Controller(AdminApiController, GalleryServiceImpl, dev_server.py) 내 하드코딩된 가상 회원/사진 리스트 제거 및 MySQL 실시간 영구 연동, 4) 웹접근성(0이슈)·보안(0취약점) 검증 및 Git 커밋·원격 푸시 완료** |
 | **v1.90**| **2026-11** | **👑 AI 어시스턴트 '통합관리자' 직무 부여 및 ssks 프로젝트 전담 운영 관리 체계 공식 수립: 1) 프로젝트 공식 개발·운영 가이드라인(GEMINI.md)에 '통합관리자(Integrated Administrator)' 전담 역할 및 책임 규정 공식 신설, 2) 시스템 아키텍처, eGovFrame Spring 백엔드, 프론트엔드 UI/UX, MySQL DB, Git 형상관리 및 보안·접근성 전반의 전담 관리 체계 확립, 3) Git 커밋 및 origin/main 푸시 완료** |
+| **v1.91**| **2026-11** | **🎨 웹 퍼블리셔(Web Publisher) UI 컴포넌트 시스템 및 스타일 가이드 Vue.js 3 기반 구축 (`publisher.html`, `js/publisher.js`): 1) `@local` 로컬 LLM(`gemma2:latest`) 협업 워크플로우를 통한 웹 퍼블리셔 UI 아키텍처 및 컴포넌트 라이브러리 설계, 2) Vue.js 3 Composition API 기반 웹 퍼블리셔 전용 UI 시스템 대시보드 구축, 3) 반응형 뷰포트(Desktop, Tablet, Mobile) 실시간 시뮬레이터 탑재, 4) TravelMates 핵심 UI 컴포넌트(Button, Form Input, TripCard 등) 쇼케이스 및 Vue SFC 코드 실시간 생성/복사 기능 제공, 5) KWCAG 2.2 웹 접근성 인터랙티브 체크리스트 및 브랜드 컬러 토큰 팔레트 구축, 6) 메인 네비게이션(`index.html`) 연동 및 Git 커밋·원격 푸시 완료** |
 
 ---
 
