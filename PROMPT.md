@@ -4,7 +4,7 @@
 
 ## 📊 프롬프트 통계 및 개요
 
-- **총 실행 프롬프트 수**: 110건
+- **총 실행 프롬프트 수**: 111건
 - **기록 기간**: 2026-11-03 ~ 2026-11-10
 - **대상 프로젝트**: TravelMates (전자정부프레임워크 + MySQL + jQuery 3.7.1 + TailwindCSS 반응형 웹)
 - **연동 로컬 모델**: Ollama `gemma2:latest` (`http://localhost:11434/v1`)
@@ -1810,6 +1810,43 @@
   5. **문서 동기화 및 Git 자동 커밋 & 푸시**:
      - `README.md` (Changelog v1.88) 및 `PROMPT.md` 최신화.
      - Git 커밋 및 `origin/main` 푸시 완료.
+
+---
+
+### #133. @local 샘플로 제시되고 있는 데이터들을 데이터베이스에 넣고, view 영역과 controller 영역에 있는 샘플 제거해줘
+- **입력 일시**: `2026-11-18 09:07:36 KST`
+- **분류 태그**: `샘플 데이터 DB 전면 적재 및 View/Controller 인라인 샘플 코드 완전 제거`
+- **실제 원문 프롬프트**:
+```text
+@local 샘플로 제시되고 있는 데이터들을 데이터베이스에 넣고, view 영역과 controller 영역에 있는 샘플 제거해줘
+```
+- **해결 내용 요약**:
+  1. **로컬 LLM(`gemma2:latest`) 질의 및 아키텍처 가이드라인 수립**:
+     - 데이터베이스 영속성 보장을 위해 뷰와 컨트롤러에 하드코딩된 mock 데이터를 데이터베이스 DML 스크립트로 이관하고, 프론트엔드 및 백엔드에서는 데이터베이스 조회 데이터만 바인딩하도록 표준화.
+  2. **MySQL TRAVELMATES_DB 7개 전체 업무 테이블 시드 데이터 전수 적재**:
+     - `database/init_data.sql` 스크립트를 확장 및 최신화하여 전체 업무 테이블에 데이터베이스 시드 적재 완료:
+       - `MEMBER`: 5명 회원 (김민수, 이지훈, 박서연, 최현우, 총괄관리자)
+       - `TRIP_GROUP`: 3개 모임 (태국 방콕, 제주도, 강원도 양양)
+       - `TRIP_MEMBER`: 10건 모임 멤버 역할 매핑
+       - `TRIP_SCHEDULE`: 18개 Day별 상세 여행 일정 (방콕 5건, 제주 8건, 양양 5건)
+       - `EXPENSE_SETTLEMENT`: 7건 회비 지출 영수증
+       - `EXPENSE_PARTICIPANT`: 23건 영수증별 분할 분담 내역
+       - `TRIP_GALLERY`: 7건 고화질 모임별 여행 추억 사진
+  3. **컨트롤러(Controller) 영역 하드코딩 샘플 데이터 제거**:
+     - `AdminApiController.java`: 회원 목록 조회 시 DB 결과가 없을 때 하드코딩된 mock 사용자 리스트를 주입하던 레거시 제거.
+     - `GalleryServiceImpl.java`: static 블록 내 하드코딩된 제주/방콕 사진 인메모리 피드 저장소 초기화 코드 제거.
+     - `TripGroupApiController.java`: 모임 생성 시 기본 샘플 ID로 명시되던 주석 및 로직 정비.
+     - `scripts/dev_server.py`: `TRIP_GALLERY` 전용 실시간 MySQL CRUD 함수(`db_fetch_gallery`, `db_insert_gallery`, `db_toggle_like_gallery`, `db_delete_gallery`) 구축 및 연동.
+  4. **뷰(View) 영역 하드코딩 샘플 데이터 및 폴백 모의 객체 제거**:
+     - `js/app.js`: 대규모 인라인 모의 데이터 `DEFAULT_GROUPS`, `DEFAULT_PLANS`, `DEFAULT_EXPENSES`, `DEFAULT_PHOTOS` 빈 구조체로 전면 전환, `loadPlannerSchedules` 및 `loadSettlementExpenses`의 mock fallback 제거(서버/DB 빈 배열 정상 처리).
+     - `admin.html`: 회원 조회 오류 시 5명 가상 회원을 주입하던 폴백 배열 제거, `getFallbackMemberGroups` 및 `sampleGroups` 함수/배열 완전 삭제.
+     - `index.html`: 정적 모임 수 하드코딩 뱃지(`3` ➔ `0`) 정리.
+  5. **표준 웹접근성 & 보안 감사 통과**:
+     - 10개 HTML 파일 웹접근성 0건 및 웹 보안 0건 올패스.
+  6. **문서 동기화 및 Git 자동 커밋 & 푸시**:
+     - `README.md` (Changelog v1.89) 및 `PROMPT.md` 최신화.
+     - Git 커밋 및 `origin/main` 푸시 완료.
+
 
 
 

@@ -69,107 +69,17 @@ window.closeRegisterModal = closeSignupModal;
 window.openLoginModal = openLoginModal;
 window.closeLoginModal = closeLoginModal;
 
-// Initial sample data
-const DEFAULT_GROUPS = [
-  {
-    id: 'grp-1',
-    groupId: 1,
-    title: '태국 방콕 & 파타야 미식 힐링 투어',
-    type: '해외',
-    location: '태국 (방콕/파타야)',
-    date: '2026.11.20 ~ 11.25 (4박 5일)',
-    maxMembers: 4,
-    currentMembers: 3,
-    members: ['민수(방장)', '지훈', '서연'],
-    createdBy: 1,
-    budget: '약 800,000원',
-    desc: '카오산로드 야시장 탐방, 마사지, 루프탑 바에서 야경을 함께 즐길 2030 친구 구해요!',
-    image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80',
-    joined: false
-  },
-  {
-    id: 'grp-2',
-    groupId: 2,
-    title: '제주도 동쪽 힐링 & 올레길 드라이브',
-    type: '국내',
-    location: '제주 (구좌/성산)',
-    date: '2026.12.05 ~ 12.08 (3박 4일)',
-    maxMembers: 4,
-    currentMembers: 2,
-    members: ['태호(방장)', '유진'],
-    createdBy: 2,
-    budget: '약 400,000원',
-    desc: '렌터카 빌려서 해안도로 달리고 오션뷰 카페 및 흑돼지 뿌실 친구들 환영합니다.',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    joined: false
-  },
-  {
-    id: 'grp-3',
-    groupId: 3,
-    title: '강원도 양양 서핑 & 불멍 캠핑 트립',
-    type: '국내',
-    location: '강원 (양양 죽도해변)',
-    date: '2026.11.14 ~ 11.16 (주말)',
-    maxMembers: 6,
-    currentMembers: 5,
-    members: ['현우(방장)', '동욱', '수민', '은지', '준혁'],
-    createdBy: 4,
-    budget: '약 250,000원',
-    desc: '초보자도 환영! 주말 양양에서 서핑 강습 받고 저녁엔 글램핑 바비큐 파티 해요.',
-    image: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80',
-    joined: false
-  }
-];
-
-const DEFAULT_PLANS = {
-  1: [
-    { id: 'p-1', time: '10:00', place: '제주공항 집결 및 렌터카 인수', memo: '3번 게이트 앞 만남, 완전자차 가입' },
-    { id: 'p-2', time: '12:30', place: '제주 흑돼지 고기국수 점심', memo: '자매국수 본점 웨이팅 확인' },
-    { id: 'p-3', time: '15:00', place: '함덕 해수욕장 & 서우봉 산책', memo: '에메랄드빛 바다 배경 단체 사진 촬영' },
-    { id: 'p-4', time: '18:30', place: '숙소 체크인 및 동문시장 야시장', memo: '딱새우회, 전복버터구이 포장해서 파티' }
-  ],
-  2: [
-    { id: 'p-5', time: '09:30', place: '성산일출봉 하이킹', memo: '편한 운동화 필수, 왕복 약 50분 소요' },
-    { id: 'p-6', time: '13:00', place: '구좌 당근케이크 오션뷰 카페', memo: '바다 전망 루프탑에서 힐링 타임' },
-    { id: 'p-7', time: '16:00', place: '비자림 숲길 힐링 산책', memo: '피톤치드 가득한 숲길 걷기' }
-  ],
-  3: [
-    { id: 'p-8', time: '10:30', place: '기념품 샵 및 감귤 체험 농장', memo: '선물용 오메기떡 & 황금향 구매' },
-    { id: 'p-9', time: '14:00', place: '렌터카 반납 및 제주공항 이동', memo: '비행기 출발 1시간 반 전 도착' }
-  ]
-};
-
-const DEFAULT_EXPENSES = {
-  1: [
-    { id: 'exp-101', settlementId: null, title: '카오산로드 팟타이 & 땡모반', amount: 48000, payer: '민수', participants: ['민수', '지훈', '서연'] },
-    { id: 'exp-102', settlementId: null, title: '루프탑 바 칵테일 & 야경', amount: 96000, payer: '지훈', participants: ['민수', '지훈', '서연'] }
-  ],
-  2: [
-    { id: 'exp-1', settlementId: 1, title: '렌터카 대여 및 보험료', amount: 160000, payer: '민수', participants: ['민수', '지훈', '서연', '태호'] },
-    { id: 'exp-2', settlementId: 2, title: '첫날 흑돼지 & 음료 저녁 식사', amount: 120000, payer: '지훈', participants: ['민수', '지훈', '서연', '태호'] },
-    { id: 'exp-3', settlementId: 3, title: '동문시장 야시장 간식 및 딱새우회', amount: 64000, payer: '서연', participants: ['민수', '지훈', '서연', '태호'] }
-  ],
-  3: [
-    { id: 'exp-301', settlementId: null, title: '서핑 강습 및 렌탈료', amount: 200000, payer: '현우', participants: ['현우', '동욱', '수민', '은지', '준혁'] },
-    { id: 'exp-302', settlementId: null, title: '글램핑 바비큐 장보기 & 숯불', amount: 145000, payer: '동욱', participants: ['현우', '동욱', '수민', '은지', '준혁'] }
-  ]
-};
-
-const DEFAULT_PHOTOS = [
-  { id: 'ph-1', photoId: 1, groupId: 2, url: 'https://images.unsplash.com/photo-1548115184-bc6544d06a58?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1548115184-bc6544d06a58?auto=format&fit=crop&w=800&q=80', caption: '성산일출봉 정상에서 맞이한 아침 햇살 🌅', uploaderName: '김민수', likes: 12, createdAt: '2026-11-01 07:20:00' },
-  { id: 'ph-2', photoId: 2, groupId: 2, url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', caption: '함덕 에메랄드빛 바다 산책로 🏖️', uploaderName: '이지연', likes: 18, createdAt: '2026-11-01 14:40:00' },
-  { id: 'ph-3', photoId: 3, groupId: 2, url: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80', caption: '저녁 캠프파이어와 바비큐 파티 🔥', uploaderName: '태호', likes: 25, createdAt: '2026-11-02 19:50:00' },
-  { id: 'ph-101', photoId: 101, groupId: 1, url: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80', caption: '방콕 왓아룬 사원의 환상적인 야경 🛕✨', uploaderName: '민수', likes: 15, createdAt: '2026-11-04 20:30:00' },
-  { id: 'ph-102', photoId: 102, groupId: 1, url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80', caption: '카오산로드 팟타이 맛집 투어 🍜', uploaderName: '지훈', likes: 9, createdAt: '2026-11-05 13:15:00' },
-  { id: 'ph-301', photoId: 301, groupId: 3, url: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=800&q=80', caption: '양양 인구해변 첫 파도 타기 성공! 🏄‍♂️', uploaderName: '현우', likes: 22, createdAt: '2026-11-03 11:00:00' },
-  { id: 'ph-302', photoId: 302, groupId: 3, url: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=800&q=80', imageUrl: 'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=800&q=80', caption: '글램핑장에서 바라본 가을 밤하늘 별빛 ⛺🌌', uploaderName: '수민', likes: 14, createdAt: '2026-11-03 21:30:00' }
-];
+// Data State (데이터베이스 연동 전 초기 빈 상태)
+const DEFAULT_GROUPS = [];
+const DEFAULT_PLANS = {};
+const DEFAULT_EXPENSES = {};
+const DEFAULT_PHOTOS = [];
 
 // App State
-let groups = JSON.parse(localStorage.getItem('travelmates_groups')) || DEFAULT_GROUPS;
-let plans = JSON.parse(localStorage.getItem('travelmates_plans')) || DEFAULT_PLANS;
-let expenses = JSON.parse(localStorage.getItem('travelmates_expenses')) || DEFAULT_EXPENSES;
-let photos = JSON.parse(localStorage.getItem('travelmates_photos')) || DEFAULT_PHOTOS;
+let groups = [];
+let plans = {};
+let expenses = {};
+let photos = [];
 let currentDay = 1;
 let currentFilter = 'all';
 let isBackendLive = false;
@@ -2033,12 +1943,7 @@ async function loadPlannerSchedules() {
     if (stored) {
       plannerSchedules = JSON.parse(stored);
     } else {
-      // DEFAULT_PLANS fallback (기존 샘플 데이터)
-      const defPlans = DEFAULT_PLANS[numericId] || [];
-      plannerSchedules = defPlans.map((p, i) => ({
-        id: p.id || ('p-' + i), scheduleId: null,
-        day: p.day || 1, time: p.time, place: p.place, memo: p.memo
-      }));
+      plannerSchedules = [];
     }
   }
 
@@ -3621,9 +3526,7 @@ async function loadSettlementExpenses() {
     if (stored) {
       settlementExpenses = JSON.parse(stored);
     } else {
-      // DEFAULT_EXPENSES에서 해당 모임 샘플 데이터 로드
-      const def = DEFAULT_EXPENSES[numericId] || [];
-      settlementExpenses = [...def];
+      settlementExpenses = [];
     }
   }
 

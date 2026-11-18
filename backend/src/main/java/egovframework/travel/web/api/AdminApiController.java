@@ -41,26 +41,8 @@ public class AdminApiController {
                 list = memberMapper.selectMemberList();
             }
 
-            if (list == null || list.isEmpty()) {
-                // 기본 표준 관리자/회원 목록 제공
-                list = new ArrayList<>();
-                LoginVO admin = new LoginVO();
-                admin.setMemberId(5);
-                admin.setUsername("admin");
-                admin.setName("총괄관리자");
-                admin.setEmail("admin@travelmates.com");
-                admin.setIsAdmin(true);
-                admin.setAdmin(true);
-                list.add(admin);
-
-                LoginVO m1 = new LoginVO();
-                m1.setMemberId(1);
-                m1.setUsername("minsoo");
-                m1.setName("김민수");
-                m1.setEmail("minsoo@naver.com");
-                m1.setIsAdmin(false);
-                m1.setAdmin(false);
-                list.add(m1);
+            if (list == null) {
+                list = Collections.emptyList();
             }
 
             response.put("success", true);

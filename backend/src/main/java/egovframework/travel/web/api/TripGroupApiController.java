@@ -59,8 +59,8 @@ public class TripGroupApiController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createGroup(@RequestBody TripGroupVO vo) throws Exception {
         log.info("📢 [POST /api/groups] 신규 여행 모임 개설 요청 - name: {}, location: {}", vo.getGroupName(), vo.getLocation());
-        if (vo.getCreatedBy() == 0) {
-            vo.setCreatedBy(1); // 기본 샘플 회원 ID
+        if (vo.getCreatedBy() <= 0) {
+            vo.setCreatedBy(1); // 기본 개설자 회원 ID
         }
         int newGroupId = tripGroupService.createTripGroup(vo);
         log.info("   신규 모임 등록 완료 - ID: {}", newGroupId);

@@ -649,6 +649,107 @@ def db_fetch_common_codes(group_code=None):
     finally:
         conn.close()
 
+def db_fetch_gallery(group_id=None):
+    """MySQL TRIP_GALLERY 테이블에서 갤러리 사진 목록 조회 (규칙: 테이블명 및 컬럼명 대문자)"""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        with conn.cursor() as cur:
+            if group_id and group_id > 0:
+                sql = """
+                    SELECT 
+                        G.GALLERY_ID AS photoId,
+                        G.GROUP_ID AS groupId,
+                        G.IMAGE_URL AS imageUrl,
+                        G.IMAGE_URL AS url,
+                        G.CAPTION AS caption,
+                        COALESCE(M.NAME, '여행자') AS uploaderName,
+                        G.LIKE_COUNT AS likes,
+                        G.LIKE_COUNT AS likesCount,
+                        DATE_FORMAT(G.CREATED_AT, '%Y-%m-%d %H:%i:%s') AS createdAt
+                    FROM TRIP_GALLERY G
+                    LEFT JOIN MEMBER M ON G.UPLOADER_ID = M.MEMBER_ID
+                    WHERE G.GROUP_ID = %s
+                    ORDER BY G.GALLERY_ID DESC
+                """
+                cur.execute(sql, (group_id,))
+            else:
+                sql = """
+                    SELECT 
+                        G.GALLERY_ID AS photoId,
+                        G.GROUP_ID AS groupId,
+                        G.IMAGE_URL AS imageUrl,
+                        G.IMAGE_URL AS url,
+                        G.CAPTION AS caption,
+                        COALESCE(M.NAME, '여행자') AS uploaderName,
+                        G.LIKE_COUNT AS likes,
+                        G.LIKE_COUNT AS likesCount,
+                        DATE_FORMAT(G.CREATED_AT, '%Y-%m-%d %H:%i:%s') AS createdAt
+                    FROM TRIP_GALLERY G
+                    LEFT JOIN MEMBER M ON G.UPLOADER_ID = M.MEMBER_ID
+                    ORDER BY G.GALLERY_ID DESC
+                """
+                cur.execute(sql)
+            return cur.fetchall()
+    except Exception as e:
+        print(f"⚠️ [MySQL db_fetch_gallery 오류]: {e}")
+        return None
+    finally:
+        conn.close()
+
+def db_insert_gallery(group_id, uploader_id, image_url, caption):
+    """MySQL TRIP_GALLERY 테이블에 신규 사진 등록 (규칙: 테이블명 및 컬럼명 대문자)"""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        with conn.cursor() as cur:
+            sql = """
+                INSERT INTO TRIP_GALLERY (GROUP_ID, UPLOADER_ID, IMAGE_URL, CAPTION, LIKE_COUNT, CREATED_AT, UPDATED_AT)
+                VALUES (%s, %s, %s, %s, 0, NOW(), NOW())
+            """
+            cur.execute(sql, (group_id, uploader_id, image_url, caption))
+            new_id = cur.lastrowid
+            return new_id
+    except Exception as e:
+        print(f"⚠️ [MySQL db_insert_gallery 오류]: {e}")
+        return None
+    finally:
+        conn.close()
+
+def db_toggle_like_gallery(photo_id):
+    """MySQL TRIP_GALLERY 테이블 사진 좋아요 카운트 증가 (규칙: 테이블명 및 컬럼명 대문자)"""
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        with conn.cursor() as cur:
+            cur.execute("UPDATE TRIP_GALLERY SET LIKE_COUNT = LIKE_COUNT + 1, UPDATED_AT = NOW() WHERE GALLERY_ID = %s", (photo_id,))
+            cur.execute("SELECT LIKE_COUNT AS likesCount FROM TRIP_GALLERY WHERE GALLERY_ID = %s", (photo_id,))
+            row = cur.fetchone()
+            return row["likesCount"] if row else None
+    except Exception as e:
+        print(f"⚠️ [MySQL db_toggle_like_gallery 오류]: {e}")
+        return None
+    finally:
+        conn.close()
+
+def db_delete_gallery(photo_id):
+    """MySQL TRIP_GALLERY 테이블 사진 삭제 (규칙: 테이블명 및 컬럼명 대문자)"""
+    conn = get_db_connection()
+    if not conn:
+        return False
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM TRIP_GALLERY WHERE GALLERY_ID = %s", (photo_id,))
+            return cur.rowcount > 0
+    except Exception as e:
+        print(f"⚠️ [MySQL db_delete_gallery 오류]: {e}")
+        return False
+    finally:
+        conn.close()
+
 def hash_password(raw_password: str) -> str:
     """비밀번호 SHA-256 단방향 암호화 (64자리 Hex 해시)"""
     if not raw_password:
@@ -1047,6 +1148,10 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
 
         # [메뉴 4] 추억 갤러리 API: GalleryApiController
         if path == '/api/photos':
+            db_photos = db_fetch_gallery()
+            if db_photos is not None:
+                self._send_json(200, db_photos)
+                return
             all_photos = []
             for gid, p_list in PHOTOS.items():
                 all_photos.extend(p_list)
@@ -1058,6 +1163,10 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
         if m_photo:
             raw_gid = m_photo.group(1)
             if raw_gid.upper() in ('ALL', '0'):
+                db_photos = db_fetch_gallery()
+                if db_photos is not None:
+                    self._send_json(200, db_photos)
+                    return
                 all_photos = []
                 for gid, p_list in PHOTOS.items():
                     all_photos.extend(p_list)
@@ -1065,7 +1174,8 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
                 self._send_json(200, all_photos)
                 return
             gid = extract_numeric_id(raw_gid)
-            items = PHOTOS.get(gid, [])
+            db_photos = db_fetch_gallery(gid)
+            items = db_photos if db_photos is not None else PHOTOS.get(gid, [])
             self._send_json(200, items)
             return
 
@@ -1461,25 +1571,32 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
         m_add_photo = re.match(r'^/api/groups/([^/]+)/photos$', path)
         if m_add_photo:
             gid = extract_numeric_id(m_add_photo.group(1))
-            if gid not in PHOTOS:
-                PHOTOS[gid] = []
-            
             img_val = body.get('imageUrl')
             valid, err_msg = validate_image_payload(img_val)
             if not valid:
                 self._send_json(400, {"success": False, "message": err_msg})
                 return
 
-            photo_id = int(re.sub(r'\D', '', str(os.urandom(4).hex()))[:6]) or 999
+            caption_val = body.get('caption', '')
+            uploader_val = body.get('uploaderName', '여행자')
+            
+            # DB 등록 시도
+            db_pid = db_insert_gallery(gid, 1, img_val, caption_val)
+            photo_id = db_pid if db_pid else (int(re.sub(r'\D', '', str(os.urandom(4).hex()))[:6]) or 999)
+            
             photo_item = {
                 "photoId": photo_id,
                 "groupId": gid,
                 "imageUrl": img_val or 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-                "caption": body.get('caption', ''),
-                "uploaderName": body.get('uploaderName', '여행자'),
+                "url": img_val or 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                "caption": caption_val,
+                "uploaderName": uploader_val,
+                "likes": 0,
                 "likesCount": 0,
                 "createdAt": "방금 전"
             }
+            if gid not in PHOTOS:
+                PHOTOS[gid] = []
             PHOTOS[gid].insert(0, photo_item)
             self._send_json(201, photo_item)
             return
@@ -1488,13 +1605,18 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
         m_like_photo = re.match(r'^/api/photos/([^/]+)/like$', path)
         if m_like_photo:
             pid = extract_numeric_id(m_like_photo.group(1))
+            db_likes = db_toggle_like_gallery(pid)
+            if db_likes is not None:
+                self._send_json(200, {"success": True, "likesCount": db_likes, "likes": db_likes})
+                return
             for gid, p_list in PHOTOS.items():
                 for p_item in p_list:
                     if p_item['photoId'] == pid:
                         p_item['likesCount'] = p_item.get('likesCount', 0) + 1
-                        self._send_json(200, {"success": True, "likesCount": p_item['likesCount']})
+                        p_item['likes'] = p_item['likesCount']
+                        self._send_json(200, {"success": True, "likesCount": p_item['likesCount'], "likes": p_item['likes']})
                         return
-            self._send_json(200, {"success": True, "likesCount": 1})
+            self._send_json(200, {"success": True, "likesCount": 1, "likes": 1})
             return
 
         self._send_json(404, {"error": "엔드포인트를 찾을 수 없습니다."})
@@ -1636,6 +1758,7 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
         m_del_photo = re.match(r'^/api/photos/([^/]+)$', path)
         if m_del_photo:
             pid = extract_numeric_id(m_del_photo.group(1))
+            db_delete_gallery(pid)
             for gid in list(PHOTOS.keys()):
                 PHOTOS[gid] = [p for p in PHOTOS[gid] if p.get('photoId') != pid and str(p.get('photoId')) != str(pid)]
             self._send_json(200, {"success": True, "message": "사진 삭제 완료"})

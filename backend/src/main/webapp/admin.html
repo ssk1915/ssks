@@ -2197,14 +2197,7 @@
         }
       } catch (err) {
         console.warn('loadAdminMembers API fallback:', err);
-        // 기본 회원 샘플 폴백 (각 회원의 참여 모임 및 일정 카운트 포함)
-        adminMembersList = [
-          { memberId: 1, username: 'mskim', name: '김민수', email: 'mskim@travelmates.com', phone: '010-1234-5678', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-04 10:15:00', totalGroups: 3, totalSchedules: 10, registeredGroups: [], joinedGroups: [] },
-          { memberId: 2, username: 'jylee', name: '이지연', email: 'jylee@travelmates.com', phone: '010-2345-6789', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-04 11:20:00', totalGroups: 3, totalSchedules: 10, registeredGroups: [], joinedGroups: [] },
-          { memberId: 3, username: 'chpark', name: '박찬호', email: 'chpark@travelmates.com', phone: '010-3456-7890', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-05 09:40:00', totalGroups: 2, totalSchedules: 6, registeredGroups: [], joinedGroups: [] },
-          { memberId: 4, username: 'swkang', name: '강수원', email: 'swkang@travelmates.com', phone: '010-4567-8901', role: 'MEMBER', isAdmin: false, createdAt: '2026-11-06 14:10:00', totalGroups: 1, totalSchedules: 3, registeredGroups: [], joinedGroups: [] },
-          { memberId: 5, username: 'admin', name: '총괄관리자', email: 'admin@travelmates.com', phone: '010-9999-9999', role: 'ADMIN', isAdmin: true, createdAt: '2026-11-03 09:00:00', totalGroups: 0, totalSchedules: 0, registeredGroups: [], joinedGroups: [] }
-        ];
+        adminMembersList = [];
       }
 
       $('#admin-tab-member-count').text(adminMembersList.length + '명');
@@ -2814,10 +2807,8 @@
         }
       } catch (err) {
         console.warn('openMemberSchedulesModal API fallback:', err);
-        // 캐시도 없으면 샘플 데이터 매핑 폴백
         if (!m.joinedGroups || m.joinedGroups.length === 0) {
-          const fallbackGroups = getFallbackMemberGroups(memberId);
-          renderMemberSchedulesContent(m, fallbackGroups);
+          renderMemberSchedulesContent(m, []);
         }
       }
     }
@@ -2980,60 +2971,6 @@
           onAdminGroupSelectChange();
         }
       }, 100);
-    }
-
-    function getFallbackMemberGroups(memberId) {
-      const sampleGroups = [
-        {
-          groupId: 1,
-          groupName: "방콕 & 치앙마이 힐링 배낭여행",
-          tripType: "해외",
-          location: "태국 (방콕/치앙마이)",
-          startDate: "2026-11-20",
-          endDate: "2026-11-27",
-          role: (memberId === 1 ? 'LEADER' : 'MEMBER'),
-          schedules: [
-            { scheduleId: 101, dayNumber: 1, planTime: "11:00", place: "방콕 수완나품 공항 도착", memo: "유심칩 수령 및 그랩 택시 탑승", latitude: 13.6900, longitude: 100.7501 },
-            { scheduleId: 102, dayNumber: 1, planTime: "14:00", place: "호텔 체크인 & 팟타이 점심", memo: "팁싸마이 본점", latitude: 13.7527, longitude: 100.5048 },
-            { scheduleId: 103, dayNumber: 1, planTime: "19:00", place: "카오산로드 야시장 탐방", memo: "로띠 간식 & 시원한 맥주 한잔", latitude: 13.7588, longitude: 100.4974 }
-          ]
-        },
-        {
-          groupId: 2,
-          groupName: "제주도 동쪽 힐링 & 올레길 드라이브",
-          tripType: "국내",
-          location: "제주 (구좌/성산)",
-          startDate: "2026-12-05",
-          endDate: "2026-12-08",
-          role: (memberId === 2 ? 'LEADER' : 'MEMBER'),
-          schedules: [
-            { scheduleId: 201, dayNumber: 1, planTime: "10:00", place: "제주공항 집결 및 렌터카 인수", memo: "3번 게이트 앞 만남, 완전자차 가입", latitude: 33.5066, longitude: 126.4930 },
-            { scheduleId: 202, dayNumber: 1, planTime: "12:30", place: "제주 흑돼지 고기국수 점심", memo: "자매국수 본점 웨이팅 확인", latitude: 33.5188, longitude: 126.5290 },
-            { scheduleId: 203, dayNumber: 1, planTime: "15:00", place: "함덕 해수욕장 & 서우봉 산책", memo: "에메랄드빛 바다 배경 단체 사진 촬영", latitude: 33.5434, longitude: 126.6698 },
-            { scheduleId: 204, dayNumber: 1, planTime: "18:30", place: "숙소 체크인 및 동문시장 야시장", memo: "딱새우회, 전복버터구이 포장해서 파티", latitude: 33.5126, longitude: 126.5284 }
-          ]
-        },
-        {
-          groupId: 3,
-          groupName: "강원도 양양 서핑 & 불멍 캠핑 트립",
-          tripType: "국내",
-          location: "강원 (양양 죽도해변)",
-          startDate: "2026-11-14",
-          endDate: "2026-11-16",
-          role: (memberId === 4 ? 'LEADER' : 'MEMBER'),
-          schedules: [
-            { scheduleId: 301, dayNumber: 1, planTime: "09:00", place: "양양 죽도해변 서핑 스쿨", memo: "슈트 및 보드 대여, 기초 강습", latitude: 37.9715, longitude: 128.7612 },
-            { scheduleId: 302, dayNumber: 1, planTime: "13:00", place: "인구해변 수제버거 점심", memo: "버거스테이지", latitude: 37.9658, longitude: 128.7645 },
-            { scheduleId: 303, dayNumber: 1, planTime: "18:00", place: "글램핑장 불멍 바비큐", memo: "삼겹살 및 마시멜로 굽기", latitude: 37.9750, longitude: 128.7500 }
-          ]
-        }
-      ];
-
-      if (memberId === 1) return [sampleGroups[0], sampleGroups[1], sampleGroups[2]];
-      if (memberId === 2) return [sampleGroups[0], sampleGroups[1], sampleGroups[2]];
-      if (memberId === 3) return [sampleGroups[0], sampleGroups[2]];
-      if (memberId === 4) return [sampleGroups[2]];
-      return [];
     }
 
     // ESC 모달 닫기 (jQuery)
