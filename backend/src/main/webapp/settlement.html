@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TravelMates - 모임별 N빵 회비 정산기</title>
+  <title>TravelMates - 모임별 회비 정산기</title>
   <!-- Tailwind CSS (로컬 정적 서빙 & 콘솔 프로덕션 경고 차단) -->
   <script>
     (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&typeof arguments[0]==='string'&&arguments[0].indexOf('cdn.tailwindcss.com')!==-1)return;w.apply(console,arguments);};})();
@@ -46,9 +46,9 @@
           <div>
             <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <i data-lucide="receipt" class="w-6 h-6 text-emerald-600"></i>
-              <span>모임별 N빵 회비 정산기</span>
+              <span>모임별 회비 정산기</span>
             </h2>
-            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 해당 모임의 영수증과 N빵 송금 내역을 관리할 수 있습니다.</p>
+            <p class="text-slate-500 text-sm mt-1">여행 모임을 선택하면 해당 모임의 영수증과 정산 송금 내역을 관리할 수 있습니다.</p>
           </div>
           <!-- 모임 선택 드롭다운 -->
           <div class="flex items-center gap-3">
@@ -76,7 +76,7 @@
           <i data-lucide="calculator" class="w-10 h-10 text-emerald-400"></i>
         </div>
         <h3 class="text-lg font-semibold text-slate-600 mb-2">정산할 여행 모임을 선택해주세요</h3>
-        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 해당 모임의 회비 및 N빵 정산 내역이 열립니다.</p>
+        <p class="text-sm text-slate-400 mb-4">상단 드롭다운에서 모임을 선택하면 해당 모임의 회비 및 정산 내역이 열립니다.</p>
         <a href="index.html" class="text-sm font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 mx-auto inline-flex">
           <i data-lucide="users" class="w-4 h-4"></i>여행 모임 보러가기
         </a>
@@ -135,7 +135,7 @@
               </div>
               <div>
                 <div class="flex items-center justify-between mb-1.5">
-                  <label class="block text-xs font-semibold text-slate-600">함께한 친구들 (N빵 분할 참여자)</label>
+                  <label class="block text-xs font-semibold text-slate-600">함께한 친구들 (분할 분담 참여자)</label>
                   <button type="button" onclick="selectAllExpenseParticipants()" class="text-[11px] text-emerald-600 hover:text-emerald-700 font-semibold">
                     전체 선택
                   </button>
@@ -252,7 +252,7 @@
               </div>
             </div>
 
-            <!-- N빵 최종 정산 송금 안내 -->
+            <!-- 최종 정산 송금 안내 -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
               <h4 class="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
                 <i data-lucide="arrow-right-left" class="w-5 h-5 text-cyan-600"></i>

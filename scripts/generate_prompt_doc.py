@@ -16,7 +16,7 @@ def categorize(idx, prompt):
     elif "일정" in p or "플래너" in p or "지도" in p or "좌표" in p or "시간" in p:
         return "일정 플래너 및 위치 연동"
     elif "회비" in p or "정산" in p or "지출" in p:
-        return "회비 N빵 정산 시스템"
+        return "회비 정산 시스템"
     elif "모임" in p or "인원" in p or "이미지" in p or "삭제" in p:
         return "여행 모임 기능"
     elif "반응형" in p or "메뉴" in p or "html" in p or "header" in p or "화면" in p:
@@ -53,7 +53,7 @@ def main():
     md_lines.append("| **아키텍처 및 DB 구축** | 전자정부프레임워크 세팅, MySQL DB 스키마/계정/대문자 규칙 수립 | #6 ~ #11, #13, #14 |")
     md_lines.append("| **인증/보안 및 사용자 관리** | 세션 로그인/로그아웃, 관리자 권한, 비밀번호 SHA-256 해시, 전화번호 AES 암호화 | #15, #16, #20, #23, #59 |")
     md_lines.append("| **여행 모임 기능** | 모임 개설 달력 팝업, 방장 권한 삭제, 인원 초과 참여 차단, 사진 업로드 | #22, #31, #33, #34, #40, #49 |")
-    md_lines.append("| **회비 N빵 정산 시스템** | 모임별 영수증 등록, 1인당 분할 부담액 산정, 최종 납부액 강조 UI | #24 ~ #26, #32 |")
+    md_lines.append("| **회비 정산 시스템** | 모임별 영수증 등록, 1인당 분할 부담액 산정, 최종 납부액 강조 UI | #24 ~ #26, #32 |")
     md_lines.append("| **UI/UX 및 컴포넌트 구조화** | Header-Contents-Footer 분리, 공통 컴포넌트 자동 주입, 모바일 햄버거/하단 탭바 | #35 ~ #38 |")
     md_lines.append("| **호환성 및 오류 해결** | JRE 25/JavaSE-11 호환성, .project Facet Nature 정리, 미사용 import 제거 | #10, #31, #41 ~ #48, #51 |")
     md_lines.append("| **일정 플래너 및 위치 연동** | Day별 타임라인, 등록 즉시 렌더링, 타임피커 모달, OpenStreetMap 위치 및 위경도 영구 저장 | #18, #43, #52 ~ #56 |")

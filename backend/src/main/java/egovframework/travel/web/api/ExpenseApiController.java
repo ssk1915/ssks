@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * [메뉴 3] 회비 N빵 정산 RESTful API 컨트롤러 (settlement.html 연동)
+ * [메뉴 3] 회비 정산 RESTful API 컨트롤러 (settlement.html 연동)
  */
 @RestController
 @RequestMapping("/api")
@@ -39,7 +39,7 @@ public class ExpenseApiController {
     }
 
     /**
-     * 2. 회비 지출 영수증 신규 등록 (선결제자, 금액, N빵 참가자 등)
+     * 2. 회비 지출 영수증 신규 등록 (선결제자, 금액, 분할 분담 참가자 등)
      * POST /api/groups/{groupId}/expenses
      */
     @PostMapping("/groups/{groupId}/expenses")

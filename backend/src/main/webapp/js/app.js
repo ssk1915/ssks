@@ -578,7 +578,7 @@ function renderGroups() {
               <span class="font-medium text-slate-600">모집 현황</span>
               <button onclick="viewGroupSettlement('${g.groupId || g.id}')"
                 class="text-[11px] text-teal-600 hover:text-teal-700 font-semibold flex items-center gap-1 hover:underline"
-                title="해당 모임의 N빵 정산기로 이동">
+                title="해당 모임의 회비 정산기로 이동">
                 <i data-lucide="receipt" class="w-3 h-3"></i>
                 <span>회비 정산</span>
               </button>
@@ -3455,7 +3455,7 @@ function initScheduleViewerMap(lat, lng, placeName, memo) {
 }
 
 // --------------------------------------------------------------------------------
-// SETTLEMENT / DUTCH PAY MODULE (모임별 독립 회비 정산 및 N빵 계산기)
+// SETTLEMENT MODULE (모임별 독립 회비 정산기)
 // --------------------------------------------------------------------------------
 
 // 0. 여행 모임 총 예산 숫자 추출 헬퍼 (예: '1,500,000원' -> 1500000)
@@ -3630,7 +3630,7 @@ async function loadSettlementExpenses() {
   renderExpenses();
 }
 
-// 6. 회비 정산 및 N빵 결과 렌더링 (영수증 가격 및 분할 참여자 대비 1인당 지출 금액 산정)
+// 6. 회비 정산 결과 렌더링 (영수증 가격 및 분할 참여자 대비 1인당 지출 금액 산정)
 function renderExpenses() {
   const $tableBody = $('#expense-table-body');
   const $totalDisplay = $('#total-expense-display');
@@ -3957,7 +3957,7 @@ function renderExpenses() {
     lucide.createIcons();
   }
 
-  // N빵 최소 거래 정산 알고리즘
+  // 최소 거래 정산 알고리즘
   const balances = {};
   allPeople.forEach(person => { balances[person] = 0; });
 
@@ -4041,7 +4041,7 @@ async function addExpense(e) {
   });
 
   if (participants.length === 0) {
-    alert('N빵 분할에 참여할 친구를 최소 1명 이상 선택해주세요.');
+    alert('회비 분할에 참여할 친구를 최소 1명 이상 선택해주세요.');
     return;
   }
 

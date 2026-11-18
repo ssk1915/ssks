@@ -4,7 +4,7 @@ import egovframework.travel.vo.ExpenseVO;
 import java.util.List;
 
 /**
- * [메뉴 3] 회비 N빵 정산 비즈니스 서비스 인터페이스
+ * [메뉴 3] 회비 정산 비즈니스 서비스 인터페이스
  */
 public interface ExpenseService {
     /**
@@ -13,7 +13,7 @@ public interface ExpenseService {
     List<ExpenseVO> getExpenseList(int groupId) throws Exception;
 
     /**
-     * 회비 지출 영수증 신규 등록 (선결제자, 금액, N빵 분할 계산)
+     * 회비 지출 영수증 신규 등록 (선결제자, 금액, 회비 분할 계산)
      */
     int addExpense(ExpenseVO vo) throws Exception;
 

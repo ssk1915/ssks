@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * [메뉴 3] 회비 N빵 정산 비즈니스 서비스 구현체
+ * [메뉴 3] 회비 정산 비즈니스 서비스 구현체
  */
 @Service("expenseService")
 public class ExpenseServiceImpl extends EgovAbstractServiceImpl implements ExpenseService {
@@ -35,7 +35,7 @@ public class ExpenseServiceImpl extends EgovAbstractServiceImpl implements Expen
         expenseMapper.insertExpense(vo);
         int settlementId = vo.getSettlementId();
 
-        // 2. 참여자 N빵 분할 계산 및 등록
+        // 2. 참여자 회비 분할 계산 및 등록
         List<Map<String, Object>> participants = new ArrayList<>();
         List<Integer> memberIds = vo.getParticipantMemberIds();
 

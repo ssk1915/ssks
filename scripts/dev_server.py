@@ -1036,7 +1036,7 @@ class TravelMatesHandler(SimpleHTTPRequestHandler):
             self._send_json(200, items)
             return
 
-        # [메뉴 3] 회비 N빵 정산 API: ExpenseApiController (MySQL 실시간 조회 + Fallback)
+        # [메뉴 3] 회비 정산 API: ExpenseApiController (MySQL 실시간 조회 + Fallback)
         m_exp = re.match(r'^/api/groups/([^/]+)/expenses$', path)
         if m_exp:
             gid = extract_numeric_id(m_exp.group(1))

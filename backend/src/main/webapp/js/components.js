@@ -77,7 +77,7 @@
         </a>
         <a href="settlement.html" id="nav-settlement" onclick="return handleProtectedNav(event, 'settlement.html')" class="${getDesktopClass(isSettlement)}">
           <i data-lucide="receipt" class="w-4 h-4 flex-shrink-0"></i>
-          <span class="whitespace-nowrap"><span class="hidden xl:inline">N빵 </span>회비 정산</span>
+          <span class="whitespace-nowrap">회비 정산</span>
         </a>
         <a href="gallery.html" id="nav-gallery" onclick="return handleProtectedNav(event, 'gallery.html')" class="${getDesktopClass(isGallery)}">
           <i data-lucide="image" class="w-4 h-4 flex-shrink-0"></i>
@@ -183,7 +183,7 @@
         </a>
         <a href="settlement.html" id="mobile-nav-settlement" onclick="return handleProtectedNav(event, 'settlement.html')" class="${getMobileClass(isSettlement)}">
           <i data-lucide="receipt" class="w-4 h-4"></i>
-          <span>N빵 회비 정산</span>
+          <span>회비 정산</span>
         </a>
         <a href="gallery.html" id="mobile-nav-gallery" onclick="return handleProtectedNav(event, 'gallery.html')" class="${getMobileClass(isGallery)}">
           <i data-lucide="image" class="w-4 h-4"></i>
@@ -787,7 +787,7 @@
                   <i data-lucide="calculator" class="w-4 h-4"></i>
                 </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-800">회비 N빵 정산</p>
+                  <p class="text-xs font-bold text-slate-800">회비 정산</p>
                   <p class="text-[11px] text-slate-400">영수증 & 송금액</p>
                 </div>
               </button>
@@ -905,7 +905,7 @@
       color: 'from-emerald-500 to-teal-600'
     },
     'settlement': {
-      title: 'N빵 회비 정산기',
+      title: '회비 정산기',
       desc: '여행 지출 영수증 등록 및 1인당 정산 금액 관리는 로그인 후 이용하실 수 있습니다.',
       icon: 'receipt',
       color: 'from-teal-500 to-cyan-600'

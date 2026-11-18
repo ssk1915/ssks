@@ -6,7 +6,7 @@
 
 ## 📖 1. 프로젝트 개요
 
-친구들과 여행을 떠날 때 겪는 다양한 번거로움(모임 결성, 일정 조율, 복잡한 회비 N빵 정산, 사진 공유)을 한곳에서 쉽고 깔끔하게 해결할 수 있도록 기획된 플랫폼입니다.  
+친구들과 여행을 떠날 때 겪는 다양한 번거로움(모임 결성, 일정 조율, 복잡한 회비 정산, 사진 공유)을 한곳에서 쉽고 깔끔하게 해결할 수 있도록 기획된 플랫폼입니다.  
 프로젝트의 기획, 아키텍처 설계, DDL 및 백엔드 코드는 **로컬에 실행 중인 오픈소스 LLM(`gemma2:latest`)과 Antigravity의 협업 워크플로우(`@local`)**를 통해 개발되었습니다.
 
 ---
@@ -69,7 +69,7 @@
        - **로그인 상태 시**: 모든 참여자 및 방장의 실제 성명(`김민수(방장)`, `이지연`, `박찬호` 등)을 실명으로 전원 투명하게 공개 (`[전원 실명 공개]` 뱃지 표기)
        - **비로그인 상태 시**: 개인정보 보호를 위해 성명 가운데 마스킹(`김*수(방장)`, `이*연(익명)`, `박*호(익명)` 또는 `익명 멤버 N`) 처리 (`[익명 마스킹 보호]` 뱃지 및 `[로그인하고 실명 확인하기 →]` 안내 버튼 제공)
        - 모집 게이지 프로그레스 바 및 정원 마감 시 로즈 레드 강조
-    5. **연계 서비스 빠른 이동**: 해당 모임의 **`일정 플래너 📋`**, **`회비 N빵 정산기 💰`**, **`추억 갤러리 📷`** 로 원클릭 즉시 이동 연동
+    5. **연계 서비스 빠른 이동**: 해당 모임의 **`일정 플래너 📋`**, **`회비 정산기 💰`**, **`추억 갤러리 📷`** 로 원클릭 즉시 이동 연동
     6. **상세 팝업 내 참여/취소 액션**: 로그인 상태 및 정원 마감 여부에 따라 `참여 신청`, `참여 취소`, `방장(내 모임)`, `모집 마감` 버튼이 실시간 동적 렌더링되며 팝업 내에서 즉시 처리 가능
   - **카드 액션 버튼 3버튼 체계 최적화**: 모임 카드 하단 액션 버튼을 3열 그리드(`grid grid-cols-3 gap-1.5`)로 개편하여 `[상세 정보]`, `[일정 확인]`, `[참여 신청/관리]`를 균형있게 제공
 * **방장 전용 모임 삭제 기능**:
@@ -110,7 +110,7 @@
   - 모임 탐색 카드에서 비로그인 사용자도 **[일정 확인]** 클릭 시 로그인 제약 없이 즉시 플래너 화면으로 이동하여 해당 모임의 일정을 바로 확인 가능
 * **시간대별 방문 장소 및 세부 메모 타임라인 관리 및 실시간 삭제**
 
-### 3) 스마트 N빵 회비 정산기 (Dutch Pay Calculator)
+### 3) 스마트 회비 정산기 (Settlement Calculator)
 * 결제자, 지출 금액, 참여 친구들을 포함한 영수증 등록
 * **🆕 여행 모임 총 예산 연동 및 잔여 예산 / 예산 집행률(소진율) 대시보드 구축**:
   - **총 예산 자동 연동**: 모임 개설 시 등록했던 '총 예산' 정보를 자동으로 가져와 상단 배너 및 요약 대시보드에 실시간 반영
@@ -271,7 +271,7 @@
 * **메뉴별 독립 HTML 분할 및 컨트롤러 1:1 매칭 구조 (eGovFrame Spring MVC)**:
   - [`index.html`](backend/src/main/webapp/index.html) / [`groups.html`](backend/src/main/webapp/groups.html): 여행 모임 탐색 및 개설 화면 ↔ [`TripGroupViewController.java`](backend/src/main/java/egovframework/travel/web/TripGroupViewController.java) (`/groups.do`, `/index.do`, `/`)
   - [`planner.html`](backend/src/main/webapp/planner.html): Day별 여행 일정 타임라인 플래너 화면 ↔ [`TripScheduleViewController.java`](backend/src/main/java/egovframework/travel/web/TripScheduleViewController.java) (`/planner.do`)
-  - [`settlement.html`](backend/src/main/webapp/settlement.html): 모임별 N빵 회비 영수증 & 정산 화면 ↔ [`ExpenseSettlementViewController.java`](backend/src/main/java/egovframework/travel/web/ExpenseSettlementViewController.java) (`/settlement.do`)
+  - [`settlement.html`](backend/src/main/webapp/settlement.html): 모임별 회비 영수증 & 정산 화면 ↔ [`ExpenseSettlementViewController.java`](backend/src/main/java/egovframework/travel/web/ExpenseSettlementViewController.java) (`/settlement.do`)
   - [`gallery.html`](backend/src/main/webapp/gallery.html): 여행 추억 사진 피드 & 라이트박스 뷰어 화면 ↔ [`GalleryViewController.java`](backend/src/main/java/egovframework/travel/web/GalleryViewController.java) (`/gallery.do`)
   - [`admin.html`](backend/src/main/webapp/admin.html): 총괄 관리자 패널(회원 관리 & 플래너) 화면 ↔ [`AdminViewController.java`](backend/src/main/java/egovframework/travel/web/AdminViewController.java) (`/admin.do`) 및 [`AdminApiController.java`](backend/src/main/java/egovframework/travel/web/AdminApiController.java) (`/api/admin/**`)
 * **공통 컴포넌트 자동 주입 매니저 ([`js/components.js`](backend/src/main/webapp/js/components.js))**:
@@ -312,7 +312,7 @@
 | **`TRIP_MEMBER`** | `TRIP_MEMBER_ID`, `GROUP_ID`, `MEMBER_ID`, `ROLE`, `JOINED_AT`, `CREATED_AT`, `UPDATED_AT` | 모임 참여자 매핑 및 방장(`LEADER`)/회원(`MEMBER`) 역할 (등록일/수정일 포함) |
 | **`TRIP_SCHEDULE`** | `SCHEDULE_ID`, `GROUP_ID`, `DAY_NUMBER`, `PLAN_TIME`, `PLACE`, `MEMO`, `LATITUDE`, `LONGITUDE`, `CREATED_AT`, `UPDATED_AT` | 일차별 타임라인 상세 일정 및 위경도 위치 좌표 (등록일/수정일 포함) |
 | **`EXPENSE_SETTLEMENT`** | `SETTLEMENT_ID`, `GROUP_ID`, `PAYER_ID`, `TITLE`, `EXPENSE_AMOUNT`, `PAYMENT_METHOD`, `CREATED_AT`, `UPDATED_AT` | 선결제 지출 영수증 (등록일/수정일 포함) |
-| **`EXPENSE_PARTICIPANT`** | `PARTICIPANT_ID`, `SETTLEMENT_ID`, `MEMBER_ID`, `SPLIT_AMOUNT`, `CREATED_AT`, `UPDATED_AT` | 지출 N빵 분할 참여자 매핑 (등록일/수정일 포함) |
+| **`EXPENSE_PARTICIPANT`** | `PARTICIPANT_ID`, `SETTLEMENT_ID`, `MEMBER_ID`, `SPLIT_AMOUNT`, `CREATED_AT`, `UPDATED_AT` | 지출 분할 분담 참여자 매핑 (등록일/수정일 포함) |
 | **`TRIP_GALLERY`** | `GALLERY_ID`, `GROUP_ID`, `UPLOADER_ID`, `IMAGE_URL`, `CAPTION`, `LIKE_COUNT`, `CREATED_AT`, `UPDATED_AT` | 여행 사진 및 좋아요 피드 (등록일/수정일 포함) |
 
 ### 👤 기본 테스트 계정
@@ -347,7 +347,7 @@ backend/
     │           ├── MemberMapper.xml                      # 회원 로그인 조회 (대문자 SQL)
     │           ├── TripGroupMapper.xml                   # 모임 CRUD (대문자 SQL)
     │           ├── TripScheduleMapper.xml                # 일정 타임라인 CRUD + 수정(UPDATE)
-    │           └── ExpenseMapper.xml                     # N빵 지출/정산 CRUD (대문자 SQL)
+    │           └── ExpenseMapper.xml                     # 회비 지출/정산 CRUD (대문자 SQL)
     ├── webapp/
     │   ├── index.html                                    # 메인 홈 (Header-Contents-Footer 구조)
     │   ├── groups.html                                   # 여행 모임 화면
@@ -383,14 +383,14 @@ backend/
         ├── service/ (impl/)                              # 🆕 메뉴별 단일 책임 원칙(SRP) 비즈니스 서비스 분리
         │   ├── TripGroupService (Impl)                   # [메뉴 1] 여행 모임 비즈니스 서비스
         │   ├── TripScheduleService (Impl)                # [메뉴 2] 일정 플래너 비즈니스 서비스
-        │   ├── ExpenseService (Impl)                     # [메뉴 3] 회비 N빵 정산 비즈니스 서비스
+        │   ├── ExpenseService (Impl)                     # [메뉴 3] 회비 정산 비즈니스 서비스
         │   ├── GalleryService (Impl)                     # [메뉴 4] 추억 사진 갤러리 피드 비즈니스 서비스
         │   └── MemberService (Impl)                      # [메뉴 5] 회원 가입 및 인증 비즈니스 서비스
         └── web/                                          # 🆕 역할별 체계적 계층화 (API / View 서브 패키지 분리)
             ├── api/                                      # RESTful API 컨트롤러 계층 (@RestController)
             │   ├── TripGroupApiController.java           # [API] 여행 모임 CRUD & 참여 관리 (/api/groups)
             │   ├── TripScheduleApiController.java        # [API] 여행 일정 타임라인 & 위치 좌표 (/api/schedules)
-            │   ├── ExpenseApiController.java             # [API] 회비 지출 & N빵 정산 관리 (/api/expenses)
+            │   ├── ExpenseApiController.java             # [API] 회비 지출 & 정산 관리 (/api/expenses)
             │   ├── GalleryApiController.java             # [API] 추억 사진 갤러리 피드 & 좋아요 (/api/photos)
             │   ├── AuthApiController.java                # [API] 로그인 & 세션 인증 관리 (/api/auth)
             │   └── AdminApiController.java               # [API] 관리자 일정 & 회원 관리 (/api/admin)
@@ -609,6 +609,7 @@ TravelMates는 전자정부프레임워크 표준 **Apache Log4j2 (`log4j2.xml`)
 | **v1.85**| **2026-11** | **🔧 관리자 화면 로그인 JS 스크립트 구문 오류(SyntaxError) 해결 및 로그인 예외 처리 고도화: 1) admin.html 인라인 스크립트 내 렌더링 예외 처리부(catch)의 잔류 닫는 태그로 인한 구문 파싱 에러(Unexpected token <) 완전 제거 및 전체 인라인 JS AST 문법 무결성 검증, 2) adminLogin() 함수 내 아이디/비밀번호 미입력 유효성 검증 사전 가드 추가, 3) 서버 에러 메시지(responseJSON.message) 실시간 동적 바인딩 및 로컬 폴백 인증 체계 정상화, 4) Git 커밋 및 원격 저장소 푸시 완료** |
 | **v1.86**| **2026-11** | **📅 관리자 패널 회원 명단 가입일시 텍스트 잘림 현상 해결 및 스마트 2줄 레이아웃 적용: 1) 가입일시 컬럼 min-width를 125px에서 155px로 확장하고 whitespace-nowrap 보장, 2) 날짜(YYYY-MM-DD)와 시간(HH:mm:ss)을 계층적으로 분리하여 1행 볼드 날짜(오렌지 캘린더 아이콘) + 2행 서브 시간(시계 아이콘) 스마트 2줄 레이아웃 도입, 3) title 툴팁 전체 일시 제공 및 모바일 카드 뷰 동기화로 줄바꿈/잘림 없는 완벽한 가시성 확보 완료** |
 | **v1.87**| **2026-11** | **↔️ 관리자 패널 테이블 가로 스크롤 직관적 시각화 및 양방향 인터랙티브 인디케이터 구축: 1) 명단 헤더 바에 펄스 애니메이션이 적용된 '가로 스크롤 가능' 직관 안내 배지 신설, 2) 테이블 좌우 양방향 페이드 그라디언트 섀도우(#member-scroll-left-hint, #member-scroll-right-hint) 및 쉐브론 화살표 인디케이터 동적 연동, 3) 스크롤 위치(scrollLeft / maxScroll)에 따른 실시간 페이드 인/아웃 리스너 탑재, 4) 전역 CSS에 9px 오렌지 그라디언트 썸과 둥근 트랙을 갖춘 고가시성 커스텀 수평 스크롤바(.table-scroll-container) 적용 및 Git 커밋·원격 푸시 완료** |
+| **v1.88**| **2026-11** | **🧹 'N빵' 비표준 구어체 문구 전면 제거 및 '회비 정산' 표준 용어 전환: 1) 상단 네비게이션, 모바일 메뉴, 페이지 타이틀, 모달 팝업, 툴팁, 버튼 내 'N빵' 문구를 '회비 정산' 및 '분할 분담' 표준 용어로 개편, 2) settlement.html 및 index.html 영수증 정산 문구 전수 정제, 3) 백엔드 컨트롤러(ExpenseApiController, ExpenseSettlementViewController) 및 서비스(ExpenseService) 주석/로깅 동기화, 4) DB 테이블 COMMENT 및 문서 최신화, 5) Git 커밋 및 origin/main 푸시 완료** |
 
 ---
 

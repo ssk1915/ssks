@@ -15,7 +15,7 @@ mysql -u root -p < database/schema.sql
 ```
 
 ## 2. 초기 샘플 데이터 입력 (Seed Data)
-기본적인 회원, 여행 모임, 일정, N빵 정산 영수증, 갤러리 샘플 데이터를 등록합니다:
+기본적인 회원, 여행 모임, 일정, 회비 정산 영수증, 갤러리 샘플 데이터를 등록합니다:
 
 ```bash
 mysql -u root -p < database/init_data.sql
